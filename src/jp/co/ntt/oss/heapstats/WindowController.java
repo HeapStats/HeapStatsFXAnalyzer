@@ -33,8 +33,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -54,6 +56,10 @@ public class WindowController implements Initializable {
     
     private static final Map<String, PluginController> pluginList;
         
+    private Region veil;
+    
+    private ProgressIndicator progress;
+    
     @FXML
     private StackPane stackPane;
     
@@ -111,9 +117,9 @@ public class WindowController implements Initializable {
         }
         
         PluginController controller = (PluginController)loader.getController();
-        controller.setMainStackPane(stackPane);
-        controller.setVeil();
-        
+        controller.setVeil(veil);
+        controller.setProgress(progress);
+
         Tab tab = new Tab();
         tab.setText(controller.getPluginName());
         tab.setContent(root);
@@ -125,8 +131,19 @@ public class WindowController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        List<String> pluginList = HeapStatsUtils.getPlugins();
-        pluginList.stream().forEach(s -> addPlugin(s));
+        veil = new Region();
+        veil.setStyle("-fx-background-color: rgba(0, 0, 0, 0.2)");
+        veil.setVisible(false);
+        
+        progress = new ProgressIndicator();
+        progress.setMaxSize(200.0d, 200.0d);
+        progress.setVisible(false);
+        
+        stackPane.getChildren().add(veil);
+        stackPane.getChildren().add(progress);
+
+        List<String> plugins = HeapStatsUtils.getPlugins();
+        plugins.stream().forEach(s -> addPlugin(s));
     }    
 
     public void setOwnerWindow(Window ownerWindow) {

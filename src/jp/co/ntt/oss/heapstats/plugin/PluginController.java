@@ -26,7 +26,6 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 
 /**
  * Base class for HeapStats FX Analyzer plugin.
@@ -35,8 +34,6 @@ import javafx.scene.layout.StackPane;
  */
 public abstract class PluginController implements Initializable{
 
-    protected StackPane mainStackPane;
-    
     private Region veil;
     
     private ProgressIndicator progress;
@@ -44,32 +41,27 @@ public abstract class PluginController implements Initializable{
     public abstract String getPluginName();
 
     /**
-     * Setter of main StackPane.
-     * This pane used for veiling (e.g. showing progress)
+     * Setter of veil region.
+     * This region is used for veiling (e.g. showing progress)
      * 
-     * @param mainStackPane StackPane of main window.
+     * @param veil 
      */
-    public void setMainStackPane(StackPane mainStackPane) {
-        this.mainStackPane = mainStackPane;
+    public void setVeil(Region veil){
+        this.veil = veil;
+    }
+    
+    /**
+     * Setter of progress indicator.
+     * This region is used for veiling (e.g. showing progress)
+     * 
+     * @param progress
+     */
+    public void setProgress(ProgressIndicator progress){
+        this.progress = progress;
     }
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        veil = new Region();
-        veil.setStyle("-fx-background-color: rgba(0, 0, 0, 0.2)");
-        veil.setVisible(false);
-        
-        progress = new ProgressIndicator();
-        progress.setMaxSize(200.0d, 200.0d);
-        progress.setVisible(false);
-    }
-    
-    /**
-     * Setter of veil.
-     */
-    public void setVeil(){
-        mainStackPane.getChildren().add(veil);
-        mainStackPane.getChildren().add(progress);
     }
     
     /**
@@ -114,22 +106,6 @@ public abstract class PluginController implements Initializable{
 
         String tip = String.format("%s: %s, %d %s", series.getName(), xData, yData, unit);
         Tooltip.install(data.getNode(), new Tooltip(tip));
-    }
-
-    public Region getVeil() {
-        return veil;
-    }
-
-    public void setVeil(Region veil) {
-        this.veil = veil;
-    }
-
-    public ProgressIndicator getProgress() {
-        return progress;
-    }
-
-    public void setProgress(ProgressIndicator progress) {
-        this.progress = progress;
     }
 
 }
