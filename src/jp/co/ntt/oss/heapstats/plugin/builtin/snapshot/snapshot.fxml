@@ -73,7 +73,7 @@
 </SplitPane>
 </content>
     </Tab>
-    <Tab text="Histogram">
+    <Tab text="Histogram" fx:id="histogramTab">
 <content><SplitPane dividerPositions="0.3" focusTraversable="true">
   <items>
     <AnchorPane>

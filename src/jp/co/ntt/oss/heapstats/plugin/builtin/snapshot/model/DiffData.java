@@ -22,10 +22,13 @@ import java.time.LocalDateTime;
 import jp.co.ntt.oss.heapstats.container.ObjectData;
 
 /**
- *
- * @author yasuenag
+ * Difference data between two snapshots.
+ * 
+ * @author Yasumasa Suenaga
  */
 public class DiffData implements Comparable<DiffData>{
+    
+    private final long tag;
     
     private final LocalDateTime diffDate;
     
@@ -38,6 +41,7 @@ public class DiffData implements Comparable<DiffData>{
     private final long totalSize;
 
     public DiffData(LocalDateTime diffDate, ObjectData prev, ObjectData current) {
+        this.tag = current.getTag();
         this.diffDate = diffDate;
         this.className = current.getName();
         this.classLoaderName = current.getLoaderName();
@@ -45,7 +49,8 @@ public class DiffData implements Comparable<DiffData>{
         this.totalSize = current.getTotalSize() - prev.getCount();
     }
 
-    public DiffData(LocalDateTime diffDate, String className, String classLoaderName, Long instances, long totalSize) {
+    public DiffData(long tag, LocalDateTime diffDate, String className, String classLoaderName, Long instances, long totalSize) {
+        this.tag = tag;
         this.diffDate = diffDate;
         this.className = className;
         this.classLoaderName = classLoaderName;
@@ -71,6 +76,10 @@ public class DiffData implements Comparable<DiffData>{
 
     public long getTotalSize() {
         return totalSize;
+    }
+
+    public long getTag() {
+        return tag;
     }
 
     @Override

@@ -18,8 +18,6 @@
 
 package jp.co.ntt.oss.heapstats.plugin.builtin.snapshot;
 
-import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.model.DiffData;
-import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.model.SummaryData;
 import java.io.File;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -47,6 +45,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -62,6 +61,8 @@ import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.DiffTask;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.ParseHeaderTask;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.SnapShotParseTask;
+import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.model.DiffData;
+import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.model.SummaryData;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 import jp.co.ntt.oss.heapstats.xml.binding.Filter;
@@ -163,6 +164,9 @@ public class SnapShotController extends PluginController implements Initializabl
 
     @FXML
     private TableColumn<ObjectData, Long> objSizeColumn;
+    
+    @FXML
+    private Tab histogramTab;
     
     private List<SnapShotHeader> currentTarget;
 
@@ -494,6 +498,16 @@ public class SnapShotController extends PluginController implements Initializabl
     }
     
     /**
+     * Get SnapShot header which is selected.
+     * This method returns snapshot header which is selected ins SnapShot Data tab.
+     * 
+     * @return selected snapshot header.
+     */
+    public SnapShotHeader getSelectedSnapShotHeader(){
+        return snapShotTimeCombo.getSelectionModel().getSelectedItem();
+    }
+    
+    /**
      * Get selected snapshot.
      * This method returns snapshot which is selected in SnapShot Data tab.
      * 
@@ -501,6 +515,31 @@ public class SnapShotController extends PluginController implements Initializabl
      */
     public Map<Long, ObjectData> getSelectedSnapShot(){
         return snapShots.get(snapShotTimeCombo.getSelectionModel().getSelectedItem());
+    }
+    
+    /**
+     * Get selected object.
+     * If histogram tab is active and diff data is selected, this method returns
+     * tag which is selected. Other case, this method returns tag which is selected
+     * in snapshot data tab.
+     * 
+     * If no object is selected, throws IllegalStateException.
+     * 
+     * @return class tag which is selected.
+     * @throws IllegalStateException no object is selected.
+     */
+    public long getSelectedClassTag() throws IllegalStateException{
+        
+        if(histogramTab.isSelected() && (lastDiffTable.getSelectionModel().getSelectedItem() != null)){
+            return lastDiffTable.getSelectionModel().getSelectedItem().getTag();
+        }
+        else if(objDataTable.getSelectionModel().getSelectedItem() != null){
+            return objDataTable.getSelectionModel().getSelectedItem().getTag();
+        }
+        else{
+            throw new IllegalStateException("Object is not selected");
+        }
+        
     }
 
     @Override
