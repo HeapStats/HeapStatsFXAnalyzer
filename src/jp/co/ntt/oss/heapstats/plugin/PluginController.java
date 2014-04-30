@@ -21,6 +21,8 @@ package jp.co.ntt.oss.heapstats.plugin;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.concurrent.Task;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.ProgressIndicator;
@@ -39,6 +41,8 @@ public abstract class PluginController implements Initializable{
     private ProgressIndicator progress;
     
     public abstract String getPluginName();
+    
+    public abstract EventHandler<Event> getOnPluginTabSelected();
 
     /**
      * Setter of veil region.

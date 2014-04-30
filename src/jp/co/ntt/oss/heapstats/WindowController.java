@@ -123,6 +123,7 @@ public class WindowController implements Initializable {
         Tab tab = new Tab();
         tab.setText(controller.getPluginName());
         tab.setContent(root);
+        tab.setOnSelectionChanged(controller.getOnPluginTabSelected());
         
         tabPane.getTabs().add(tab);
         

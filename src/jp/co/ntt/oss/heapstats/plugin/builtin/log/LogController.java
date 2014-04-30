@@ -33,6 +33,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -356,6 +358,11 @@ public class LogController extends PluginController implements Initializable{
     @Override
     public String getPluginName() {
         return "Log Data";
+    }
+
+    @Override
+    public EventHandler<Event> getOnPluginTabSelected() {
+        return null;
     }
     
 }

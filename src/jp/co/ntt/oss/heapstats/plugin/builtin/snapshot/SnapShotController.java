@@ -34,6 +34,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -499,6 +501,11 @@ public class SnapShotController extends PluginController implements Initializabl
      */
     public Map<Long, ObjectData> getSelectedSnapShot(){
         return snapShots.get(snapShotTimeCombo.getSelectionModel().getSelectedItem());
+    }
+
+    @Override
+    public EventHandler<Event> getOnPluginTabSelected() {
+        return null;
     }
     
 }
