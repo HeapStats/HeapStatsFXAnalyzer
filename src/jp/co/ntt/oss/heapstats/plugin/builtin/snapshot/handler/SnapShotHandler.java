@@ -65,14 +65,14 @@ public class SnapShotHandler implements ParserEventHandler{
 
     @Override
     public ParseResult onChildEntry(long parentClassTag, ChildObjectData child) {
-        Map<Long, List<ChildObjectData>> referenceMap = currentObjectData.getReferenceMap();
-        if(referenceMap == null){
-            referenceMap = new HashMap<>();
-            currentObjectData.setReferenceMap(referenceMap);
+        List<ChildObjectData> referenceList = currentObjectData.getReferenceList();
+
+        if(referenceList == null){
+            referenceList = new ArrayList<>();
+            currentObjectData.setReferenceList(referenceList);
         }
         
-        referenceMap.putIfAbsent(parentClassTag, new ArrayList<>());
-        referenceMap.get(parentClassTag).add(child);
+        referenceList.add(child);
 
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }

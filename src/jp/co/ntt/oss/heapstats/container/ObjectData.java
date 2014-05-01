@@ -59,8 +59,8 @@ public class ObjectData implements Serializable, Cloneable, Comparable<ObjectDat
     /** The name of the ClassLoader. */
     private String loaderName;
     
-    /** Key: class tag, Value: list of Child Object */
-    private Map<Long, List<ChildObjectData>> referenceMap;
+    /** List of Child Object */
+    private List<ChildObjectData> referenceList;
 
     /**
      * Create a ObjectData.
@@ -73,10 +73,10 @@ public class ObjectData implements Serializable, Cloneable, Comparable<ObjectDat
         count = 0;
         totalSize = 0;
         this.loaderName = null;
-        referenceMap = null;
+        referenceList = null;
     }
 
-    public ObjectData(long tag, String name, long classLoader, long classLoaderTag, long count, long totalSize, String loaderName, Map<Long, List<ChildObjectData>> referenceMap) {
+    public ObjectData(long tag, String name, long classLoader, long classLoaderTag, long count, long totalSize, String loaderName, List<ChildObjectData> referenceList) {
         this.tag = tag;
         this.name = name;
         this.classLoader = classLoader;
@@ -84,7 +84,7 @@ public class ObjectData implements Serializable, Cloneable, Comparable<ObjectDat
         this.count = count;
         this.totalSize = totalSize;
         this.loaderName = loaderName;
-        this.referenceMap = referenceMap;
+        this.referenceList = referenceList;
     }
 
     /**
@@ -233,21 +233,21 @@ public class ObjectData implements Serializable, Cloneable, Comparable<ObjectDat
     }
 
     /**
-     * Get reference map.
+     * Get reference list.
      * 
-     * @return Reference map. This map represents referrer of this ObjectData.
+     * @return Reference list. This list represents referrer of this ObjectData.
      */
-    public Map<Long, List<ChildObjectData>> getReferenceMap() {
-        return referenceMap;
+    public List<ChildObjectData> getReferenceList() {
+        return referenceList;
     }
 
     /**
-     * Setter of reference map.
+     * Setter of reference list.
      * 
-     * @param referenceMap New reference map.
+     * @param referenceList New reference list.
      */
-    public void setReferenceMap(Map<Long, List<ChildObjectData>> referenceMap) {
-        this.referenceMap = referenceMap;
+    public void setReferenceList(List<ChildObjectData> referenceList) {
+        this.referenceList = referenceList;
     }
 
     @Override
@@ -279,7 +279,7 @@ public class ObjectData implements Serializable, Cloneable, Comparable<ObjectDat
         cloneObj.setCount(count);
         cloneObj.setTotalSize(totalSize);
         cloneObj.setLoaderName(loaderName);
-        cloneObj.setReferenceMap(referenceMap);
+        cloneObj.setReferenceList(referenceList);
 
         return cloneObj;
     }
