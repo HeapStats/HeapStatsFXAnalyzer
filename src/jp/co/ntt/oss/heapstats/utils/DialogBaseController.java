@@ -49,12 +49,20 @@ public class DialogBaseController implements Initializable {
 
     /**
      * Setter method for Stage.
-     * This value is used to set parent window for Ranking dialog.
      * 
      * @param stage Instance of main Stage.
      */
     public void setStage(Stage stage) {
         this.stage = stage;
+    }
+
+    /**
+     * Getter method for Stage.
+     * 
+     * @return stage of this dialog.
+     */
+    public Stage getStage() {
+        return stage;
     }
 
 }

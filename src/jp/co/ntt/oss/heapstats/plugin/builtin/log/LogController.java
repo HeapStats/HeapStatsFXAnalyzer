@@ -18,10 +18,6 @@
 
 package jp.co.ntt.oss.heapstats.plugin.builtin.log;
 
-import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.DiffData;
-import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.ArchiveData;
-import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.SummaryData;
-import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.LogData;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -50,7 +46,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
+import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.ArchiveData;
+import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.DiffData;
+import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.LogData;
+import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.SummaryData;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
+import jp.co.ntt.oss.heapstats.utils.InfoDialog;
 import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 
 /**
@@ -201,6 +202,8 @@ public class LogController extends PluginController implements Initializable{
     private void onOkClick(ActionEvent event){
         
         if(logEntries == null){
+            InfoDialog dialog1 = new InfoDialog("Error", "Please select log file.", null);
+            dialog1.show();
             return;
         }
         

@@ -21,12 +21,14 @@ package jp.co.ntt.oss.heapstats.utils;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 
 /**
  * Helper class for Dialog.
@@ -36,11 +38,15 @@ import javafx.stage.StageStyle;
  */
 public class DialogHelper {
     
-    private final String fxmlName;
-    
     private final String title;
     
+    private final FXMLLoader loader;
+    
     private Stage dialog;
+    
+    private DialogBaseController controller;
+    
+    private EventHandler<WindowEvent> onShown;
 
     /**
      * Constructor of DialogHelper.
@@ -49,10 +55,21 @@ public class DialogHelper {
      *                  This value is used through ClassLoader#getResource() .
      * @param title Title of this dialog.
      */
-    public DialogHelper(String fxmlName, String title) {
-        this.fxmlName = fxmlName;
+    public DialogHelper(String fxmlName, String title){
         this.title = title;
         this.dialog = null;
+        this.onShown = null;
+
+        loader = new FXMLLoader(getClass().getResource(fxmlName));
+        
+        try {
+            loader.load();
+            controller = loader.getController();
+        }
+        catch (IOException ex) {
+            Logger.getLogger(DialogHelper.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
     
     /**
@@ -60,22 +77,16 @@ public class DialogHelper {
      * Dialog will be created with fxmlName field.
      */
     public void show(){
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlName));
-        
-        try {
-            loader.load();
-        } catch (IOException ex) {
-            Logger.getLogger(DialogHelper.class.getName()).log(Level.SEVERE, null, ex);
-            return;
-        }
-        
-        Parent root = loader.getRoot();
-        
-        DialogBaseController controller = loader.getController();
-        
+        Parent root = loader.getRoot();        
         Scene scene = new Scene(root);
+        
         dialog = new Stage(StageStyle.UTILITY);
         controller.setStage(dialog);
+        
+        if(onShown != null){
+            dialog.setOnShown(onShown);
+        }
+        
         dialog.setScene(scene);
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setResizable(false);
@@ -97,6 +108,24 @@ public class DialogHelper {
      */
     public Stage getDialog() {
         return dialog;
+    }
+
+    /**
+     * Get Controller class of this dialog.
+     * 
+     * @return Controller of dialog.
+     */
+    public DialogBaseController getController() {
+        return controller;
+    }
+    
+    /**
+     * Set onShown event to this stage.
+     * 
+     * @param value onShown event handler.
+     */
+    public void setOnShown(EventHandler<WindowEvent> value){
+        onShown = value;
     }
     
 }

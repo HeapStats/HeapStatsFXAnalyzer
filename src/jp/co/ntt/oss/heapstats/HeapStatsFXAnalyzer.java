@@ -18,12 +18,18 @@
 
 package jp.co.ntt.oss.heapstats;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.UncheckedIOException;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
+import jp.co.ntt.oss.heapstats.utils.InfoDialog;
 
 /**
  * Main class of HeapStats FX Analyzer.
@@ -35,6 +41,20 @@ public class HeapStatsFXAnalyzer extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+                                                               String stackTrace;
+                                                               
+                                                               try(StringWriter strWriter = new StringWriter();
+                                                                   PrintWriter printWriter = new PrintWriter(strWriter);){
+                                                                 e.printStackTrace(printWriter);
+                                                                 stackTrace = strWriter.toString();
+                                                               }
+                                                               catch(IOException ioe){
+                                                                   throw new UncheckedIOException(ioe);
+                                                               }
+                                                                   
+                                                               Platform.runLater(() -> (new InfoDialog("Error", e.toString(), stackTrace)).show());
+                                                            });
         HeapStatsUtils.load();
         FXMLLoader mainWindowLoader = new FXMLLoader(getClass().getResource("window.fxml"));
         
