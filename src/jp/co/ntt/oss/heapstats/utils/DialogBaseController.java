@@ -16,42 +16,45 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package jp.co.ntt.oss.heapstats;
+package jp.co.ntt.oss.heapstats.utils;
 
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
+import java.net.URL;
+import java.util.ResourceBundle;
+import javafx.fxml.Initializable;
 import javafx.stage.Stage;
-import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
 /**
- * Main class of HeapStats FX Analyzer.
- * This class provides entry point of HeapStats FX Analyzer.
- * 
+ * This class is controller class of Rank dialog.
+ * This class shows dialog for setting rank value.
+ *
  * @author Yasumasa Suenaga
  */
-public class HeapStatsFXAnalyzer extends Application {
+public class DialogBaseController implements Initializable {
     
+    private Stage stage;
+    
+    /**
+     * Initializes the controller class.
+     */
     @Override
-    public void start(Stage stage) throws Exception {
-        HeapStatsUtils.load();
-        FXMLLoader mainWindowLoader = new FXMLLoader(getClass().getResource("window.fxml"));
-        
-        Parent root = mainWindowLoader.load();
-        Scene scene = new Scene(root);
-        
-        stage.setScene(scene);
-        stage.show();
+    public void initialize(URL url, ResourceBundle rb) {
+    }    
+
+    /**
+     * Close this dialog.
+     */
+    public void close(){
+        stage.close();
     }
 
     /**
-     * Main method of HeapStats analyzer.
+     * Setter method for Stage.
+     * This value is used to set parent window for Ranking dialog.
      * 
-     * @param args the command line arguments
+     * @param stage Instance of main Stage.
      */
-    public static void main(String[] args) {
-        launch(args);
+    public void setStage(Stage stage) {
+        this.stage = stage;
     }
-    
+
 }

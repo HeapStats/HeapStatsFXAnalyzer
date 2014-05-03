@@ -24,7 +24,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
+import jp.co.ntt.oss.heapstats.utils.DialogBaseController;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
 /**
@@ -33,9 +33,7 @@ import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
  *
  * @author Yasumasa Suenaga
  */
-public class RankDialogController implements Initializable {
-    
-    private Stage stage;
+public class RankDialogController extends DialogBaseController implements Initializable {
     
     @FXML
     private TextField rankText;
@@ -57,17 +55,7 @@ public class RankDialogController implements Initializable {
     @FXML
     private void onOKClick(ActionEvent event){
         HeapStatsUtils.setRankLevel(Integer.parseInt(rankText.getText()));
-        stage.close();
-    }
-
-    /**
-     * Setter method for Stage.
-     * This value is used to set parent window for Ranking dialog.
-     * 
-     * @param stage Instance of main Stage.
-     */
-    public void setStage(Stage stage) {
-        this.stage = stage;
+        super.close();
     }
 
 }

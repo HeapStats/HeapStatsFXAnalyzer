@@ -32,17 +32,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.Window;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
+import jp.co.ntt.oss.heapstats.utils.DialogHelper;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
 /**
@@ -51,8 +47,6 @@ import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
  * @author Yasumasa Suenaga
  */
 public class WindowController implements Initializable {
-    
-    private Window ownerWindow;
     
     private static final Map<String, PluginController> pluginList;
         
@@ -77,28 +71,8 @@ public class WindowController implements Initializable {
     
     @FXML
     private void onRankLevelClick(ActionEvent event){
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("rankDialog.fxml"));
-        
-        try {
-            loader.load();
-        } catch (IOException ex) {
-            Logger.getLogger(WindowController.class.getName()).log(Level.SEVERE, null, ex);
-            return;
-        }
-        
-        Parent root = loader.getRoot();
-        
-        RankDialogController controller = loader.getController();
-        
-        Scene scene = new Scene(root);
-        Stage dialog = new Stage(StageStyle.UTILITY);
-        controller.setStage(dialog);
-        dialog.setScene(scene);
-        dialog.initOwner(ownerWindow);
-        dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.setResizable(false);
-        dialog.setTitle("Rank Level setting");
-        dialog.showAndWait();
+        DialogHelper rankDialog = new DialogHelper("/jp/co/ntt/oss/heapstats/rankDialog.fxml", "Rank Level setting");
+        rankDialog.show();
     }
 
     private void addPlugin(String packageName){
@@ -147,10 +121,6 @@ public class WindowController implements Initializable {
         plugins.stream().forEach(s -> addPlugin(s));
     }    
 
-    public void setOwnerWindow(Window ownerWindow) {
-        this.ownerWindow = ownerWindow;
-    }
-    
     public static PluginController getPluginController(String pluginName){
         return pluginList.get(pluginName);
     }
