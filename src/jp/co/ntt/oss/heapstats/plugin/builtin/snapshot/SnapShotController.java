@@ -546,5 +546,15 @@ public class SnapShotController extends PluginController implements Initializabl
     public EventHandler<Event> getOnPluginTabSelected() {
         return null;
     }
+
+    @Override
+    public String getLicense() {
+        return super.LICENSE_GPL_V2;
+    }
+
+    @Override
+    public Map<String, String> getLibraryLicense() {
+        return null;
+    }
     
 }

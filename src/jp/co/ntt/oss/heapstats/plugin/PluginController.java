@@ -19,6 +19,7 @@
 package jp.co.ntt.oss.heapstats.plugin;
 
 import java.net.URL;
+import java.util.Map;
 import java.util.ResourceBundle;
 import javafx.concurrent.Task;
 import javafx.event.Event;
@@ -35,6 +36,12 @@ import javafx.scene.layout.Region;
  * @author Yasumasa Suenaga
  */
 public abstract class PluginController implements Initializable{
+    
+    /** License indication for GPLv2 */
+    public final String LICENSE_GPL_V2 = "GNU General Public License version 2";
+    
+    /** License indication for BSD License */
+    public final String LICENSE_BSD = "Berkeley Software Distribution License";
 
     private Region veil;
     
@@ -42,6 +49,26 @@ public abstract class PluginController implements Initializable{
     
     public abstract String getPluginName();
     
+    /**
+     * Getter of license of this plugin.
+     * 
+     * @return License of this plugin.
+     */
+    public abstract String getLicense();
+    
+    /**
+     * Getter of license map which is used by this plugin.
+     * Key is library name, value is license of library.
+     * 
+     * @return License of libraryes.
+     */
+    public abstract Map<String, String> getLibraryLicense();
+    
+    /**
+     * Event handler when tab of this plugin is selected.
+     * 
+     * @return Event handler of this plugin.
+     */
     public abstract EventHandler<Event> getOnPluginTabSelected();
 
     /**
