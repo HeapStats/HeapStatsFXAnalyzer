@@ -549,7 +549,7 @@ public class SnapShotController extends PluginController implements Initializabl
 
     @Override
     public String getLicense() {
-        return super.LICENSE_GPL_V2;
+        return PluginController.LICENSE_GPL_V2;
     }
 
     @Override

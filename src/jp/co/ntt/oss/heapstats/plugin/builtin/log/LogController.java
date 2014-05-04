@@ -370,7 +370,7 @@ public class LogController extends PluginController implements Initializable{
 
     @Override
     public String getLicense() {
-        return super.LICENSE_GPL_V2;
+        return PluginController.LICENSE_GPL_V2;
     }
 
     @Override

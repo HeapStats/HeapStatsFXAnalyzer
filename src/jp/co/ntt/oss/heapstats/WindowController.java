@@ -75,6 +75,12 @@ public class WindowController implements Initializable {
         rankDialog.show();
     }
 
+    @FXML
+    private void onAboutMenuClick(ActionEvent event){
+        DialogHelper aboutDialog = new DialogHelper("/jp/co/ntt/oss/heapstats/aboutDialog.fxml", "about HeapStatsFXAnalyzer");
+        aboutDialog.show();
+    }
+
     private void addPlugin(String packageName){
         String lastPackageName = packageName.substring(packageName.lastIndexOf('.') + 1);
         packageName = packageName.replace('.', '/');
@@ -121,8 +127,23 @@ public class WindowController implements Initializable {
         plugins.stream().forEach(s -> addPlugin(s));
     }    
 
+    /**
+     * Get controller instance of plugin.
+     * 
+     * @param pluginName Plugin name which you want.
+     * @return Controller of Plugin. If it does not exist, return null.
+     */
     public static PluginController getPluginController(String pluginName){
         return pluginList.get(pluginName);
+    }
+
+    /**
+     * Get loaded plugin list.
+     * 
+     * @return Loaded plugin list.
+     */
+    public static Map<String, PluginController> getPluginList() {
+        return pluginList;
     }
 
 }

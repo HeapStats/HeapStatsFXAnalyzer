@@ -38,10 +38,10 @@ import javafx.scene.layout.Region;
 public abstract class PluginController implements Initializable{
     
     /** License indication for GPLv2 */
-    public final String LICENSE_GPL_V2 = "GNU General Public License version 2";
+    public static final String LICENSE_GPL_V2 = "GNU General Public License version 2";
     
     /** License indication for BSD License */
-    public final String LICENSE_BSD = "Berkeley Software Distribution License";
+    public static final String LICENSE_BSD = "Berkeley Software Distribution License";
 
     private Region veil;
     
@@ -137,6 +137,37 @@ public abstract class PluginController implements Initializable{
 
         String tip = String.format("%s: %s, %d %s", series.getName(), xData, yData, unit);
         Tooltip.install(data.getNode(), new Tooltip(tip));
+    }
+    
+    /**
+     * This class represents license of libraries which are used by each plugin.
+     */
+    public static class LibraryLicense{
+        
+        private final String pluginName;
+        
+        private final String libraryName;
+        
+        private final String license;
+
+        public LibraryLicense(String pluginName, String libraryName, String license) {
+            this.pluginName = pluginName;
+            this.libraryName = libraryName;
+            this.license = license;
+        }
+
+        public String getPluginName() {
+            return pluginName;
+        }
+
+        public String getLibraryName() {
+            return libraryName;
+        }
+
+        public String getLicense() {
+            return license;
+        }
+        
     }
 
 }
