@@ -26,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -108,19 +107,22 @@ public class LogFileParser extends Task<Void>{
         /* Sort log files order by date&time */
         logEntries.sort(Comparator.naturalOrder());
 
-        /* Calculate diff data */
-        Iterator<LogData> itr = logEntries.iterator();
-        
-        if(itr.hasNext()){
-            LogData prev = itr.next(); // get top element in arrays.
-            
-            while(itr.hasNext()){
-                LogData current = itr.next();
-                diffEntries.add(new DiffData(prev, current));
-                prev = current;
-            }
-        
-        }
+        /*
+         * Calculate diff data
+         * Difference data needs 2 elements at least.
+         *
+         *  1. Skip top element in logEntries.
+         *  2. Pass top element in logEntries to reduce() as identity value.
+         *  3. Calculate difference data in reduce().
+         *  4. Return current element in logEntries. That value passes next
+         *     calculation in reduce().
+         */
+        logEntries.stream()
+                  .skip(1)
+                  .reduce(logEntries.get(0), (x, y) -> {
+                                                          diffEntries.add(new DiffData(x, y));
+                                                          return y;
+                                                       });
         
         super.succeeded();
         return null;
