@@ -98,11 +98,20 @@ public class InfoDialogController extends DialogBaseController implements Initia
     
     /**
      * Setter of detail message which is shown in dialog.
+     * If details is null, visible property of Accordion compornent is set to
+     * false.
      * 
      * @param details 
      */
     public void setDetails(String details){
-        detailsTextArea.setText(details);
+        
+        if(details == null){
+            detailsAccordion.setVisible(false);
+        }
+        else{
+            detailsTextArea.setText(details);
+        }
+        
     }
     
     /**

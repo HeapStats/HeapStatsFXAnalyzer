@@ -41,7 +41,7 @@ public class InfoDialog {
     public InfoDialog(String title, String message, String details) {
         this.title = title;
         this.message = message;
-        this.details = (details == null) ? "" : details;
+        this.details = details;
     }
     
     /**
