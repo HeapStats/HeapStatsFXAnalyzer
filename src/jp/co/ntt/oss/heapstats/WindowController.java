@@ -19,7 +19,13 @@
 package jp.co.ntt.oss.heapstats;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -37,6 +43,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import jp.co.ntt.oss.heapstats.plugin.PluginClassLoader;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.utils.DialogHelper;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
@@ -53,6 +60,8 @@ public class WindowController implements Initializable {
     private Region veil;
     
     private ProgressIndicator progress;
+    
+    private PluginClassLoader pluginClassLoader;
     
     @FXML
     private StackPane stackPane;
@@ -84,8 +93,8 @@ public class WindowController implements Initializable {
     private void addPlugin(String packageName){
         String lastPackageName = packageName.substring(packageName.lastIndexOf('.') + 1);
         packageName = packageName.replace('.', '/');
-        String fxmlName = "/" + packageName + "/" + lastPackageName + ".fxml";
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlName));
+        String fxmlName = packageName + "/" + lastPackageName + ".fxml";
+        FXMLLoader loader = new FXMLLoader(pluginClassLoader.getResource(fxmlName));
         Parent root;
         
         try {
@@ -122,9 +131,31 @@ public class WindowController implements Initializable {
         
         stackPane.getChildren().add(veil);
         stackPane.getChildren().add(progress);
+        
+        Path appJarPath = FileSystems.getDefault().getPath(System.getProperty("java.class.path"));
+        Path libPath = appJarPath.getParent().resolve("lib");
+        
+        try(DirectoryStream<Path> jarPaths = Files.newDirectoryStream(libPath, "*.jar")){
+            List<URL> jarURLList = new ArrayList<>();
+            jarPaths.forEach(p -> {
+                                     try{
+                                       jarURLList.add(p.toUri().toURL());
+                                     }
+                                     catch (MalformedURLException ex) {
+                                       Logger.getLogger(WindowController.class.getName()).log(Level.SEVERE, null, ex);
+                                     }
+                                  });
+            
+            pluginClassLoader = new PluginClassLoader(jarURLList.toArray(new URL[0]));
+            FXMLLoader.setDefaultClassLoader(pluginClassLoader);
+            
+            List<String> plugins = HeapStatsUtils.getPlugins();
+            plugins.stream().forEach(s -> addPlugin(s));
+        }
+        catch(IOException ex) {
+            Logger.getLogger(WindowController.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
-        List<String> plugins = HeapStatsUtils.getPlugins();
-        plugins.stream().forEach(s -> addPlugin(s));
     }    
 
     /**

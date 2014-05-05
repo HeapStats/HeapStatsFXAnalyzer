@@ -55,6 +55,7 @@
     <target depends="-jfx-copylibs,-rebase-libs,jfx-deployment" name="-post-jar">
         <copy file="heapstats.properties" todir="dist"/>
         <copy file="filterDefine.xsd" todir="dist"/>
+        <mkdir dir="dist/lib"/>
     </target>
      
 </project>
