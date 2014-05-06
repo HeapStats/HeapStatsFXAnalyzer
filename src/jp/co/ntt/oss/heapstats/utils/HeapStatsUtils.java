@@ -20,6 +20,8 @@ package jp.co.ntt.oss.heapstats.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -30,6 +32,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.scene.paint.Color;
@@ -193,6 +197,27 @@ public class HeapStatsUtils {
     
     public static void setRankLevel(int rankLevel){
         prop.setProperty("ranklevel", Integer.toString(rankLevel));
+    }
+    
+    /**
+     * Convert stack trace to String.
+     * @param e Throwable object to convert.
+     * 
+     * @return String result of e.printStackTrace()
+     */
+    public static String stackTarceToString(Throwable e){
+        String result = null;
+        
+        try(StringWriter strWriter = new StringWriter();
+            PrintWriter printWriter = new PrintWriter(strWriter)){
+            e.printStackTrace(printWriter);
+            result = strWriter.toString();
+        }
+        catch(IOException ex) {
+            Logger.getLogger(HeapStatsUtils.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return result;
     }
     
 }

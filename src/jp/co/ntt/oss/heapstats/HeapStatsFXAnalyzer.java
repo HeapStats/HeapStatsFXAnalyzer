@@ -18,10 +18,6 @@
 
 package jp.co.ntt.oss.heapstats;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.UncheckedIOException;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -41,20 +37,7 @@ public class HeapStatsFXAnalyzer extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-                                                               String stackTrace;
-                                                               
-                                                               try(StringWriter strWriter = new StringWriter();
-                                                                   PrintWriter printWriter = new PrintWriter(strWriter);){
-                                                                 e.printStackTrace(printWriter);
-                                                                 stackTrace = strWriter.toString();
-                                                               }
-                                                               catch(IOException ioe){
-                                                                   throw new UncheckedIOException(ioe);
-                                                               }
-                                                                   
-                                                               Platform.runLater(() -> (new InfoDialog("Error", e.toString(), stackTrace)).show());
-                                                            });
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> (new InfoDialog("Error", e.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(e))).show()));
         HeapStatsUtils.load();
         FXMLLoader mainWindowLoader = new FXMLLoader(getClass().getResource("window.fxml"));
         
