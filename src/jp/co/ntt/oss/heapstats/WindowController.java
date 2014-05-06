@@ -132,11 +132,15 @@ public class WindowController implements Initializable {
         stackPane.getChildren().add(veil);
         stackPane.getChildren().add(progress);
         
-        Path appJarPath = FileSystems.getDefault().getPath(System.getProperty("java.class.path"));
+        String resourceName = "/" + this.getClass().getName().replace('.', '/') + ".class";
+        String appJarString = this.getClass().getResource(resourceName).getPath();
+        appJarString = appJarString.substring(0, appJarString.indexOf('!')).replaceFirst("file:/", "");
+
+        Path appJarPath = FileSystems.getDefault().getPath(appJarString);
         Path libPath = appJarPath.getParent().resolve("lib");
+        List<URL> jarURLList = new ArrayList<>();
         
         try(DirectoryStream<Path> jarPaths = Files.newDirectoryStream(libPath, "*.jar")){
-            List<URL> jarURLList = new ArrayList<>();
             jarPaths.forEach(p -> {
                                      try{
                                        jarURLList.add(p.toUri().toURL());
@@ -145,17 +149,16 @@ public class WindowController implements Initializable {
                                        Logger.getLogger(WindowController.class.getName()).log(Level.SEVERE, null, ex);
                                      }
                                   });
-            
-            pluginClassLoader = new PluginClassLoader(jarURLList.toArray(new URL[0]));
-            FXMLLoader.setDefaultClassLoader(pluginClassLoader);
-            
-            List<String> plugins = HeapStatsUtils.getPlugins();
-            plugins.stream().forEach(s -> addPlugin(s));
         }
         catch(IOException ex) {
             Logger.getLogger(WindowController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+        pluginClassLoader = new PluginClassLoader(jarURLList.toArray(new URL[0]));
+        FXMLLoader.setDefaultClassLoader(pluginClassLoader);
+            
+        List<String> plugins = HeapStatsUtils.getPlugins();
+        plugins.stream().forEach(s -> addPlugin(s));
     }    
 
     /**
