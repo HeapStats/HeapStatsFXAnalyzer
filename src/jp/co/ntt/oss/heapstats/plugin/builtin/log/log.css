@@ -1,0 +1,85 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 2014/05/11, 23:24:38
+    Author     : Yasu
+*/
+
+
+/* Java CPU */
+#javaCPUUserSeries .chart-series-area-fill { -fx-fill: red; }
+#javaCPUUserSeries .chart-series-area-line { -fx-stroke: red; }
+#javaCPUUserSeries .chart-area-symbol      { -fx-background-color: red, white; }
+
+#javaCPUSysSeries  .chart-series-area-fill { -fx-fill: blue; }
+#javaCPUSysSeries  .chart-series-area-line { -fx-stroke: blue; }
+#javaCPUSysSeries  .chart-area-symbol      { -fx-background-color: blue, white; }
+
+
+/* System CPU */
+#systemCPUUserSeries .chart-series-area-fill { -fx-fill: red; }
+#systemCPUUserSeries .chart-series-area-line { -fx-stroke: red; }
+#systemCPUUserSeries .chart-area-symbol      { -fx-background-color: red, white; }
+
+#systemCPUNiceSeries  .chart-series-area-fill { -fx-fill: lime; }
+#systemCPUNiceSeries  .chart-series-area-line { -fx-stroke: lime; }
+#systemCPUNiceSeries  .chart-area-symbol      { -fx-background-color: lime, white; }
+
+#systemCPUIdleSeries  .chart-series-area-fill { -fx-fill: yellow; }
+#systemCPUIdleSeries  .chart-series-area-line { -fx-stroke: yellow; }
+#systemCPUIdleSeries  .chart-area-symbol      { -fx-background-color: yellow, white; }
+
+#systemCPUIOWaitSeries  .chart-series-area-fill { -fx-fill: pink; }
+#systemCPUIOWaitSeries  .chart-series-area-line { -fx-stroke: pink; }
+#systemCPUIOWaitSeries  .chart-area-symbol      { -fx-background-color: pink, white; }
+
+#systemCPUIRQSeries  .chart-series-area-fill { -fx-fill: skyblue; }
+#systemCPUIRQSeries  .chart-series-area-line { -fx-stroke: skyblue; }
+#systemCPUIRQSeries  .chart-area-symbol      { -fx-background-color: skyblue, white; }
+
+#systemCPUSoftIRQSeries  .chart-series-area-fill { -fx-fill: bisque; }
+#systemCPUSoftIRQSeries  .chart-series-area-line { -fx-stroke: bisque; }
+#systemCPUSoftIRQSeries  .chart-area-symbol      { -fx-background-color: bisque, white; }
+
+#systemCPUStealSeries  .chart-series-area-fill { -fx-fill: darkgray; }
+#systemCPUStealSeries  .chart-series-area-line { -fx-stroke: darkgray; }
+#systemCPUStealSeries  .chart-area-symbol      { -fx-background-color: darkgray, white; }
+
+#systemCPUGuestSeries  .chart-series-area-fill { -fx-fill: maroon; }
+#systemCPUGuestSeries  .chart-series-area-line { -fx-stroke: maroon; }
+#systemCPUGuestSeries  .chart-area-symbol      { -fx-background-color: maroon, white; }
+
+
+/* Java Native Memory */
+
+/* VSZ */
+#javaMemoryChart .default-color0.chart-series-line { -fx-stroke: blue; }
+#javaMemoryChart .default-color0.chart-line-symbol { -fx-background-color: blue, white; }
+
+/* RSS */
+#javaMemoryChart .default-color1.chart-series-line { -fx-stroke: red; }
+#javaMemoryChart .default-color1.chart-line-symbol { -fx-background-color: red, white; }
+
+
+/* Safepoint chart */
+#safepointChart .default-color0.chart-series-line { -fx-stroke: lime; }
+#safepointChart .default-color0.chart-line-symbol { -fx-background-color: lime, white; }
+
+/* Safepoint time chart */
+#safepointTimeChart .default-color0.chart-series-line { -fx-stroke: yellow; }
+#safepointTimeChart .default-color0.chart-line-symbol { -fx-background-color: yellow, white; }
+
+
+/* Thread */
+
+/* Threads */
+#threadChart .default-color0.chart-series-line { -fx-stroke: red; }
+#threadChart .default-color0.chart-line-symbol { -fx-background-color: red, white; }
+
+/* Monitors */
+#threadChart .default-color1.chart-series-line { -fx-stroke: blue; }
+#threadChart .default-color1.chart-line-symbol { -fx-background-color: blue, white; }
+

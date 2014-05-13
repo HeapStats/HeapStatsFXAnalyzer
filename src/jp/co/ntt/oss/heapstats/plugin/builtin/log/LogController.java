@@ -135,6 +135,12 @@ public class LogController extends PluginController implements Initializable{
         valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         archiveKeyColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
         archiveVauleColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+        
+        javaCPUChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
+        systemCPUChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
+        javaMemoryChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
+        safepointChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
+        threadChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
     }
     
     /**
@@ -233,6 +239,8 @@ public class LogController extends PluginController implements Initializable{
         javaUserUsage.setName("user");
         javaSysUsage.setName("sys");
         javaCPUChart.getData().addAll(javaUserUsage, javaSysUsage);
+        javaUserUsage.getNode().setId("javaCPUUserSeries");
+        javaSysUsage.getNode().setId("javaCPUSysSeries");
 
         /* System CPU */
         XYChart.Series<String, Double> systemUserUsage = new XYChart.Series<>();
@@ -256,6 +264,15 @@ public class LogController extends PluginController implements Initializable{
         systemCPUChart.getData().addAll(systemUserUsage, systemNiceUsage, systemSysUsage,
                                         systemIdleUsage, systemIOWaitUsage, systemIRQUsage,
                                         systemSoftIRQUsage, systemStealUsage, systemGuestUsage);
+        systemUserUsage.getNode().setId("systemCPUUserSeries");
+        systemNiceUsage.getNode().setId("systemCPUNiceSeries");
+        systemSysUsage.getNode().setId("systemCPUSysSeries");
+        systemIdleUsage.getNode().setId("systemCPUIdleSeries");
+        systemIOWaitUsage.getNode().setId("systemCPUIOWaitSeries");
+        systemIRQUsage.getNode().setId("systemCPUIRQSeries");
+        systemSoftIRQUsage.getNode().setId("systemCPUSoftIRQSeries");
+        systemStealUsage.getNode().setId("systemCPUStealSeries");
+        systemGuestUsage.getNode().setId("systemCPUGuestSeries");
         
         /* Java Memory */
         XYChart.Series<String, Long> javaVSZUsage = new XYChart.Series<>();
@@ -263,6 +280,13 @@ public class LogController extends PluginController implements Initializable{
         javaVSZUsage.setName("VSZ");
         javaRSSUsage.setName("RSS");
         javaMemoryChart.getData().addAll(javaVSZUsage, javaRSSUsage);
+
+        /*
+         * This code does not work.
+         * I want to set color style to seies through CSS ID.
+         */
+        //javaVSZUsage.getNode().setId("javaVSZSeries");
+        //javaRSSUsage.getNode().setId("javaRSSSeries");
         
         /* Safepoints */
         XYChart.Series<String, Long> safepoints = new XYChart.Series<>();

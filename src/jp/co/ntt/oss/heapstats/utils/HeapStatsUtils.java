@@ -139,7 +139,7 @@ public class HeapStatsUtils {
         /* Background color to draw graphs. */
         String bgColorStr = prop.getProperty("bgcolor");
         if(bgColorStr == null){
-            prop.setProperty("bgcolor", "0");
+            prop.setProperty("bgcolor", "white");
         }
         else{
             try{
@@ -197,6 +197,10 @@ public class HeapStatsUtils {
     
     public static void setRankLevel(int rankLevel){
         prop.setProperty("ranklevel", Integer.toString(rankLevel));
+    }
+    
+    public static String getChartBgColor(){
+        return prop.getProperty("bgcolor");
     }
     
     /**
