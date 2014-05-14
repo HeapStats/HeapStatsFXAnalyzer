@@ -206,6 +206,10 @@ public class SnapShotController extends PluginController implements Initializabl
         objSizeColumn.setCellValueFactory(new PropertyValueFactory<>("totalSize"));
         
         searchList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        
+        heapChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
+        gcTimeChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
+        metaspaceChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
     }
     
     /**
@@ -319,18 +323,28 @@ public class SnapShotController extends PluginController implements Initializabl
         oldUsage.setName("Old");
         free.setName("Free");
         heapChart.getData().addAll(youngUsage, oldUsage, free);
+        youngUsage.getNode().setId("youngSeries");
+        oldUsage.getNode().setId("oldSeries");
+        free.getNode().setId("freeSeries");
         
         /* GC time Chart */
         XYChart.Series<String, Long> gcTime = new XYChart.Series<>();
-        gcTime.setName("GC TIme");
+        gcTime.setName("GC Time");
         gcTimeChart.getData().add(gcTime);
+        /*
+         * This code does not work.
+         * I want to set color style to seies through CSS ID.
+         */
+        //gcTime.getNode().setId("gcTimeSeries");
         
         /* Metaspace Chart */
         XYChart.Series<String, Long> metaspaceUsage = new XYChart.Series<>();
         XYChart.Series<String, Long> metaspaceCapacity = new XYChart.Series<>();
         metaspaceUsage.setName("Usage");
         metaspaceCapacity.setName("Capacity");
-        metaspaceChart.getData().addAll(metaspaceUsage, metaspaceCapacity);
+        metaspaceChart.getData().addAll(metaspaceCapacity, metaspaceUsage);
+        metaspaceUsage.getNode().setId("usageSeries");
+        metaspaceCapacity.getNode().setId("capacitySeries");
 
         snapShotTimeCombo.getItems().addAll(currentTarget);
         SnapShotParseTask task = new SnapShotParseTask(currentTarget);
