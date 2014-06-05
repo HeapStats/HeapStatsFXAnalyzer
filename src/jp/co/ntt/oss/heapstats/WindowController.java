@@ -43,8 +43,10 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Window;
 import jp.co.ntt.oss.heapstats.plugin.PluginClassLoader;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
+import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.SnapShotController;
 import jp.co.ntt.oss.heapstats.utils.DialogHelper;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
@@ -62,6 +64,8 @@ public class WindowController implements Initializable {
     private ProgressIndicator progress;
     
     private PluginClassLoader pluginClassLoader;
+    
+    private Window owner;
     
     @FXML
     private StackPane stackPane;
@@ -119,6 +123,18 @@ public class WindowController implements Initializable {
         pluginList.put(controller.getPluginName(), controller);
     }
     
+    @FXML
+    private void onGCAllClick(ActionEvent event) {
+        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        snapShotController.dumpGCStatisticsToCSV(owner, false);
+    }
+
+    @FXML
+    private void onGCSelectedClick(ActionEvent event) {
+        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        snapShotController.dumpGCStatisticsToCSV(owner, true);
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         veil = new Region();
@@ -178,6 +194,14 @@ public class WindowController implements Initializable {
      */
     public static Map<String, PluginController> getPluginList() {
         return pluginList;
+    }
+
+    public Window getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Window owner) {
+        this.owner = owner;
     }
 
 }

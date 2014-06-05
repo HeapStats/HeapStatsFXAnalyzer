@@ -50,8 +50,8 @@
 </Menu>
 <Menu mnemonicParsing="false" text="GC Statistics">
 <items>
-<MenuItem mnemonicParsing="false" text="All" />
-<MenuItem mnemonicParsing="false" text="Selected" />
+<MenuItem mnemonicParsing="false" onAction="#onGCAllClick" text="All" />
+<MenuItem mnemonicParsing="false" onAction="#onGCSelectedClick" text="Selected" />
 </items>
 </Menu>
 </items>

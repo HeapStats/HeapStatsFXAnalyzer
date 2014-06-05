@@ -56,9 +56,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Window;
 import javax.xml.bind.JAXB;
 import jp.co.ntt.oss.heapstats.container.ObjectData;
 import jp.co.ntt.oss.heapstats.container.SnapShotHeader;
+import jp.co.ntt.oss.heapstats.csv.CSVDumpGCTask;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.DiffTask;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.ParseHeaderTask;
@@ -623,6 +625,31 @@ public class SnapShotController extends PluginController implements Initializabl
     @Override
     public Map<String, String> getLibraryLicense() {
         return null;
+    }
+    
+    /**
+     * Dump GC Statistics to CSV.
+     * 
+     * @param owner Owner window of this call.
+     * @param isSelected If this value is true, this method dumps data which is selected time range,
+     *                    otherwise this method dumps all snapshot data.
+     */
+    public void dumpGCStatisticsToCSV(Window owner, boolean isSelected){
+        FileChooser dialog = new FileChooser();
+        dialog.setTitle("Select CSV files");
+        dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
+        dialog.getExtensionFilters().addAll(new ExtensionFilter("CSV file (*.csv)", "*.csv"),
+                                            new ExtensionFilter("All files", "*.*"));
+        File csvFile = dialog.showSaveDialog(owner);
+        
+        if(csvFile != null){
+            CSVDumpGCTask task = new CSVDumpGCTask(csvFile, isSelected ? currentTarget : startCombo.getItems());
+            super.bindTask(task);
+            
+            Thread parseThread = new Thread(task);
+            parseThread.start();
+        }
+        
     }
     
 }
