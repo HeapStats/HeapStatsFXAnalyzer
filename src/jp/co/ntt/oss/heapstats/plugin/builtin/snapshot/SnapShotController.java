@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -46,6 +47,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -124,6 +126,9 @@ public class SnapShotController extends PluginController implements Initializabl
     private TableView<DiffData> lastDiffTable;
     
     @FXML
+    private TableColumn<DiffData, String> colorColumn;
+    
+    @FXML
     private TableColumn<DiffData, String> classNameColumn;
     
     @FXML
@@ -151,8 +156,11 @@ public class SnapShotController extends PluginController implements Initializabl
     private PieChart usagePieChart;
     
     @FXML
-    private TableView<ObjectData> objDataTable;
+    private TableColumn<ObjectData, String> objColorColumn;
 
+    @FXML
+    private TableView<ObjectData> objDataTable;
+    
     @FXML
     private TableColumn<ObjectData, String> objClassNameColumn;
 
@@ -173,7 +181,7 @@ public class SnapShotController extends PluginController implements Initializabl
     private Map<LocalDateTime, List<ObjectData>> topNList;
     
     private Map<SnapShotHeader, Map<Long, ObjectData>> snapShots;
-
+    
     /**
      * Initializes the controller class.
      */
@@ -192,6 +200,18 @@ public class SnapShotController extends PluginController implements Initializabl
         hideColumn.setCellFactory(CheckBoxTableCell.forTableColumn(hideColumn));
         excludeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
+        colorColumn.setCellFactory(p -> new TableCell<DiffData, String>() {
+                                              @Override
+                                              protected void updateItem(String item, boolean empty) {
+                                                super.updateItem(item, empty);
+                                                String style = Optional.ofNullable((DiffData)getTableRow().getItem())
+                                                                       .filter(d -> d.isRanked())
+                                                                       .map(d -> String.format("-fx-background-color: #%06x;", d.getClassName().hashCode() & 0xFFFFFF))
+                                                                       .orElse("-fx-background-color: transparent;");
+                                                setStyle(style);
+                                              }
+                                            });
+        
         classNameColumn.setCellValueFactory(new PropertyValueFactory<>("className"));
         classLoaderColumn.setCellValueFactory(new PropertyValueFactory<>("classLoaderName"));
         instanceColumn.setCellValueFactory(new PropertyValueFactory<>("instances"));
@@ -200,6 +220,18 @@ public class SnapShotController extends PluginController implements Initializabl
         snapShotSummaryKey.setCellValueFactory(new PropertyValueFactory<>("key"));
         snapShotSummaryValue.setCellValueFactory(new PropertyValueFactory<>("value"));
         
+        objColorColumn.setCellFactory(p -> new TableCell<ObjectData, String>() {
+                                                 @Override
+                                                 protected void updateItem(String item, boolean empty) {
+                                                   super.updateItem(item, empty);
+                                                   String style = Optional.ofNullable((ObjectData)getTableRow().getItem())
+                                                                          .filter(o -> topNChart.getData().stream().anyMatch(d -> d.getName().equals(o.getName())))
+                                                                          .map(o -> String.format("-fx-background-color: #%06x;", o.getName().hashCode() & 0xFFFFFF))
+                                                                          .orElse("-fx-background-color: transparent;");
+                                                   setStyle(style);
+                                                 }
+                                               });
+
         objClassNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         objClassLoaderColumn.setCellValueFactory(new PropertyValueFactory<>("loaderName"));
         objInstancesColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
@@ -210,6 +242,7 @@ public class SnapShotController extends PluginController implements Initializabl
         heapChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
         gcTimeChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
         metaspaceChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
+        topNChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
     }
     
     /**
@@ -255,6 +288,24 @@ public class SnapShotController extends PluginController implements Initializabl
         
     }
     
+    private void setTopNChartColor(){
+        topNChart.getData().stream()
+                           .forEach( s -> {
+                                             int idx = topNChart.getData().indexOf(s);
+                                             String colorHexCode = String.format("#%06x", s.getName().hashCode() & 0xFFFFFF);
+                                             topNChart.lookup(String.format(".default-color%d.area-legend-symbol", idx))
+                                                                    .setStyle(String.format("-fx-background-color: %s, white;", colorHexCode));
+                                             topNChart.lookup(String.format(".default-color%d.chart-series-area-line", idx))
+                                                                    .setStyle(String.format("-fx-stroke: %s;", colorHexCode));
+                                             topNChart.lookup(String.format(".default-color%d.chart-series-area-fill", idx))
+                                                      .setStyle(String.format("-fx-fill: %s;", colorHexCode));
+                                             s.getData().stream()
+                                                        .map(data -> data.getNode().lookup(String.format(".default-color%d.chart-area-symbol", idx)))
+                                                        .filter(node -> node != null)
+                                                        .forEach(node -> node.setStyle(String.format("-fx-background-color: %s, white;", colorHexCode)));
+                                          });
+    }
+    
     /**
      * Drawing Top N data to Chart and Table.
      * 
@@ -290,6 +341,7 @@ public class SnapShotController extends PluginController implements Initializabl
                                                                             });
                                           lastDiffTable.getItems().addAll(diffTask.getLastDiffList());
                                           snapShotTimeCombo.getSelectionModel().selectLast();
+                                          setTopNChartColor();
                                        });
                                      
         super.bindTask(diffTask);
@@ -412,6 +464,8 @@ public class SnapShotController extends PluginController implements Initializabl
         usagePieChart.getData().addAll(topNList.get(header.getSnapShotDate()).stream()
                                                                              .map(o -> new PieChart.Data(o.getName(), o.getTotalSize()))
                                                                              .collect(Collectors.toList()));
+        usagePieChart.getData().stream()
+                               .forEach(d -> d.getNode().setStyle(String.format("-fx-pie-color: #%06X;", d.getName().hashCode() & 0xFFFFFF)));
         
         objDataTable.getItems().addAll(snapShots.get(header).values().stream().collect(Collectors.toList()));
     }

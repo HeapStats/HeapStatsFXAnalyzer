@@ -112,7 +112,7 @@
     <AnchorPane>
 <children><TableView fx:id="lastDiffTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
   <columns>
-    <TableColumn editable="false" prefWidth="75.0" sortable="false" />
+    <TableColumn fx:id="colorColumn" editable="false" prefWidth="75.0" sortable="false" />
     <TableColumn fx:id="classNameColumn" editable="false" prefWidth="75.0" text="Name" /><TableColumn fx:id="classLoaderColumn" editable="false" prefWidth="75.0" text="ClassLoader" /><TableColumn fx:id="instanceColumn" editable="false" prefWidth="75.0" text="Instances" /><TableColumn fx:id="totalSizeColumn" editable="false" prefWidth="75.0" text="Total size" />
   </columns>
 </TableView>
@@ -134,11 +134,11 @@
   </columns>
 </TableView>
 </children></AnchorPane><AnchorPane prefHeight="200.0" prefWidth="200.0">
-<children><PieChart fx:id="usagePieChart" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+<children><PieChart fx:id="usagePieChart" legendVisible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
 </children></AnchorPane><AnchorPane prefHeight="186.0" prefWidth="772.0">
 <children><TableView fx:id="objDataTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
   <columns>
-    <TableColumn editable="false" prefWidth="40.0" sortable="false" />
+    <TableColumn fx:id="objColorColumn" editable="false" prefWidth="40.0" sortable="false" />
     <TableColumn fx:id="objClassNameColumn" editable="false" prefWidth="200.0" text="Name" /><TableColumn fx:id="objClassLoaderColumn" editable="false" prefWidth="200.0" text="ClassLoader" /><TableColumn fx:id="objInstancesColumn" editable="false" prefWidth="75.0" text="Instances" /><TableColumn fx:id="objSizeColumn" editable="false" prefWidth="75.0" text="Size" />
   </columns>
 </TableView>

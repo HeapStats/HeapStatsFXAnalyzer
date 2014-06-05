@@ -39,23 +39,32 @@ public class DiffData implements Comparable<DiffData>{
     private final long instances;
     
     private final long totalSize;
+    
+    private final boolean ranked;
 
-    public DiffData(LocalDateTime diffDate, ObjectData prev, ObjectData current) {
+    public DiffData(LocalDateTime diffDate, ObjectData prev, ObjectData current, boolean isRanked) {
+        
+        if(prev == null){
+            prev = new ObjectData();
+        }
+        
         this.tag = current.getTag();
         this.diffDate = diffDate;
         this.className = current.getName();
         this.classLoaderName = current.getLoaderName();
         this.instances = current.getCount() - prev.getCount();
         this.totalSize = current.getTotalSize() - prev.getCount();
+        this.ranked = isRanked;
     }
 
-    public DiffData(long tag, LocalDateTime diffDate, String className, String classLoaderName, Long instances, long totalSize) {
+    public DiffData(long tag, LocalDateTime diffDate, String className, String classLoaderName, Long instances, long totalSize, boolean ranked) {
         this.tag = tag;
         this.diffDate = diffDate;
         this.className = className;
         this.classLoaderName = classLoaderName;
         this.instances = instances;
         this.totalSize = totalSize;
+        this.ranked = ranked;
     }
 
     public LocalDateTime getDiffDate() {
@@ -82,10 +91,14 @@ public class DiffData implements Comparable<DiffData>{
         return tag;
     }
 
+    public boolean isRanked() {
+        return ranked;
+    }
+
     @Override
     public int compareTo(DiffData o) {
         return Long.compare(totalSize, o.totalSize);
     }
     
-    
+
 }

@@ -80,12 +80,20 @@ public class DiffTask extends Task<Void>{
                                        updateProgress(cnt.longValue(), maxItrs);
                                     }); 
         
+       List<Long> rankedTagList = topNList.values().stream()
+                                                   .flatMap(c -> c.stream())
+                                                   .mapToLong(o -> o.getTag())
+                                                   .filter(t -> t != 0L)
+                                                   .distinct()
+                                                   .boxed()
+                                                   .collect(Collectors.toList());
+        
         /* Calculate summarize diff */
         Map<Long, ObjectData> start = snapShots.get(keyList.get(0));
         SnapShotHeader endHeader = keyList.get(keyList.size() - 1);
         Map<Long, ObjectData> end = snapShots.get(endHeader);
         start.forEach((k, v) -> end.putIfAbsent(k, new ObjectData(k, v.getName(), v.getClassLoader(), v.getClassLoaderTag(), 0, 0, v.getLoaderName(), null)));
-        end.forEach((k, v) -> lastDiffList.add(new DiffData(endHeader.getSnapShotDate(), start.get(k), v)));
+        end.forEach((k, v) -> lastDiffList.add(new DiffData(endHeader.getSnapShotDate(), start.get(k), v, rankedTagList.contains(v.getTag()))));
         
         return null;
     }
