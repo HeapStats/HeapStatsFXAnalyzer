@@ -135,6 +135,18 @@ public class WindowController implements Initializable {
         snapShotController.dumpGCStatisticsToCSV(owner, true);
     }
 
+    @FXML
+    private void onHeapAllClick(ActionEvent event) {
+        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        snapShotController.dumpClassHistogramToCSV(owner, false);
+    }
+
+    @FXML
+    private void onHeapSelectedClick(ActionEvent event) {
+        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        snapShotController.dumpClassHistogramToCSV(owner, true);
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         veil = new Region();

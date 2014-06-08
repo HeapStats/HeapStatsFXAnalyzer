@@ -44,8 +44,8 @@
 <items>
 <Menu mnemonicParsing="false" text="Heap Usage">
 <items>
-<MenuItem mnemonicParsing="false" text="All" />
-<MenuItem mnemonicParsing="false" text="Selected" />
+<MenuItem mnemonicParsing="false" onAction="#onHeapAllClick" text="All" />
+<MenuItem mnemonicParsing="false" onAction="#onHeapSelectedClick" text="Selected" />
 </items>
 </Menu>
 <Menu mnemonicParsing="false" text="GC Statistics">

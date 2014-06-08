@@ -61,6 +61,7 @@ import javax.xml.bind.JAXB;
 import jp.co.ntt.oss.heapstats.container.ObjectData;
 import jp.co.ntt.oss.heapstats.container.SnapShotHeader;
 import jp.co.ntt.oss.heapstats.csv.CSVDumpGCTask;
+import jp.co.ntt.oss.heapstats.csv.CSVDumpHeapTask;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.DiffTask;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.ParseHeaderTask;
@@ -644,6 +645,31 @@ public class SnapShotController extends PluginController implements Initializabl
         
         if(csvFile != null){
             CSVDumpGCTask task = new CSVDumpGCTask(csvFile, isSelected ? currentTarget : startCombo.getItems());
+            super.bindTask(task);
+            
+            Thread parseThread = new Thread(task);
+            parseThread.start();
+        }
+        
+    }
+    
+    /**
+     * Dump Java Class Histogram to CSV.
+     * 
+     * @param owner Owner window of this call.
+     * @param isSelected If this value is true, this method dumps data which is selected in class filter,
+     *                    otherwise this method dumps all snapshot data.
+     */
+    public void dumpClassHistogramToCSV(Window owner, boolean isSelected){
+        FileChooser dialog = new FileChooser();
+        dialog.setTitle("Select CSV files");
+        dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
+        dialog.getExtensionFilters().addAll(new ExtensionFilter("CSV file (*.csv)", "*.csv"),
+                                            new ExtensionFilter("All files", "*.*"));
+        File csvFile = dialog.showSaveDialog(owner);
+        
+        if(csvFile != null){
+            CSVDumpHeapTask task = new CSVDumpHeapTask(csvFile, snapShots, isSelected ? new HashSet<>(searchList.getSelectionModel().getSelectedItems()) : null);
             super.bindTask(task);
             
             Thread parseThread = new Thread(task);
