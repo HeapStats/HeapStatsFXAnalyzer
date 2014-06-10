@@ -33,10 +33,10 @@ import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringJoiner;
 import java.util.logging.Level;
@@ -71,7 +71,7 @@ public class ArchiveData {
     
     private File tmpPath;
     
-    private List<AbstractMap.SimpleEntry<String, String>> envInfo;
+    private Map<String, String> envInfo;
     
     private List<String> tcp;
     
@@ -138,9 +138,9 @@ public class ArchiveData {
                                                           }
                                                         });
                 
-            envInfo = new ArrayList<>();
-            envInfo.add(new AbstractMap.SimpleEntry<>("archive", archivePath));
-            prop.forEach((k, v) -> envInfo.add(new AbstractMap.SimpleEntry<>((String)k, (String)v)));
+            envInfo = new HashMap<>();
+            envInfo.put("archive", archivePath);
+            prop.forEach((k, v) -> envInfo.put((String)k, (String)v));
         }
         catch (IOException ex) {
             Logger.getLogger(ArchiveData.class.getName()).log(Level.SEVERE, null, ex);
@@ -418,7 +418,7 @@ public class ArchiveData {
      * 
      * @return envInfo in this archive.
      */
-    public List<AbstractMap.SimpleEntry<String, String>> getEnvInfo() {
+    public Map<String, String> getEnvInfo() {
         return envInfo;
     }
     

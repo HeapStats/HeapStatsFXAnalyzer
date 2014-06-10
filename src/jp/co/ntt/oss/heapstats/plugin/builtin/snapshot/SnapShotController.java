@@ -339,7 +339,7 @@ public class SnapShotController extends PluginController implements Initializabl
                                                                                                            }
 
                                                                                                            String time = converter.toString(h.getSnapShotDate());
-                                                                                                           addChartDataLong(series, time, o.getTotalSize() / 1024 / 1024, "MB");
+                                                                                                           addChartDataLong(series, time, o.getTotalSize() / 1024 / 1024, "MB", false);
                                                                                                         });
                                                                             });
                                           lastDiffTable.getItems().addAll(diffTask.getLastDiffList());
@@ -416,14 +416,14 @@ public class SnapShotController extends PluginController implements Initializabl
                      .forEachOrdered(d -> {
                                              String time = converter.toString(d.getSnapShotDate());
                                       
-                                             addChartDataLong(youngUsage, time, d.getNewHeap() / 1024 / 1024, "MB");
-                                             addChartDataLong(oldUsage, time, d.getOldHeap() / 1024 / 1024, "MB");
-                                             addChartDataLong(free, time, (d.getTotalCapacity() - d.getNewHeap() - d.getOldHeap()) / 1024 / 1024, "MB");
+                                             addChartDataLong(youngUsage, time, d.getNewHeap() / 1024 / 1024, "MB", false);
+                                             addChartDataLong(oldUsage, time, d.getOldHeap() / 1024 / 1024, "MB", false);
+                                             addChartDataLong(free, time, (d.getTotalCapacity() - d.getNewHeap() - d.getOldHeap()) / 1024 / 1024, "MB", false);
                                       
-                                             addChartDataLong(gcTime, time, d.getGcTime(), "ms");
+                                             addChartDataLong(gcTime, time, d.getGcTime(), "ms", false);
                                       
-                                             addChartDataLong(metaspaceUsage, time, d.getMetaspaceUsage() / 1024 / 1024, "MB");
-                                             addChartDataLong(metaspaceCapacity, time, d.getMetaspaceCapacity() / 1024 / 1024, "MB");
+                                             addChartDataLong(metaspaceUsage, time, d.getMetaspaceUsage() / 1024 / 1024, "MB", false);
+                                             addChartDataLong(metaspaceCapacity, time, d.getMetaspaceCapacity() / 1024 / 1024, "MB", false);
                                           });
         
         summaryTable.getItems().addAll((new SummaryData(currentTarget)).getSummaryAsList());

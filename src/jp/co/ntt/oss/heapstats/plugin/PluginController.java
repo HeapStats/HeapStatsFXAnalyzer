@@ -114,13 +114,20 @@ public abstract class PluginController implements Initializable{
      * @param series Series to be added.
      * @param xData X value.
      * @param yData Y value. This value must be percentage.
+     * @param label Label of this plot.
+     * @param needHighlight Highlight plot if this value is set to true.
      */
-    protected void addChartDataAsPercent(XYChart.Series<String, Double> series, String xData, Double yData){
+    protected void addChartDataAsPercent(XYChart.Series<String, Double> series, String xData, Double yData, String label, boolean needHighlight){
         XYChart.Data<String, Double> data = new XYChart.Data<>(xData, yData);
         series.getData().add(data);
 
-        String tip = String.format("%s: %s, %.02f %%", series.getName(), xData, yData);
+        String tip = String.format("%s: %s, %.02f %% %s", series.getName(), xData, yData, label);
         Tooltip.install(data.getNode(), new Tooltip(tip));
+
+        if(needHighlight){
+            data.getNode().setStyle("-fx-background-color: black, black;");
+        }
+        
     }
     
     /**
@@ -130,13 +137,20 @@ public abstract class PluginController implements Initializable{
      * @param series Series to be added.
      * @param xData X value.
      * @param yData Y value.
+     * @param unit Unit of this value.
+     * @param needHighlight Highlight plot if this value is set to true.
      */
-    protected void addChartDataLong(XYChart.Series<String, Long> series, String xData, Long yData, String unit){
+    protected void addChartDataLong(XYChart.Series<String, Long> series, String xData, Long yData, String unit, boolean needHighlight){
         XYChart.Data<String, Long> data = new XYChart.Data<>(xData, yData);
         series.getData().add(data);
 
         String tip = String.format("%s: %s, %d %s", series.getName(), xData, yData, unit);
         Tooltip.install(data.getNode(), new Tooltip(tip));
+        
+        if(needHighlight){
+            data.getNode().setStyle("-fx-background-color: black, black;");
+        }
+        
     }
     
     /**

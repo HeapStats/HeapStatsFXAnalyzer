@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -187,6 +188,7 @@ public class LogController extends PluginController implements Initializable{
                                                                                      .map(d -> new ArchiveData(d))
                                                                                      .collect(Collectors.toList());
                                           if(archiveList.size() > 0){
+                                            archiveList.forEach(a -> a.parseArchive());
                                             archiveCombo.getItems().addAll(archiveList);
                                           }
                                           
@@ -307,27 +309,39 @@ public class LogController extends PluginController implements Initializable{
         targetDiffData.stream()
                       .forEachOrdered(d -> {
                                               String time = converter.toString(d.getDateTime());
-                                              addChartDataAsPercent(javaUserUsage, time, d.getJavaUserUsage());
-                                              addChartDataAsPercent(javaSysUsage, time, d.getJavaSysUsage());
-                                              addChartDataAsPercent(systemUserUsage, time, d.getCpuUserUsage());
-                                              addChartDataAsPercent(systemNiceUsage, time, d.getCpuNiceUsage());
-                                              addChartDataAsPercent(systemSysUsage, time, d.getCpuSysUsage());
-                                              addChartDataAsPercent(systemIdleUsage, time, d.getCpuIdleUsage());
-                                              addChartDataAsPercent(systemIOWaitUsage, time, d.getCpuIOWaitUsage());
-                                              addChartDataAsPercent(systemIRQUsage, time, d.getCpuIRQUsage());
-                                              addChartDataAsPercent(systemSoftIRQUsage, time, d.getCpuSoftIRQUsage());
-                                              addChartDataAsPercent(systemStealUsage, time, d.getCpuStealUsage());
-                                              addChartDataAsPercent(systemGuestUsage, time, d.getCpuGuestUsage());
-                                              addChartDataLong(monitors, time, d.getJvmSyncPark(), "");
+                                              String label = archiveCombo.getItems().stream()
+                                                                                    .filter(a -> a.getDate().equals(d.getDateTime()))
+                                                                                    .findAny()
+                                                                                    .map(a -> String.format("(%s)", a.getEnvInfo().get("LogTrigger")))
+                                                                                    .orElse("");
+                                              
+                                              addChartDataAsPercent(javaUserUsage, time, d.getJavaUserUsage(), label, label.length() > 0);
+                                              addChartDataAsPercent(javaSysUsage, time, d.getJavaSysUsage(), label, label.length() > 0);
+                                              addChartDataAsPercent(systemUserUsage, time, d.getCpuUserUsage(), label, label.length() > 0);
+                                              addChartDataAsPercent(systemNiceUsage, time, d.getCpuNiceUsage(), label, label.length() > 0);
+                                              addChartDataAsPercent(systemSysUsage, time, d.getCpuSysUsage(), label, label.length() > 0);
+                                              addChartDataAsPercent(systemIdleUsage, time, d.getCpuIdleUsage(), label, label.length() > 0);
+                                              addChartDataAsPercent(systemIOWaitUsage, time, d.getCpuIOWaitUsage(), label, label.length() > 0);
+                                              addChartDataAsPercent(systemIRQUsage, time, d.getCpuIRQUsage(), label, label.length() > 0);
+                                              addChartDataAsPercent(systemSoftIRQUsage, time, d.getCpuSoftIRQUsage(), label, label.length() > 0);
+                                              addChartDataAsPercent(systemStealUsage, time, d.getCpuStealUsage(), label, label.length() > 0);
+                                              addChartDataAsPercent(systemGuestUsage, time, d.getCpuGuestUsage(), label, label.length() > 0);
+                                              addChartDataLong(monitors, time, d.getJvmSyncPark(), label, label.length() > 0);
                                            });
         targetLogData.stream()
                      .forEachOrdered(d -> {
                                              String time = converter.toString(d.getDateTime());
-                                             addChartDataLong(javaVSZUsage, time, d.getJavaVSSize() / 1024 / 1024, "MB");
-                                             addChartDataLong(javaRSSUsage, time, d.getJavaRSSize() / 1024 / 1024, "MB");
-                                             addChartDataLong(safepoints, time, d.getJvmSafepoints(), "");
-                                             addChartDataLong(safepointTime, time, d.getJvmSafepointTime(), "ms");
-                                             addChartDataLong(threads, time, d.getJvmLiveThreads(), "");
+                                             String label = archiveCombo.getItems().stream()
+                                                                                   .filter(a -> a.getDate().equals(d.getDateTime()))
+                                                                                   .findAny()
+                                                                                   .map(a -> String.format("(%s)", a.getEnvInfo().get("LogTrigger")))
+                                                                                   .orElse("");
+
+                                             addChartDataLong(javaVSZUsage, time, d.getJavaVSSize() / 1024 / 1024, "MB " + label, label.length() > 0);
+                                             addChartDataLong(javaRSSUsage, time, d.getJavaRSSize() / 1024 / 1024, "MB " + label, label.length() > 0);
+                                             addChartDataLong(safepoints, time, d.getJvmSafepoints(), label, label.length() > 0);
+                                             addChartDataLong(safepointTime, time, d.getJvmSafepointTime(), "ms " + label, label.length() > 0);
+                                             addChartDataLong(threads, time, d.getJvmLiveThreads(), label, label.length() > 0);
                                           });
         
         /* Put summary data to table */
@@ -350,8 +364,14 @@ public class LogController extends PluginController implements Initializable{
             return;
         }
         
-        target.parseArchive();
-        archiveEnvInfoTable.getItems().addAll(target.getEnvInfo());
+        /*
+         * Convert Map to List.
+         * Map.Entry of HashMap (HashMap$Node) is package private class. So JavaFX
+         * cannot access them through reflection API.
+         * Thus I convert Map.Entry to AbstractMap.SimpleEntry.
+         */
+        target.getEnvInfo().entrySet().forEach(e -> archiveEnvInfoTable.getItems().add(new AbstractMap.SimpleEntry<>(e)));
+        
         fileCombo.getItems().addAll(target.getFileList());
     }
     
