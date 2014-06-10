@@ -30,8 +30,8 @@
       <items>
 <Menu mnemonicParsing="false" text="Open">
 <items>
-<MenuItem mnemonicParsing="false" text="SnapShot" />
-        <MenuItem mnemonicParsing="false" text="Log" />
+<MenuItem mnemonicParsing="false" onAction="#onSnapShotOpenClick" text="SnapShot" />
+        <MenuItem mnemonicParsing="false" onAction="#onLogOpenClick" text="Log" />
 </items>
 </Menu>
 <MenuItem mnemonicParsing="false" onAction="#onExitClick" text="Exit" />

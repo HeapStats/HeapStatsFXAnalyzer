@@ -34,7 +34,6 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
@@ -150,14 +149,14 @@ public class LogController extends PluginController implements Initializable{
      * @param event ActionEvent of this event.
      */
     @FXML
-    private void onLogFileClick(ActionEvent event){
+    public void onLogFileClick(ActionEvent event){
         FileChooser dialog = new FileChooser();
         dialog.setTitle("Select log files");
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new ExtensionFilter("Log file (*.csv)", "*.csv"),
                                             new ExtensionFilter("All files", "*.*"));
         
-        List<File> logList = dialog.showOpenMultipleDialog(((Node)event.getSource()).getScene().getWindow());
+        List<File> logList = dialog.showOpenMultipleDialog(getOwner());
         
         if(logList != null){
             HeapStatsUtils.setDefaultDirectory(logList.get(0).getParent());

@@ -45,6 +45,7 @@ public class HeapStatsFXAnalyzer extends Application {
         Scene scene = new Scene(root);
         WindowController controller = (WindowController)mainWindowLoader.getController();
         controller.setOwner(stage);
+        controller.loadPlugin();
         
         stage.setScene(scene);
         stage.show();

@@ -56,7 +56,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.Window;
 import javax.xml.bind.JAXB;
 import jp.co.ntt.oss.heapstats.container.ObjectData;
 import jp.co.ntt.oss.heapstats.container.SnapShotHeader;
@@ -254,14 +253,14 @@ public class SnapShotController extends PluginController implements Initializabl
      * @param event ActionEvent of this event.
      */
     @FXML
-    private void onSnapshotFileClick(ActionEvent event){
+    public void onSnapshotFileClick(ActionEvent event){
         FileChooser dialog = new FileChooser();
         dialog.setTitle("Select SnapShot files");
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new ExtensionFilter("SnapShot file (*.dat)", "*.dat"),
                                             new ExtensionFilter("All files", "*.*"));
         
-        List<File> snapshotFileList = dialog.showOpenMultipleDialog(((Node)event.getSource()).getScene().getWindow());
+        List<File> snapshotFileList = dialog.showOpenMultipleDialog(getOwner());
         
         if(snapshotFileList != null){
             HeapStatsUtils.setDefaultDirectory(snapshotFileList.get(0).getParent());
@@ -627,17 +626,16 @@ public class SnapShotController extends PluginController implements Initializabl
     /**
      * Dump GC Statistics to CSV.
      * 
-     * @param owner Owner window of this call.
      * @param isSelected If this value is true, this method dumps data which is selected time range,
      *                    otherwise this method dumps all snapshot data.
      */
-    public void dumpGCStatisticsToCSV(Window owner, boolean isSelected){
+    public void dumpGCStatisticsToCSV(boolean isSelected){
         FileChooser dialog = new FileChooser();
         dialog.setTitle("Select CSV files");
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new ExtensionFilter("CSV file (*.csv)", "*.csv"),
                                             new ExtensionFilter("All files", "*.*"));
-        File csvFile = dialog.showSaveDialog(owner);
+        File csvFile = dialog.showSaveDialog(getOwner());
         
         if(csvFile != null){
             CSVDumpGCTask task = new CSVDumpGCTask(csvFile, isSelected ? currentTarget : startCombo.getItems());
@@ -652,17 +650,16 @@ public class SnapShotController extends PluginController implements Initializabl
     /**
      * Dump Java Class Histogram to CSV.
      * 
-     * @param owner Owner window of this call.
      * @param isSelected If this value is true, this method dumps data which is selected in class filter,
      *                    otherwise this method dumps all snapshot data.
      */
-    public void dumpClassHistogramToCSV(Window owner, boolean isSelected){
+    public void dumpClassHistogramToCSV(boolean isSelected){
         FileChooser dialog = new FileChooser();
         dialog.setTitle("Select CSV files");
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new ExtensionFilter("CSV file (*.csv)", "*.csv"),
                                             new ExtensionFilter("All files", "*.*"));
-        File csvFile = dialog.showSaveDialog(owner);
+        File csvFile = dialog.showSaveDialog(getOwner());
         
         if(csvFile != null){
             CSVDumpHeapTask task = new CSVDumpHeapTask(csvFile, snapShots, isSelected ? new HashSet<>(searchList.getSelectionModel().getSelectedItems()) : null);

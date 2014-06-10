@@ -29,6 +29,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Region;
+import javafx.stage.Window;
 
 /**
  * Base class for HeapStats FX Analyzer plugin.
@@ -46,6 +47,8 @@ public abstract class PluginController implements Initializable{
     private Region veil;
     
     private ProgressIndicator progress;
+    
+    private Window owner;
     
     public abstract String getPluginName();
     
@@ -152,7 +155,23 @@ public abstract class PluginController implements Initializable{
         }
         
     }
-    
+
+    /**
+     * Get appliaction window owner
+     * @return owner window
+     */
+    public Window getOwner() {
+        return owner;
+    }
+
+    /**
+     * Set application window owner
+     * @param owner owner window
+     */
+    public void setOwner(Window owner) {
+        this.owner = owner;
+    }
+
     /**
      * This class represents license of libraries which are used by each plugin.
      */

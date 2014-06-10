@@ -46,6 +46,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Window;
 import jp.co.ntt.oss.heapstats.plugin.PluginClassLoader;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
+import jp.co.ntt.oss.heapstats.plugin.builtin.log.LogController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.SnapShotController;
 import jp.co.ntt.oss.heapstats.utils.DialogHelper;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
@@ -110,6 +111,7 @@ public class WindowController implements Initializable {
         }
         
         PluginController controller = (PluginController)loader.getController();
+        controller.setOwner(owner);
         controller.setVeil(veil);
         controller.setProgress(progress);
 
@@ -126,25 +128,49 @@ public class WindowController implements Initializable {
     @FXML
     private void onGCAllClick(ActionEvent event) {
         SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
-        snapShotController.dumpGCStatisticsToCSV(owner, false);
+        snapShotController.dumpGCStatisticsToCSV(false);
     }
 
     @FXML
     private void onGCSelectedClick(ActionEvent event) {
         SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
-        snapShotController.dumpGCStatisticsToCSV(owner, true);
+        snapShotController.dumpGCStatisticsToCSV(true);
     }
 
     @FXML
     private void onHeapAllClick(ActionEvent event) {
         SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
-        snapShotController.dumpClassHistogramToCSV(owner, false);
+        snapShotController.dumpClassHistogramToCSV(false);
     }
 
     @FXML
     private void onHeapSelectedClick(ActionEvent event) {
         SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
-        snapShotController.dumpClassHistogramToCSV(owner, true);
+        snapShotController.dumpClassHistogramToCSV(true);
+    }
+
+    @FXML
+    private void onSnapShotOpenClick(ActionEvent event) {
+        Tab snapShotTab = tabPane.getTabs().stream()
+                                 .filter(t -> t.getText().equals("SnapShot Data"))
+                                 .findAny()
+                                 .orElseThrow(() -> new IllegalStateException("SnapShot plugin must be loaded."));
+        tabPane.getSelectionModel().select(snapShotTab);
+        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        
+        snapShotController.onSnapshotFileClick(event);
+    }
+
+    @FXML
+    private void onLogOpenClick(ActionEvent event) {
+        Tab snapShotTab = tabPane.getTabs().stream()
+                                 .filter(t -> t.getText().equals("Log Data"))
+                                 .findAny()
+                                 .orElseThrow(() -> new IllegalStateException("Log plugin must be loaded."));
+        tabPane.getSelectionModel().select(snapShotTab);
+        LogController logController = (LogController)WindowController.getPluginController("Log Data");
+        
+        logController.onLogFileClick(event);
     }
 
     @Override
@@ -159,7 +185,12 @@ public class WindowController implements Initializable {
         
         stackPane.getChildren().add(veil);
         stackPane.getChildren().add(progress);
-        
+    }
+
+    /**
+     * Load plugins which is defined in heapstats.properties.
+     */
+    public void loadPlugin(){
         String resourceName = "/" + this.getClass().getName().replace('.', '/') + ".class";
         String appJarString = this.getClass().getResource(resourceName).getPath();
         appJarString = appJarString.substring(0, appJarString.indexOf('!')).replaceFirst("file:/", "");
@@ -187,7 +218,7 @@ public class WindowController implements Initializable {
             
         List<String> plugins = HeapStatsUtils.getPlugins();
         plugins.stream().forEach(s -> addPlugin(s));
-    }    
+    }
 
     /**
      * Get controller instance of plugin.
