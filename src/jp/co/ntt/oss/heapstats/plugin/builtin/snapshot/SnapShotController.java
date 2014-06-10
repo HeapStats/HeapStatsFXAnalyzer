@@ -294,18 +294,14 @@ public class SnapShotController extends PluginController implements Initializabl
     private void setTopNChartColor(){
         topNChart.getData().stream()
                            .forEach( s -> {
-                                             int idx = topNChart.getData().indexOf(s);
                                              String colorHexCode = String.format("#%06x", s.getName().hashCode() & 0xFFFFFF);
-                                             topNChart.lookup(String.format(".default-color%d.area-legend-symbol", idx))
-                                                                    .setStyle(String.format("-fx-background-color: %s, white;", colorHexCode));
-                                             topNChart.lookup(String.format(".default-color%d.chart-series-area-line", idx))
-                                                                    .setStyle(String.format("-fx-stroke: %s;", colorHexCode));
-                                             topNChart.lookup(String.format(".default-color%d.chart-series-area-fill", idx))
-                                                      .setStyle(String.format("-fx-fill: %s;", colorHexCode));
+                                             
+                                             s.getNode().lookup(".chart-series-area-line").setStyle(String.format("-fx-stroke: %s;", colorHexCode));
+                                             s.getNode().lookup(".chart-series-area-fill").setStyle(String.format("-fx-fill: %s;", colorHexCode));
+
                                              s.getData().stream()
-                                                        .map(data -> data.getNode().lookup(String.format(".default-color%d.chart-area-symbol", idx)))
-                                                        .filter(node -> node != null)
-                                                        .forEach(node -> node.setStyle(String.format("-fx-background-color: %s, white;", colorHexCode)));
+                                                        .map(d -> d.getNode().lookup(".chart-area-symbol"))
+                                                        .forEach(n -> n.setStyle(String.format("-fx-background-color: %s, white;", colorHexCode)));
                                           });
     }
     

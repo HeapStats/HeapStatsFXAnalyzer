@@ -99,7 +99,7 @@
 <children><SplitPane dividerPositions="0.5" focusTraversable="true" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
   <items>
     <AnchorPane>
-<children><StackedAreaChart fx:id="topNChart" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<children><StackedAreaChart fx:id="topNChart" legendVisible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
   <xAxis>
     <CategoryAxis side="BOTTOM" tickLabelsVisible="false" />
   </xAxis>
