@@ -24,15 +24,18 @@
 /* Java Heap */
 #youngSeries .chart-series-area-fill { -fx-fill: blue; }
 #youngSeries .chart-series-area-line { -fx-stroke: blue; }
-#youngSeries .chart-area-symbol      { -fx-background-color: blue, white; }
+#heapChart .default-color0.chart-area-symbol  { -fx-background-color: blue, white; }
+#heapChart .default-color0.area-legend-symbol { -fx-background-color: blue, white; }
 
 #oldSeries .chart-series-area-fill { -fx-fill: lime; }
 #oldSeries .chart-series-area-line { -fx-stroke: lime; }
-#oldSeries .chart-area-symbol      { -fx-background-color: lime, white; }
+#heapChart .default-color1.chart-area-symbol  { -fx-background-color: lime, white; }
+#heapChart .default-color1.area-legend-symbol { -fx-background-color: lime, white; }
 
 #freeSeries .chart-series-area-fill { -fx-fill: red; }
 #freeSeries .chart-series-area-line { -fx-stroke: red; }
-#freeSeries .chart-area-symbol      { -fx-background-color: red, white; }
+#heapChart .default-color2.chart-area-symbol  { -fx-background-color: red, white; }
+#heapChart .default-color2.area-legend-symbol { -fx-background-color: red, white; }
 
 
 /* GC time */
@@ -41,10 +44,12 @@
 
 
 /* Metaspace */
-#usageSeries .chart-series-area-fill { -fx-fill: blue; }
-#usageSeries .chart-series-area-line { -fx-stroke: blue; }
-#usageSeries .chart-area-symbol      { -fx-background-color: blue, white; }
-
 #capacitySeries .chart-series-area-fill { -fx-fill: red; }
 #capacitySeries .chart-series-area-line { -fx-stroke: red; }
-#capacitySeries .chart-area-symbol      { -fx-background-color: red, white; }
+#metaspaceChart .default-color0.chart-area-symbol  { -fx-background-color: red, white; }
+#metaspaceChart .default-color0.area-legend-symbol { -fx-background-color: red, white; }
+
+#usageSeries .chart-series-area-fill { -fx-fill: blue; }
+#usageSeries .chart-series-area-line { -fx-stroke: blue; }
+#metaspaceChart .default-color1.chart-area-symbol  { -fx-background-color: blue, white; }
+#metaspaceChart .default-color1.area-legend-symbol { -fx-background-color: blue, white; }
