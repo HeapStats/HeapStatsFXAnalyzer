@@ -40,21 +40,21 @@
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
   </rowConstraints>
-<children><LineChart id="javaMemoryChart" fx:id="javaMemoryChart" legendSide="BOTTOM" legendVisible="true" minHeight="0.0" minWidth="0.0" title="Java Native Memory" GridPane.rowIndex="1">
+<children><LineChart id="javaMemoryChart" fx:id="javaMemoryChart" animated="false" legendSide="BOTTOM" legendVisible="true" minHeight="0.0" minWidth="0.0" title="Java Native Memory" GridPane.rowIndex="1">
   <xAxis>
     <CategoryAxis side="BOTTOM" tickLabelsVisible="false" />
   </xAxis>
   <yAxis>
     <NumberAxis label="MB" side="LEFT" />
   </yAxis>
-</LineChart><StackedAreaChart id="javaCPUChart" fx:id="javaCPUChart" legendSide="BOTTOM" legendVisible="true" minHeight="0.0" minWidth="0.0" title="Java CPU">
+</LineChart><StackedAreaChart id="javaCPUChart" fx:id="javaCPUChart" animated="false" legendSide="BOTTOM" legendVisible="true" minHeight="0.0" minWidth="0.0" title="Java CPU">
   <xAxis>
     <CategoryAxis side="BOTTOM" tickLabelsVisible="false" />
   </xAxis>
   <yAxis>
     <NumberAxis autoRanging="false" label="\%" lowerBound="0.0" side="LEFT" tickUnit="10.0" upperBound="100.0d" />
   </yAxis>
-</StackedAreaChart><StackedAreaChart id="systemCPUChart" fx:id="systemCPUChart" legendSide="BOTTOM" legendVisible="true" minHeight="0.0" minWidth="0.0" title="System CPU" GridPane.columnIndex="1">
+</StackedAreaChart><StackedAreaChart id="systemCPUChart" fx:id="systemCPUChart" animated="false" legendSide="BOTTOM" legendVisible="true" minHeight="0.0" minWidth="0.0" title="System CPU" GridPane.columnIndex="1">
   <xAxis>
     <CategoryAxis side="BOTTOM" tickLabelsVisible="false" />
   </xAxis>
@@ -62,7 +62,7 @@
     <NumberAxis autoRanging="false" label="\%" lowerBound="0.0" side="LEFT" tickUnit="10.0" upperBound="100.0d" />
   </yAxis>
 </StackedAreaChart><StackPane GridPane.columnIndex="1" GridPane.rowIndex="1">
-<children><LineChart id="safepointChart" fx:id="safepointChart" title="Safepoint">
+<children><LineChart id="safepointChart" fx:id="safepointChart" animated="false" title="Safepoint">
   <xAxis>
     <CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" visible="false" />
   </xAxis>
@@ -72,7 +72,7 @@
 <StackPane.margin>
 <Insets right="43.0" />
 </StackPane.margin>
-</LineChart><LineChart id="safepointTimeChart" fx:id="safepointTimeChart" minHeight="0.0" minWidth="0.0" title=" ">
+</LineChart><LineChart id="safepointTimeChart" fx:id="safepointTimeChart" animated="false" minHeight="0.0" minWidth="0.0" title=" ">
   <xAxis>
     <CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" visible="false" />
   </xAxis>
@@ -88,7 +88,7 @@
     <TableColumn id="category" fx:id="categoryColumn" editable="false" prefWidth="200.0" sortable="false" />
     <TableColumn id="value" fx:id="valueColumn" editable="false" prefWidth="200.0" sortable="false" />
   </columns>
-</TableView><LineChart id="threadChart" fx:id="threadChart" minHeight="0.0" minWidth="0.0" title="Threads" GridPane.rowIndex="2">
+</TableView><LineChart id="threadChart" fx:id="threadChart" animated="false" minHeight="0.0" minWidth="0.0" title="Threads" GridPane.rowIndex="2">
   <xAxis>
     <CategoryAxis side="BOTTOM" tickLabelsVisible="false" />
   </xAxis>
