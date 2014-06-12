@@ -58,7 +58,7 @@ public class HeapStatsParser {
     private final ByteBuffer intBuffer;
 
     public HeapStatsParser() {
-        longBuffer = ByteBuffer.allocate(8);
+        longBuffer = ByteBuffer.allocate(48);
         intBuffer = ByteBuffer.allocate(4);
     }
     
@@ -77,16 +77,14 @@ public class HeapStatsParser {
      * Reader of long (8 bytes) value from channel.
      * 
      * @param ch Channel to be read.
-     * @return read value.
+     * @param size Read size.
      * @throws IOException 
      */
-    private long readLong(SeekableByteChannel ch) throws IOException{
+    private void readLong(SeekableByteChannel ch, int size) throws IOException{
+        longBuffer.position(0);
+        longBuffer.limit(size);
         ch.read(longBuffer);
         longBuffer.flip();
-        long ret = longBuffer.getLong();
-        longBuffer.flip();
-        
-        return ret;
     }
 
     /**
@@ -106,61 +104,33 @@ public class HeapStatsParser {
     }
     
     /**
-     * Parse SnapShot.
-     * @param fname File name to be parsed.
-     * @param startOfs Offset of to be parsed in SnapShot.
+     * Parse single SnapShot.
+     * @param header SnapShotHeader to parse.
      * @param handler SnapShot handler.
      * @return true if parsing is succeeded.
      * @throws IOException 
      */
-    public boolean parse(String fname, long startOfs, ParserEventHandler handler) throws IOException {
-        SnapShotHeader header;
+    public boolean parseSingle(SnapShotHeader header, ParserEventHandler handler) throws IOException {
 
-        try(FileInputStream stream = new FileInputStream(fname)) {
-            stream.skip(startOfs);
+        try(FileInputStream stream = new FileInputStream(header.getSnapshotFile().toFile())) {
             FileChannel ch = stream.getChannel();
-            
-            while (true) {
-                long offset = ch.position();
-                handler.onStart(offset);
+            ch.position(header.getFileOffset() + header.getSnapShotHeaderSize());
+            setByteOrder(header.getByteOrderMark());
 
-                int ret = stream.read();
+            handler.onStart(header.getFileOffset());
 
-                if (ret == -1) {
-                    // EOF
-                    break;
-                }
-                else if(ret == FILE_FORMAT_NO_CHILD ||
-                        ret == FILE_FORMAT_HAVE_CHILD ||
-                        ret == FILE_FORMAT_HAVE_CHILD_AND_METASPACE){
-                    // Heap
-                    header = parseHeader(stream, ret);
-                    header.setFileOffset(offset);
-                    header.setSnapshotFile(FileSystems.getDefault().getPath(fname));
-
-                    if(handler.onNewSnapShot(header, fname) != ParseResult.HEAPSTATS_PARSE_CONTINUE){
-                        return false;
-                    }
-                    
-                    if(parseElement(stream, header, handler, ret) == ParseResult.HEAPSTATS_PARSE_ABORT){
-                        return false;
-                    }
-
-                }
-                else{
-                    StringBuilder errString = new StringBuilder();
-                    errString.append("Unknown FileType! (");
-                    errString.append(ret);
-                    errString.append(")");
-                    throw new IOException(errString.toString());
-                }
-                
-                if(handler.onFinish(ch.position()) == ParseResult.HEAPSTATS_PARSE_ABORT){
-                    return false;
-                }
-                
+            if(handler.onNewSnapShot(header, header.getSnapshotFile().toString()) != ParseResult.HEAPSTATS_PARSE_CONTINUE){
+                return false;
             }
-            
+                    
+            if(parseElement(stream, header, handler) == ParseResult.HEAPSTATS_PARSE_ABORT){
+                return false;
+            }
+
+            if(handler.onFinish(ch.position()) == ParseResult.HEAPSTATS_PARSE_ABORT){
+                return false;
+            }
+                
         }
 
         return true;
@@ -177,20 +147,69 @@ public class HeapStatsParser {
      *         ByteOrder agent if that occurs
      */
     public boolean parse(String fname, ParserEventHandler handler) throws IOException {
-        return parse(fname, 0, handler);
+
+        try(FileInputStream stream = new FileInputStream(fname)) {
+            SnapShotHeader header;
+            FileChannel ch = stream.getChannel();
+            
+            while ((header = parseHeader(stream, fname)) != null) {
+                handler.onStart(header.getFileOffset());
+
+                if(handler.onNewSnapShot(header, fname) != ParseResult.HEAPSTATS_PARSE_CONTINUE){
+                    return false;
+                }
+                    
+                if(parseElement(stream, header, handler) == ParseResult.HEAPSTATS_PARSE_ABORT){
+                    return false;
+                }
+
+                if(handler.onFinish(ch.position()) == ParseResult.HEAPSTATS_PARSE_ABORT){
+                    return false;
+                }
+                
+            }
+            
+        }
+
+        return true;
     }
 
     /**
      * Extracting the header information of the snapshot.
      *
      * @param stream the file Java Heap Information.
-     * @param format Snapshot format.
+     * @param fname Snapshot file name.
      * @return Return the SnapShotHeader
      * @throws IOException If other I / O error occurs.
      */
-    protected SnapShotHeader parseHeader(final FileInputStream stream, final int format) throws IOException {
+    protected SnapShotHeader parseHeader(FileInputStream stream, String fname) throws IOException {
         SnapShotHeader header = new SnapShotHeader();
+        FileChannel ch = stream.getChannel();
+        long startPos = ch.position();
+        
         int ret = stream.read();
+
+        if (ret == -1) {
+          // EOF
+          return null;
+        }
+        else if(ret == FILE_FORMAT_NO_CHILD ||
+                ret == FILE_FORMAT_HAVE_CHILD ||
+                ret == FILE_FORMAT_HAVE_CHILD_AND_METASPACE){
+          // Heap
+          header.setSnapShotType(ret);
+          header.setFileOffset(startPos);
+          header.setSnapshotFile(FileSystems.getDefault().getPath(fname));
+        }
+        else{
+          StringBuilder errString = new StringBuilder();
+          errString.append("Unknown SnapShot Type! (");
+          errString.append(ret);
+          errString.append(")");
+          throw new IOException(errString.toString());
+        }
+
+        ret = stream.read();
 
         switch (ret) {
             
@@ -211,50 +230,56 @@ public class HeapStatsParser {
                 
         }
 
-        FileChannel ch = stream.getChannel();
         setByteOrder(header.getByteOrderMark());
 
         // SnapShot Date
-        header.setSnapShotDateAsLong(readLong(ch));
+        readLong(ch, 16);
+        header.setSnapShotDateAsLong(longBuffer.getLong());
         // Entries
-        header.setNumEntries(readLong(ch));
+        header.setNumEntries(longBuffer.getLong());
 
         // SnapShot Cause
         header.setCause(readInt(ch));
 
         // GC Cause
-        int len = (int)readLong(ch);
+        readLong(ch, 8);
+        int len = (int)longBuffer.getLong();
         byte[] gcCause = new byte[len];
         if (stream.read(gcCause) != gcCause.length) {
             throw new IOException("Could not get the GC Cause.");
         }
         header.setGcCause(gcCause[0] == '\0' ? "-" : new String(gcCause));
 
+        readLong(ch, 48);
         // Full GC Count
-        header.setFullCount(readLong(ch));
+        header.setFullCount(longBuffer.getLong());
 
         // Young GC Count
-        header.setYngCount(readLong(ch));
+        header.setYngCount(longBuffer.getLong());
 
         // GC Time
-        header.setGcTime(readLong(ch));
+        header.setGcTime(longBuffer.getLong());
 
         // New Heap Size
-        header.setNewHeap(readLong(ch));
+        header.setNewHeap(longBuffer.getLong());
 
         // Old Heap Size
-        header.setOldHeap(readLong(ch));
+        header.setOldHeap(longBuffer.getLong());
 
         // Total Heap Size
-        header.setTotalCapacity(readLong(ch));
+        header.setTotalCapacity(longBuffer.getLong());
 
-        if(format == FILE_FORMAT_HAVE_CHILD_AND_METASPACE){
+        if(header.getSnapShotType() == FILE_FORMAT_HAVE_CHILD_AND_METASPACE){
+          readLong(ch, 16);
+          
           // Metaspace usage
-          header.setMetaspaceUsage(readLong(ch));
+          header.setMetaspaceUsage(longBuffer.getLong());
 
           // Metaspace capacity
-          header.setMetaspaceCapacity(readLong(ch));
+          header.setMetaspaceCapacity(longBuffer.getLong());
         }
+        
+        header.setSnapShotHeaderSize(ch.position() - startPos);
 
         return header;
     }
@@ -265,13 +290,10 @@ public class HeapStatsParser {
      * @param stream the file Java Heap Information.
      * @param header the SnapShot header
      * @param handler ParserEventHandler
-     * @param format Format version of the snapshot file
      * @return Return the Parse result.
      * @throws IOException If some other I/O error occurs
      */
-    protected ParseResult parseElement(final FileInputStream stream,
-            final SnapShotHeader header, final ParserEventHandler handler,
-            final int format) throws IOException {
+    protected ParseResult parseElement(FileInputStream stream, SnapShotHeader header, ParserEventHandler handler) throws IOException {
 
         FileChannel ch = stream.getChannel();
         
@@ -280,12 +302,14 @@ public class HeapStatsParser {
             ParserEventHandler.ParseResult eventResult;
             ObjectData obj;
             obj = new ObjectData();
+            
+            readLong(ch, 16);
 
             // tag
-            obj.setTag(readLong(ch));
+            obj.setTag(longBuffer.getLong());
 
             // class Name
-            classNameInBytes = new byte[(int)readLong(ch)];
+            classNameInBytes = new byte[(int)longBuffer.getLong()];
             if (stream.read(classNameInBytes) != classNameInBytes.length) {
                 throw new IOException("Could not get the Class name.");
             }
@@ -316,20 +340,23 @@ public class HeapStatsParser {
                 obj.setName(new String(classNameInBytes));
             }
 
-            if (format >= FILE_FORMAT_HAVE_CHILD) {
-                obj.setClassLoader(readLong(ch));
-                obj.setClassLoaderTag(readLong(ch));
+            if (header.getSnapShotType() >= FILE_FORMAT_HAVE_CHILD) {
+                readLong(ch, 16);
+                obj.setClassLoader(longBuffer.getLong());
+                obj.setClassLoaderTag(longBuffer.getLong());
             }
 
+            readLong(ch, 16);
+            
             // instance
-            obj.setCount(readLong(ch));
+            obj.setCount(longBuffer.getLong());
             // heap usage
-            obj.setTotalSize(readLong(ch));
+            obj.setTotalSize(longBuffer.getLong());
 
             eventResult = handler.onEntry(obj);
 
             if ((eventResult == ParseResult.HEAPSTATS_PARSE_CONTINUE) &&
-                (format >= FILE_FORMAT_HAVE_CHILD)) {
+                (header.getSnapShotType() >= FILE_FORMAT_HAVE_CHILD)) {
                 eventResult = parseChildClass(obj.getTag(), ch,
                                          header.getByteOrderMark(), handler);
             }
@@ -359,9 +386,11 @@ public class HeapStatsParser {
             final ParserEventHandler handler) throws IOException {
 
         while (true) {
-            long childClassTag = readLong(ch);
-            long instances = readLong(ch);
-            long totalSize = readLong(ch);
+            readLong(ch, 24);
+            
+            long childClassTag = longBuffer.getLong();
+            long instances = longBuffer.getLong();
+            long totalSize = longBuffer.getLong();
 
             if (childClassTag == -1) {
                 return ParseResult.HEAPSTATS_PARSE_CONTINUE;

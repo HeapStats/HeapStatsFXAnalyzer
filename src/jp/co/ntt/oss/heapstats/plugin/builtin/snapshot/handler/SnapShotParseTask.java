@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
 import javafx.concurrent.Task;
 import jp.co.ntt.oss.heapstats.container.ObjectData;
@@ -47,26 +48,26 @@ public class SnapShotParseTask extends Task<Void>{
     protected Void call() throws Exception {
         
         /* Parse SnapShot */
-        HeapStatsParser parser = new HeapStatsParser();
-        SnapShotHandler handler = new SnapShotHandler();
+        snapShots = new ConcurrentHashMap<>();
         LongAdder progress = new LongAdder();
-        
-        snapShotList.stream()
-                    .forEachOrdered(d -> {
-                                            progress.increment();
-                                            
-                                            try{
-                                                parser.parse(d.getSnapshotFile().toString(), d.getFileOffset(), handler);
-                                            }
-                                            catch(IOException e){
-                                                throw new UncheckedIOException(e);
-                                            }
-                                            
-                                            updateProgress(progress.longValue(), snapShotList.size());
-                                         });
-        
-        snapShots = handler.getSnapShots();
 
+        snapShotList.parallelStream()
+                    .forEach(d -> {
+                                     progress.increment();
+                                     SnapShotHandler handler = new SnapShotHandler();
+                                     HeapStatsParser parser = new HeapStatsParser();
+                                     
+                                     try{
+                                       parser.parseSingle(d, handler);
+                                     }
+                                     catch(IOException e){
+                                       throw new UncheckedIOException(e);
+                                     }
+                             
+                                     snapShots.put(d, handler.getSnapShot());
+                                     updateProgress(progress.longValue(), snapShotList.size());
+                                  });
+        
         return null;
     }
 

@@ -33,16 +33,10 @@ import jp.co.ntt.oss.heapstats.parser.ParserEventHandler;
  */
 public class SnapShotHandler implements ParserEventHandler{
     
-    private final Map<SnapShotHeader, Map<Long, ObjectData>> snapShots;
-    
-    private Map<Long, ObjectData> currentSnapShotData;
+    private Map<Long, ObjectData> snapShotData;
     
     private ObjectData currentObjectData;
     
-    public SnapShotHandler() {
-        snapShots = new HashMap<>();
-    }
-
     @Override
     public ParseResult onStart(long off) {
         /* Nothing to do */
@@ -51,14 +45,13 @@ public class SnapShotHandler implements ParserEventHandler{
 
     @Override
     public ParseResult onNewSnapShot(SnapShotHeader header, String parent) {
-        currentSnapShotData = new HashMap<>();
-        snapShots.put(header, currentSnapShotData);
+        snapShotData = new HashMap<>();
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
     @Override
     public ParseResult onEntry(ObjectData data) {
-        currentSnapShotData.put(data.getTag(), data);
+        snapShotData.put(data.getTag(), data);
         currentObjectData = data;
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
@@ -79,12 +72,12 @@ public class SnapShotHandler implements ParserEventHandler{
 
     @Override
     public ParseResult onFinish(long off) {
-        currentSnapShotData.forEach((k, v) -> v.setLoaderName(currentSnapShotData));
+        snapShotData.forEach((k, v) -> v.setLoaderName(snapShotData));
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
-    public Map<SnapShotHeader, Map<Long, ObjectData>> getSnapShots() {
-        return snapShots;
+    public Map<Long, ObjectData> getSnapShot() {
+        return snapShotData;
     }
 
 }

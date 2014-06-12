@@ -90,7 +90,11 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
     
     private Path snapshotFile;
     
+    private int snapShotType;
+    
     private long fileOffset;
+    
+    private long snapShotHeaderSize;
     
     private long snapShotSize;
 
@@ -391,6 +395,28 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
     }
 
     /**
+     * Get SnapShot type.
+     * This type is defined in HeapStatsParser:
+     * FILE_FORMAT_NO_CHILD, FILE_FORMAT_HAVE_CHILD, FILE_FORMAT_HAVE_CHILD_AND_METASPACE
+     * 
+     * @return SnapShot Type
+     */
+    public int getSnapShotType() {
+        return snapShotType;
+    }
+
+    /**
+     * Set SnapShot type.
+     * This type is defined in HeapStatsParser:
+     * FILE_FORMAT_NO_CHILD, FILE_FORMAT_HAVE_CHILD, FILE_FORMAT_HAVE_CHILD_AND_METASPACE
+     * 
+     * @param snapShotType 
+     */
+    public void setSnapShotType(int snapShotType) {
+        this.snapShotType = snapShotType;
+    }
+
+    /**
      * Getter of offset of this snapshot in file.
      * 
      * @return Offset of this snapshot in file.
@@ -406,6 +432,24 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
      */
     public void setFileOffset(long fileOffset) {
         this.fileOffset = fileOffset;
+    }
+
+    /**
+     * Get Size of SnapShot header.
+     * 
+     * @return header size.
+     */
+    public long getSnapShotHeaderSize() {
+        return snapShotHeaderSize;
+    }
+
+    /**
+     * Set size of SnapShot header.
+     * 
+     * @param snapShotHeaderSize 
+     */
+    public void setSnapShotHeaderSize(long snapShotHeaderSize) {
+        this.snapShotHeaderSize = snapShotHeaderSize;
     }
 
     /**
