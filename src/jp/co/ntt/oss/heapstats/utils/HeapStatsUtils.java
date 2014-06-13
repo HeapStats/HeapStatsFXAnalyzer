@@ -60,7 +60,7 @@ public class HeapStatsUtils {
                                          .filter(s -> s.endsWith("HeapStatsFXAnalyzer.jar"))
                                          .findFirst()
                                          .get();
-            currentPath = Paths.get(appJar).getParent();
+            currentPath = Paths.get(appJar).toAbsolutePath().getParent();
         }
         
         return currentPath;
