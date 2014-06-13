@@ -326,6 +326,8 @@ public class LogController extends PluginController implements Initializable{
                                               addChartDataAsPercent(systemStealUsage, time, d.getCpuStealUsage(), label, label.length() > 0);
                                               addChartDataAsPercent(systemGuestUsage, time, d.getCpuGuestUsage(), label, label.length() > 0);
                                               addChartDataLong(monitors, time, d.getJvmSyncPark(), label, label.length() > 0);
+                                              addChartDataLong(safepoints, time, d.getJvmSafepoints(), label, label.length() > 0);
+                                              addChartDataLong(safepointTime, time, d.getJvmSafepointTime(), "ms " + label, label.length() > 0);
                                            });
         targetLogData.stream()
                      .forEachOrdered(d -> {
@@ -338,8 +340,6 @@ public class LogController extends PluginController implements Initializable{
 
                                              addChartDataLong(javaVSZUsage, time, d.getJavaVSSize() / 1024 / 1024, "MB " + label, label.length() > 0);
                                              addChartDataLong(javaRSSUsage, time, d.getJavaRSSize() / 1024 / 1024, "MB " + label, label.length() > 0);
-                                             addChartDataLong(safepoints, time, d.getJvmSafepoints(), label, label.length() > 0);
-                                             addChartDataLong(safepointTime, time, d.getJvmSafepointTime(), "ms " + label, label.length() > 0);
                                              addChartDataLong(threads, time, d.getJvmLiveThreads(), label, label.length() > 0);
                                           });
         
