@@ -19,16 +19,14 @@
 package jp.co.ntt.oss.heapstats.plugin.builtin.log.model;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.UncheckedIOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -39,12 +37,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringJoiner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import jp.co.ntt.oss.heapstats.plugin.builtin.log.LogController;
+import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
+import jp.co.ntt.oss.heapstats.utils.InfoDialog;
 import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 
 /**
@@ -98,7 +95,7 @@ public class ArchiveData {
         try {
             tmpPath = Files.createTempDirectory("heapstats_archive").toFile();
         } catch (IOException ex) {
-            Logger.getLogger(ArchiveData.class.getName()).log(Level.SEVERE, null, ex);
+            (new InfoDialog("Error", ex.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(ex))).show();
         }
         
         tmpPath.deleteOnExit();
@@ -119,31 +116,15 @@ public class ArchiveData {
             prop.computeIfPresent("CollectionDate", (k, v) -> (new LocalDateTimeConverter())
                                                                  .toString(LocalDateTime.ofInstant(Instant.ofEpochMilli(
                                                                          Long.parseLong((String)v)), ZoneId.systemDefault())));
-            prop.computeIfPresent("LogTrigger", (k, v) -> {
-                                                             switch(Integer.parseInt((String)v)){
-                                                                 case 1:
-                                                                     return "Resource Exhausted";
-                                                                         
-                                                                 case 2:
-                                                                     return "Signal";
-                                                                         
-                                                                 case 3:
-                                                                     return "Interval";
-                                                                         
-                                                                 case 4:
-                                                                     return "Deadlock";
-                                                                         
-                                                                 default:
-                                                                     return "Unknown";
-                                                          }
-                                                        });
+            String[] triggers = {"Resource Exhausted", "Signal", "Interval", "Deadlock"};
+            prop.computeIfPresent("LogTrigger", (k, v) -> triggers[Integer.parseInt((String)v) - 1]);
                 
             envInfo = new HashMap<>();
             envInfo.put("archive", archivePath);
             prop.forEach((k, v) -> envInfo.put((String)k, (String)v));
         }
         catch (IOException ex) {
-            Logger.getLogger(ArchiveData.class.getName()).log(Level.SEVERE, null, ex);
+            (new InfoDialog("Error", ex.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(ex))).show();
         }
 
     }
@@ -164,7 +145,7 @@ public class ArchiveData {
                          .collect(Collectors.toList());
         }
         catch (IOException ex) {
-            Logger.getLogger(ArchiveData.class.getName()).log(Level.SEVERE, null, ex);
+            (new InfoDialog("Error", ex.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(ex))).show();
         }
     
         return null;
@@ -177,25 +158,17 @@ public class ArchiveData {
      * @param entry ZipEntry to be deflated.
      */
     private void deflateFileData(ZipFile archive, ZipEntry entry){
-        Path destPath = FileSystems.getDefault().getPath(tmpPath.getAbsolutePath(), entry.getName());
+        Path destPath = Paths.get(tmpPath.getAbsolutePath(), entry.getName());
         
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(archive.getInputStream(entry)));
-            BufferedWriter writer = Files.newBufferedWriter(destPath, StandardOpenOption.CREATE);){
+            PrintWriter writer = new PrintWriter(Files.newBufferedWriter(destPath, StandardOpenOption.CREATE));){
             
             reader.lines()
                   .map(s -> s.replace('\0', ' '))
-                  .forEach(s -> {
-                                   try{
-                                       writer.write(s);
-                                       writer.newLine();
-                                   }
-                                   catch(IOException e){
-                                       throw new UncheckedIOException(e);
-                                   }
-                                });
+                  .forEach(s -> writer.println(s));
         }
         catch (IOException ex) {
-            Logger.getLogger(ArchiveData.class.getName()).log(Level.SEVERE, null, ex);
+            (new InfoDialog("Error", ex.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(ex))).show();
         }
 
     }
@@ -274,43 +247,13 @@ public class ArchiveData {
         writer.print(Integer.parseInt(foreignAddr[1], 16));
         writer.print("\t");
         
-        switch(Integer.parseInt(data[INDEX_STATE], 16)){ // connection state
-            case 1:
-                writer.println("ESTABLISHED");
-                break;
-            case 2:
-                writer.println("SYN_SENT");
-                break;
-            case 3:
-                writer.println("SYN_RECV");
-                break;
-            case 4:
-                writer.println("FIN_WAIT1");
-                break;
-            case 5:
-                writer.println("FIN_WAIT2");
-                break;
-            case 6:
-                writer.println("TIME_WAIT");
-                break;
-            case 7:
-                writer.println("CLOSE");
-                break;
-            case 8:
-                writer.println("CLOSE_WAIT");
-                break;
-            case 9:
-                writer.println("LAST_ACK");
-                break;
-            case 10:
-                writer.println("LISTEN");
-                break;
-            case 11:
-                writer.println("CLOSING");
-                break;
-            default:
-                writer.println("-");
-                break;
+        try{
+            String[] states = {"ESTABLISHED", "SYN_SENT", "SYN_RECV", "FIN_WAIT1", "FIN_WAIT2",
+                                  "TIME_WAIT", "CLOSE", "CLOSE_WAIT", "LAST_ACK", "LISTEN", "CLOSING"};
+            writer.println(states[Integer.parseInt(data[INDEX_STATE], 16) - 1]); // connection state
+        }
+        catch(ArrayIndexOutOfBoundsException e){
+            writer.println("-");
         }
         
     }
@@ -321,7 +264,7 @@ public class ArchiveData {
      * @throws IOException 
      */
     private void buildSockData() throws IOException{
-        Path sockfile = FileSystems.getDefault().getPath(tmpPath.getAbsolutePath(), "socket");
+        Path sockfile = Paths.get(tmpPath.getAbsolutePath(), "socket");
         
         try(PrintWriter writer = new PrintWriter(Files.newOutputStream(sockfile, StandardOpenOption.CREATE))){
             writer.println("Owner\tProto\tRecv-Q\tSend-Q\tLocal Address\tForeign Address\tState");
@@ -390,7 +333,7 @@ public class ArchiveData {
             buildSockData();
         }
         catch (IOException ex) {
-            Logger.getLogger(LogController.class.getName()).log(Level.SEVERE, null, ex);
+            (new InfoDialog("Error", ex.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(ex))).show();
         }
         
         parsed = true;
@@ -441,10 +384,8 @@ public class ArchiveData {
      * @throws IOException 
      */
     public String getFileContents(String file) throws IOException{
-        Path filePath = FileSystems.getDefault().getPath(tmpPath.getAbsolutePath(), file);
-        return Files.readAllLines(filePath).stream()
-                                           .collect(StringBuilder::new, (r, s) -> r.append(s).append("\n"), StringBuilder::append)
-                                           .toString();
+        Path filePath = Paths.get(tmpPath.getAbsolutePath(), file);
+        return Files.lines(filePath).collect(Collectors.joining("\n"));
     }
     
 }
