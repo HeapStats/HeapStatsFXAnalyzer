@@ -24,6 +24,7 @@ import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -193,9 +194,22 @@ public class WindowController implements Initializable {
     public void loadPlugin(){
         String resourceName = "/" + this.getClass().getName().replace('.', '/') + ".class";
         String appJarString = this.getClass().getResource(resourceName).getPath();
-        appJarString = appJarString.substring(0, appJarString.indexOf('!')).replaceFirst("file:/", "");
-
-        Path appJarPath = FileSystems.getDefault().getPath(appJarString);
+        appJarString = appJarString.substring(0, appJarString.indexOf('!')).replaceFirst("file:", "");
+        
+        Path appJarPath;
+        
+        try{
+            appJarPath = FileSystems.getDefault().getPath(appJarString);
+        }
+        catch(InvalidPathException e){
+            if((appJarString.charAt(0) == '/') && (appJarString.length() > 2)){ // for Windows
+                appJarPath = FileSystems.getDefault().getPath(appJarString.substring(1));
+            }
+            else{
+                throw e;
+            }
+        }
+        
         Path libPath = appJarPath.getParent().resolve("lib");
         List<URL> jarURLList = new ArrayList<>();
         
