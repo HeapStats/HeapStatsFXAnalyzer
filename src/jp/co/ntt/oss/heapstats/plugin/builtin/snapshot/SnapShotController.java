@@ -445,11 +445,15 @@ public class SnapShotController extends PluginController implements Initializabl
      */
     @FXML
     private void onSnapShotTimeSelected(ActionEvent event){
+        SnapShotHeader header = snapShotTimeCombo.getSelectionModel().getSelectedItem();
+        if(header == null){
+            return;
+        }
+
         ObservableList<Map.Entry<String, String>> summaryList = snapShotSummaryTable.getItems();
         summaryList.clear();
         usagePieChart.getData().clear();
         objDataTable.getItems().clear();
-        SnapShotHeader header = snapShotTimeCombo.getSelectionModel().getSelectedItem();
         
         summaryList.addAll(
                 new AbstractMap.SimpleEntry<>("Date", (new LocalDateTimeConverter()).toString(header.getSnapShotDate())),
