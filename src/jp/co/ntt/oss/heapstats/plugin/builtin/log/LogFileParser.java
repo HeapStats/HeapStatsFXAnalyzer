@@ -18,20 +18,19 @@
 
 package jp.co.ntt.oss.heapstats.plugin.builtin.log;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.concurrent.Task;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.DiffData;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.LogData;
+import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
+import jp.co.ntt.oss.heapstats.utils.InfoDialog;
 
 /**
  * HeapStats log file (CSV) parser.
@@ -69,7 +68,8 @@ public class LogFileParser extends Task<Void>{
             element.parseFromCSV(csvLine, logdir);
         }
         catch(IllegalArgumentException ex){
-            Logger.getLogger(LogFileParser.class.getName()).log(Level.SEVERE, null, ex);
+            InfoDialog dialog = new InfoDialog("Error", ex.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(ex));
+            dialog.show();
             return;
         }
         
@@ -82,16 +82,15 @@ public class LogFileParser extends Task<Void>{
      * @param logfile Log to be parsedd.
      */
     protected void parse(String logfile){
-        String logdir = FileSystems.getDefault()
-                                   .getPath(logfile)
-                                   .getParent()
-                                   .toString();
+        Path logPath = Paths.get(logfile);
+        String logdir =logPath.getParent().toString();
         
-        try(BufferedReader reader = Files.newBufferedReader(Paths.get(logfile))){
-            reader.lines().forEach(s -> addEntry(s, logdir));
+        try{
+            Files.lines(logPath).forEach(s -> addEntry(s, logdir));
         }
         catch (IOException ex){
-            Logger.getLogger(LogFileParser.class.getName()).log(Level.SEVERE, null, ex);
+            InfoDialog dialog = new InfoDialog("Error", ex.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(ex));
+            dialog.show();
         }
         
     }
