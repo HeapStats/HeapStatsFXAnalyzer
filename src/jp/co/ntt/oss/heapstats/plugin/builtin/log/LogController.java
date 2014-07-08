@@ -89,6 +89,9 @@ public class LogController extends PluginController implements Initializable{
     private LineChart<String, Long> threadChart;
     
     @FXML
+    private LineChart<String, Long> monitorChart;
+    
+    @FXML
     private TableView<SummaryData.SummaryDataEntry> procSummary;
     
     @FXML
@@ -136,11 +139,14 @@ public class LogController extends PluginController implements Initializable{
         archiveKeyColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
         archiveVauleColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         
-        javaCPUChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
-        systemCPUChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
-        javaMemoryChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
-        safepointChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
-        threadChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
+        String bgcolor = "-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";";
+        javaCPUChart.lookup(".chart").setStyle(bgcolor);
+        systemCPUChart.lookup(".chart").setStyle(bgcolor);
+        javaMemoryChart.lookup(".chart").setStyle(bgcolor);
+        safepointChart.lookup(".chart").setStyle(bgcolor);
+        safepointTimeChart.lookup(".chart").setStyle(bgcolor);
+        threadChart.lookup(".chart").setStyle(bgcolor);
+        monitorChart.lookup(".chart").setStyle(bgcolor);
     }
     
     /**
@@ -222,6 +228,8 @@ public class LogController extends PluginController implements Initializable{
         javaMemoryChart.getData().clear();
         safepointChart.getData().clear();
         safepointTimeChart.getData().clear();
+        threadChart.getData().clear();
+        monitorChart.getData().clear();
         procSummary.getItems().clear();
         
         /* Get range */
@@ -299,10 +307,13 @@ public class LogController extends PluginController implements Initializable{
         
         /* Threads */
         XYChart.Series<String, Long> threads = new XYChart.Series<>();
-        XYChart.Series<String, Long> monitors = new XYChart.Series<>();
         threads.setName("Threads");
+        threadChart.getData().add(threads);
+        
+        /* Monitor contantion */
+        XYChart.Series<String, Long> monitors = new XYChart.Series<>();
         monitors.setName("Monitors");
-        threadChart.getData().addAll(threads, monitors);
+        monitorChart.getData().add(monitors);
         
         /* Generate graph data */
         targetDiffData.stream()

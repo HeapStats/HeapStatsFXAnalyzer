@@ -93,21 +93,19 @@
 
 
 /* Safepoint chart */
-#safepointChart .default-color0.chart-series-line { -fx-stroke: lime; }
-#safepointChart .default-color0.chart-line-symbol { -fx-background-color: lime, white; }
+#safepointChart .chart-series-line { -fx-stroke: lime; }
+#safepointChart .chart-line-symbol { -fx-background-color: lime, white; }
 
 /* Safepoint time chart */
-#safepointTimeChart .default-color0.chart-series-line { -fx-stroke: yellow; }
-#safepointTimeChart .default-color0.chart-line-symbol { -fx-background-color: yellow, white; }
+#safepointTimeChart .chart-series-line { -fx-stroke: yellow; }
+#safepointTimeChart .chart-line-symbol { -fx-background-color: yellow, white; }
 
 
-/* Thread */
+/* Thread chart */
+#threadChart .chart-series-line { -fx-stroke: red; }
+#threadChart .chart-line-symbol { -fx-background-color: red, white; }
 
-/* Threads */
-#threadChart .default-color0.chart-series-line { -fx-stroke: red; }
-#threadChart .default-color0.chart-line-symbol { -fx-background-color: red, white; }
-
-/* Monitors */
-#threadChart .default-color1.chart-series-line { -fx-stroke: blue; }
-#threadChart .default-color1.chart-line-symbol { -fx-background-color: blue, white; }
+/* Monitor chart */
+#monitorChart .chart-series-line { -fx-stroke: blue; }
+#monitorChart .chart-line-symbol { -fx-background-color: blue, white; }
 
