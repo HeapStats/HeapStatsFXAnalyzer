@@ -25,59 +25,48 @@
 /* Java CPU */
 #javaCPUUserSeries .chart-series-area-fill { -fx-fill: red; }
 #javaCPUUserSeries .chart-series-area-line { -fx-stroke: red; }
-#javaCPUChart .default-color0.chart-area-symbol  { -fx-background-color: red, white; }
 #javaCPUChart .default-color0.area-legend-symbol { -fx-background-color: red, white; }
 
 #javaCPUSysSeries  .chart-series-area-fill { -fx-fill: blue; }
 #javaCPUSysSeries  .chart-series-area-line { -fx-stroke: blue; }
-#javaCPUChart .default-color1.chart-area-symbol  { -fx-background-color: blue, white; }
 #javaCPUChart .default-color1.area-legend-symbol { -fx-background-color: blue, white; }
 
 
 /* System CPU */
 #systemCPUUserSeries .chart-series-area-fill { -fx-fill: red; }
 #systemCPUUserSeries .chart-series-area-line { -fx-stroke: red; }
-#systemCPUChart .default-color0.chart-area-symbol  { -fx-background-color: red, white; }
 #systemCPUChart .default-color0.area-legend-symbol { -fx-background-color: red, white; }
 
 #systemCPUNiceSeries  .chart-series-area-fill { -fx-fill: lime; }
 #systemCPUNiceSeries  .chart-series-area-line { -fx-stroke: lime; }
-#systemCPUChart .default-color1.chart-area-symbol  { -fx-background-color: lime, white; }
 #systemCPUChart .default-color1.area-legend-symbol { -fx-background-color: lime, white; }
 
 #systemCPUSysSeries  .chart-series-area-fill { -fx-fill: blue; }
 #systemCPUSysSeries  .chart-series-area-line { -fx-stroke: blue; }
-#systemCPUChart .default-color2.chart-area-symbol  { -fx-background-color: blue, white; }
 #systemCPUChart .default-color2.area-legend-symbol { -fx-background-color: blue, white; }
 
 #systemCPUIdleSeries  .chart-series-area-fill { -fx-fill: yellow; }
 #systemCPUIdleSeries  .chart-series-area-line { -fx-stroke: yellow; }
-#systemCPUChart .default-color3.chart-area-symbol  { -fx-background-color: yellow, white; }
 #systemCPUChart .default-color3.area-legend-symbol { -fx-background-color: yellow, white; }
 
 #systemCPUIOWaitSeries  .chart-series-area-fill { -fx-fill: pink; }
 #systemCPUIOWaitSeries  .chart-series-area-line { -fx-stroke: pink; }
-#systemCPUChart .default-color4.chart-area-symbol  { -fx-background-color: pink, white; }
 #systemCPUChart .default-color4.area-legend-symbol { -fx-background-color: pink, white; }
 
 #systemCPUIRQSeries  .chart-series-area-fill { -fx-fill: skyblue; }
 #systemCPUIRQSeries  .chart-series-area-line { -fx-stroke: skyblue; }
-#systemCPUChart .default-color5.chart-area-symbol  { -fx-background-color: skyblue, white; }
 #systemCPUChart .default-color5.area-legend-symbol { -fx-background-color: skyblue, white; }
 
 #systemCPUSoftIRQSeries  .chart-series-area-fill { -fx-fill: bisque; }
 #systemCPUSoftIRQSeries  .chart-series-area-line { -fx-stroke: bisque; }
-#systemCPUChart .default-color6.chart-area-symbol  { -fx-background-color: bisque, white; }
 #systemCPUChart .default-color6.area-legend-symbol { -fx-background-color: bisque, white; }
 
 #systemCPUStealSeries  .chart-series-area-fill { -fx-fill: darkgray; }
 #systemCPUStealSeries  .chart-series-area-line { -fx-stroke: darkgray; }
-#systemCPUChart .default-color7.chart-area-symbol  { -fx-background-color: darkgray, white; }
 #systemCPUChart .default-color7.area-legend-symbol { -fx-background-color: darkgray, white; }
 
 #systemCPUGuestSeries  .chart-series-area-fill { -fx-fill: maroon; }
 #systemCPUGuestSeries  .chart-series-area-line { -fx-stroke: maroon; }
-#systemCPUChart .default-color8.chart-area-symbol  { -fx-background-color: maroon, white; }
 #systemCPUChart .default-color8.area-legend-symbol { -fx-background-color: maroon, white; }
 
 
@@ -85,27 +74,21 @@
 
 /* VSZ */
 #javaMemoryChart .default-color0.chart-series-line { -fx-stroke: blue; }
-#javaMemoryChart .default-color0.chart-line-symbol { -fx-background-color: blue, white; }
 
 /* RSS */
 #javaMemoryChart .default-color1.chart-series-line { -fx-stroke: red; }
-#javaMemoryChart .default-color1.chart-line-symbol { -fx-background-color: red, white; }
 
 
 /* Safepoint chart */
 #safepointChart .chart-series-line { -fx-stroke: lime; }
-#safepointChart .chart-line-symbol { -fx-background-color: lime, white; }
 
 /* Safepoint time chart */
 #safepointTimeChart .chart-series-line { -fx-stroke: yellow; }
-#safepointTimeChart .chart-line-symbol { -fx-background-color: yellow, white; }
 
 
 /* Thread chart */
 #threadChart .chart-series-line { -fx-stroke: red; }
-#threadChart .chart-line-symbol { -fx-background-color: red, white; }
 
 /* Monitor chart */
 #monitorChart .chart-series-line { -fx-stroke: blue; }
-#monitorChart .chart-line-symbol { -fx-background-color: blue, white; }
 

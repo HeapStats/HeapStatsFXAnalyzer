@@ -21,6 +21,7 @@ package jp.co.ntt.oss.heapstats.plugin;
 import java.net.URL;
 import java.util.Map;
 import java.util.ResourceBundle;
+import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -49,6 +50,8 @@ public abstract class PluginController implements Initializable{
     private ProgressIndicator progress;
     
     private Window owner;
+    
+    private ChangeListener windowResizeEvent;
     
     public abstract String getPluginName();
     
@@ -118,19 +121,13 @@ public abstract class PluginController implements Initializable{
      * @param xData X value.
      * @param yData Y value. This value must be percentage.
      * @param label Label of this plot.
-     * @param needHighlight Highlight plot if this value is set to true.
      */
-    protected void addChartDataAsPercent(XYChart.Series<String, Double> series, String xData, Double yData, String label, boolean needHighlight){
+    protected void addChartDataAsPercent(XYChart.Series<String, Double> series, String xData, Double yData, String label){
         XYChart.Data<String, Double> data = new XYChart.Data<>(xData, yData);
         series.getData().add(data);
 
         String tip = String.format("%s: %s, %.02f %% %s", series.getName(), xData, yData, label);
         Tooltip.install(data.getNode(), new Tooltip(tip));
-
-        if(needHighlight){
-            data.getNode().setStyle("-fx-background-color: black, black;");
-        }
-        
     }
     
     /**
@@ -141,19 +138,13 @@ public abstract class PluginController implements Initializable{
      * @param xData X value.
      * @param yData Y value.
      * @param unit Unit of this value.
-     * @param needHighlight Highlight plot if this value is set to true.
      */
-    protected void addChartDataLong(XYChart.Series<String, Long> series, String xData, Long yData, String unit, boolean needHighlight){
+    protected void addChartDataLong(XYChart.Series<String, Long> series, String xData, Long yData, String unit){
         XYChart.Data<String, Long> data = new XYChart.Data<>(xData, yData);
         series.getData().add(data);
 
         String tip = String.format("%s: %s, %d %s", series.getName(), xData, yData, unit);
         Tooltip.install(data.getNode(), new Tooltip(tip));
-        
-        if(needHighlight){
-            data.getNode().setStyle("-fx-background-color: black, black;");
-        }
-        
     }
 
     /**
@@ -170,6 +161,22 @@ public abstract class PluginController implements Initializable{
      */
     public void setOwner(Window owner) {
         this.owner = owner;
+        
+        if(this.windowResizeEvent != null){
+            this.owner.widthProperty().addListener(this.windowResizeEvent);
+            this.owner.heightProperty().addListener(this.windowResizeEvent);
+        }
+        
+    }
+
+    public void setOnWindowResize(ChangeListener event){
+        this.windowResizeEvent = event;
+        
+        if(this.owner != null){
+            this.owner.widthProperty().addListener(event);
+            this.owner.heightProperty().addListener(event);
+        }
+        
     }
 
     /**

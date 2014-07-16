@@ -260,5 +260,5 @@ public class WindowController implements Initializable {
     public void setOwner(Window owner) {
         this.owner = owner;
     }
-
+    
 }

@@ -29,20 +29,28 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.chart.Axis;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
@@ -71,25 +79,49 @@ public class LogController extends PluginController implements Initializable{
     private TextField logFileList;
     
     @FXML
+    private GridPane chartGrid;
+    
+    @FXML
     private StackedAreaChart<String, Double> javaCPUChart;
+    
+    @FXML
+    private AnchorPane javaCPUAnchor;
     
     @FXML
     private StackedAreaChart<String, Double> systemCPUChart;
     
     @FXML
+    private AnchorPane systemCPUAnchor;
+    
+    @FXML
     private LineChart<String, Long> javaMemoryChart;
+    
+    @FXML
+    private AnchorPane javaMemoryAnchor;
     
     @FXML
     private LineChart<String, Long> safepointChart;
     
     @FXML
+    private AnchorPane safepointAnchor;
+    
+    @FXML
     private LineChart<String, Long> safepointTimeChart;
+    
+    @FXML
+    private AnchorPane safepointTimeAnchor;
     
     @FXML
     private LineChart<String, Long> threadChart;
     
     @FXML
+    private AnchorPane threadsAnchor;
+    
+    @FXML
     private LineChart<String, Long> monitorChart;
+    
+    @FXML
+    private AnchorPane monitorAnchor;
     
     @FXML
     private TableView<SummaryData.SummaryDataEntry> procSummary;
@@ -147,6 +179,8 @@ public class LogController extends PluginController implements Initializable{
         safepointTimeChart.lookup(".chart").setStyle(bgcolor);
         threadChart.lookup(".chart").setStyle(bgcolor);
         monitorChart.lookup(".chart").setStyle(bgcolor);
+        
+        setOnWindowResize((v, o, n) -> Platform.runLater(() -> drawArchiveLine()));
     }
     
     /**
@@ -204,6 +238,55 @@ public class LogController extends PluginController implements Initializable{
             parseThread.start();
         }
         
+    }
+    
+    private void drawArchiveLine(){
+        LocalDateTimeConverter converter = new LocalDateTimeConverter();
+        
+        chartGrid.getChildren().stream()
+                               .filter(n -> n instanceof StackPane)
+                               .forEach(p -> {
+                                                AnchorPane anchor = (AnchorPane)((StackPane)p).getChildren().stream()
+                                                                                                            .filter(n -> n instanceof AnchorPane)
+                                                                                                            .findAny()
+                                                                                                            .get();
+                                                XYChart chart = (XYChart)((StackPane)p).getChildren().stream()
+                                                                                                     .filter(n -> n instanceof XYChart)
+                                                                                                     .findAny()
+                                                                                                     .get();
+                                                anchor.getChildren().clear();
+                                                
+                                                CategoryAxis xAxis = (CategoryAxis)chart.getXAxis();
+                                                Axis yAxis = chart.getYAxis();
+                                                Label chartTitle = (Label)chart.getChildrenUnmodifiable().stream()
+                                                                                                         .filter(n -> n.getStyleClass().contains("chart-title"))
+                                                                                                         .findFirst()
+                                                                                                         .get();
+                                                
+                                                double startX = xAxis.getLayoutX() + xAxis.getStartMargin() - 1.0d;
+                                                double yPos = yAxis.getLayoutY() + chartTitle.getLayoutY() + chartTitle.getHeight();
+                                                List<Rectangle> rectList = archiveCombo.getItems().stream()
+                                                                                                  .map(a -> new Rectangle(xAxis.getDisplayPosition(converter.toString(a.getDate())) + startX, yPos, 2.0d, yAxis.getHeight()))
+                                                                                                  .collect(Collectors.toList());
+                                                anchor.getChildren().addAll(rectList);
+                                             });
+        /*
+        threadsAnchor.getChildren().clear();
+        
+        archiveCombo.getItems().forEach(a -> {
+                                                CategoryAxis xAxis = (CategoryAxis)threadChart.getXAxis();
+                                                Axis yAxis = threadChart.getYAxis();
+                                                Label chartTitle = (Label)threadChart.getChildrenUnmodifiable().stream()
+                                                                                                               .filter(n -> n.getStyleClass().contains("chart-title"))
+                                                                                                               .findFirst()
+                                                                                                               .get();
+                                                double xPos = xAxis.getDisplayPosition(converter.toString(a.getDate())) + xAxis.getLayoutX() + xAxis.getStartMargin() - 1.0d;
+                                                double yPos = yAxis.getLayoutY() + chartTitle.getLayoutY() + chartTitle.getHeight();
+
+                                                Rectangle rect = new Rectangle(xPos, yPos, 2.0d, yAxis.getHeight());
+                                                threadsAnchor.getChildren().add(rect);
+                                             });
+        */
     }
 
     /**
@@ -325,20 +408,20 @@ public class LogController extends PluginController implements Initializable{
                                                                                     .map(a -> String.format("(%s)", a.getEnvInfo().get("LogTrigger")))
                                                                                     .orElse("");
                                               
-                                              addChartDataAsPercent(javaUserUsage, time, d.getJavaUserUsage(), label, label.length() > 0);
-                                              addChartDataAsPercent(javaSysUsage, time, d.getJavaSysUsage(), label, label.length() > 0);
-                                              addChartDataAsPercent(systemUserUsage, time, d.getCpuUserUsage(), label, label.length() > 0);
-                                              addChartDataAsPercent(systemNiceUsage, time, d.getCpuNiceUsage(), label, label.length() > 0);
-                                              addChartDataAsPercent(systemSysUsage, time, d.getCpuSysUsage(), label, label.length() > 0);
-                                              addChartDataAsPercent(systemIdleUsage, time, d.getCpuIdleUsage(), label, label.length() > 0);
-                                              addChartDataAsPercent(systemIOWaitUsage, time, d.getCpuIOWaitUsage(), label, label.length() > 0);
-                                              addChartDataAsPercent(systemIRQUsage, time, d.getCpuIRQUsage(), label, label.length() > 0);
-                                              addChartDataAsPercent(systemSoftIRQUsage, time, d.getCpuSoftIRQUsage(), label, label.length() > 0);
-                                              addChartDataAsPercent(systemStealUsage, time, d.getCpuStealUsage(), label, label.length() > 0);
-                                              addChartDataAsPercent(systemGuestUsage, time, d.getCpuGuestUsage(), label, label.length() > 0);
-                                              addChartDataLong(monitors, time, d.getJvmSyncPark(), label, label.length() > 0);
-                                              addChartDataLong(safepoints, time, d.getJvmSafepoints(), label, label.length() > 0);
-                                              addChartDataLong(safepointTime, time, d.getJvmSafepointTime(), "ms " + label, label.length() > 0);
+                                              addChartDataAsPercent(javaUserUsage, time, d.getJavaUserUsage(), label);
+                                              addChartDataAsPercent(javaSysUsage, time, d.getJavaSysUsage(), label);
+                                              addChartDataAsPercent(systemUserUsage, time, d.getCpuUserUsage(), label);
+                                              addChartDataAsPercent(systemNiceUsage, time, d.getCpuNiceUsage(), label);
+                                              addChartDataAsPercent(systemSysUsage, time, d.getCpuSysUsage(), label);
+                                              addChartDataAsPercent(systemIdleUsage, time, d.getCpuIdleUsage(), label);
+                                              addChartDataAsPercent(systemIOWaitUsage, time, d.getCpuIOWaitUsage(), label);
+                                              addChartDataAsPercent(systemIRQUsage, time, d.getCpuIRQUsage(), label);
+                                              addChartDataAsPercent(systemSoftIRQUsage, time, d.getCpuSoftIRQUsage(), label);
+                                              addChartDataAsPercent(systemStealUsage, time, d.getCpuStealUsage(), label);
+                                              addChartDataAsPercent(systemGuestUsage, time, d.getCpuGuestUsage(), label);
+                                              addChartDataLong(monitors, time, d.getJvmSyncPark(), label);
+                                              addChartDataLong(safepoints, time, d.getJvmSafepoints(), label);
+                                              addChartDataLong(safepointTime, time, d.getJvmSafepointTime(), "ms " + label);
                                            });
         targetLogData.stream()
                      .forEachOrdered(d -> {
@@ -349,13 +432,15 @@ public class LogController extends PluginController implements Initializable{
                                                                                    .map(a -> String.format("(%s)", a.getEnvInfo().get("LogTrigger")))
                                                                                    .orElse("");
 
-                                             addChartDataLong(javaVSZUsage, time, d.getJavaVSSize() / 1024 / 1024, "MB " + label, label.length() > 0);
-                                             addChartDataLong(javaRSSUsage, time, d.getJavaRSSize() / 1024 / 1024, "MB " + label, label.length() > 0);
-                                             addChartDataLong(threads, time, d.getJvmLiveThreads(), label, label.length() > 0);
+                                             addChartDataLong(javaVSZUsage, time, d.getJavaVSSize() / 1024 / 1024, "MB " + label);
+                                             addChartDataLong(javaRSSUsage, time, d.getJavaRSSize() / 1024 / 1024, "MB " + label);
+                                             addChartDataLong(threads, time, d.getJvmLiveThreads(), label);
                                           });
         
         /* Put summary data to table */
         procSummary.getItems().addAll((new SummaryData(targetLogData, targetDiffData)).getSummaryAsList());
+        
+        Platform.runLater(() -> drawArchiveLine());
     }
     
     /**
