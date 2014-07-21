@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,12 +48,15 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Popup;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.ArchiveData;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.DiffData;
@@ -153,6 +157,8 @@ public class LogController extends PluginController implements Initializable{
     List<LogData> logEntries;
     
     List<DiffData> diffEntries;
+    
+    private static final Popup chartPopup = new Popup();
     
     
     /**
@@ -489,6 +495,44 @@ public class LogController extends PluginController implements Initializable{
             logArea.setText("");
         }
 
+    }
+    
+    /**
+     * Show popup window with pointing data in chart.
+     * 
+     * @param chart Target chart.
+     * @param xValue value in X Axis.
+     * @param event Mouse event.
+     */
+    private void showChartPopup(XYChart<String, Number> chart, String xValue, MouseEvent event){
+        chartPopup.hide();
+
+        String label = chart.getData().stream()
+                                      .map(s -> s.getName() + " = " + s.getData().stream()
+                                                                                 .filter(d -> d.getXValue().equals(xValue))
+                                                                                 .map(d -> d.getYValue().toString())
+                                                                                 .findAny()
+                                                                                 .orElse("<none>"))
+                                      .collect(Collectors.joining("\n"));
+
+        chartPopup.getContent().clear();
+        chartPopup.getContent().add(new Text(xValue + "\n" + label));
+        chartPopup.show(chart, event.getScreenX() + 3.0d, event.getScreenY() + 3.0d);
+    }
+    
+    @FXML
+    private void onChartMouseMoved(MouseEvent event){
+        XYChart<String, Number> chart = (XYChart)event.getSource();
+        CategoryAxis xAxis = (CategoryAxis)chart.getXAxis();
+        double startXPoint = xAxis.getLayoutX() + xAxis.getStartMargin();
+        
+        Optional.ofNullable(chart.getXAxis().getValueForDisplay(event.getX() - startXPoint))
+                .ifPresent(v -> showChartPopup(chart, v, event));
+    }
+    
+    @FXML
+    private void onChartMouseExited(MouseEvent event){
+        chartPopup.hide();
     }
     
     /**
