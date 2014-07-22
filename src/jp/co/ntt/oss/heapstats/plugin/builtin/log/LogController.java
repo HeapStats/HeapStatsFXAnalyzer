@@ -158,7 +158,9 @@ public class LogController extends PluginController implements Initializable{
     
     List<DiffData> diffEntries;
     
-    private static final Popup chartPopup = new Popup();
+    private Popup chartPopup;
+    
+    private Text popupText;
     
     
     /**
@@ -185,6 +187,10 @@ public class LogController extends PluginController implements Initializable{
         safepointTimeChart.lookup(".chart").setStyle(bgcolor);
         threadChart.lookup(".chart").setStyle(bgcolor);
         monitorChart.lookup(".chart").setStyle(bgcolor);
+        
+        chartPopup = new Popup();
+        popupText = new Text();
+        chartPopup.getContent().add(popupText);
         
         setOnWindowResize((v, o, n) -> Platform.runLater(() -> drawArchiveLine()));
     }
@@ -505,8 +511,6 @@ public class LogController extends PluginController implements Initializable{
      * @param event Mouse event.
      */
     private void showChartPopup(XYChart<String, Number> chart, String xValue, MouseEvent event){
-        chartPopup.hide();
-
         String label = chart.getData().stream()
                                       .map(s -> s.getName() + " = " + s.getData().stream()
                                                                                  .filter(d -> d.getXValue().equals(xValue))
@@ -515,8 +519,7 @@ public class LogController extends PluginController implements Initializable{
                                                                                  .orElse("<none>"))
                                       .collect(Collectors.joining("\n"));
 
-        chartPopup.getContent().clear();
-        chartPopup.getContent().add(new Text(xValue + "\n" + label));
+        popupText.setText(xValue + "\n" + label);
         chartPopup.show(chart, event.getScreenX() + 3.0d, event.getScreenY() + 3.0d);
     }
     
