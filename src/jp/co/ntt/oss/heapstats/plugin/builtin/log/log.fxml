@@ -49,6 +49,11 @@
         <yAxis>
           <NumberAxis side="LEFT" />
         </yAxis>
+        <data>
+            <javafx.collections.FXCollections fx:factory="observableArrayList">
+                <javafx.scene.chart.XYChart.Series fx:id="threads" name="Threads"/> 
+            </javafx.collections.FXCollections>
+        </data>
       </LineChart>
                                     <AnchorPane fx:id="threadsAnchor" minHeight="0.0" minWidth="0.0" mouseTransparent="true" />
                                  </children></StackPane><TableView fx:id="procSummary" layoutX="-6.0" layoutY="23.0" minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="23.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
@@ -66,6 +71,12 @@
         <yAxis>
           <NumberAxis autoRanging="false" label="\%" lowerBound="0.0" side="LEFT" tickUnit="10.0" upperBound="100.0d" />
         </yAxis>
+        <data>
+            <javafx.collections.FXCollections fx:factory="observableArrayList">
+                <javafx.scene.chart.XYChart.Series fx:id="javaUserUsage" name="user"/> 
+                <javafx.scene.chart.XYChart.Series fx:id="javaSysUsage" name="sys"/> 
+            </javafx.collections.FXCollections>
+        </data>
       </StackedAreaChart>
                                     <AnchorPane fx:id="javaCPUAnchor" minHeight="0.0" minWidth="0.0" mouseTransparent="true" />
                                  </children>
@@ -79,6 +90,19 @@
         <yAxis>
           <NumberAxis autoRanging="false" label="\%" lowerBound="0.0" side="LEFT" tickUnit="10.0" upperBound="100.0d" />
         </yAxis>
+        <data>
+            <javafx.collections.FXCollections fx:factory="observableArrayList">
+                <javafx.scene.chart.XYChart.Series fx:id="systemUserUsage" name="user"/> 
+                <javafx.scene.chart.XYChart.Series fx:id="systemNiceUsage" name="nice"/> 
+                <javafx.scene.chart.XYChart.Series fx:id="systemSysUsage" name="sys"/> 
+                <javafx.scene.chart.XYChart.Series fx:id="systemIdleUsage" name="idle"/> 
+                <javafx.scene.chart.XYChart.Series fx:id="systemIOWaitUsage" name="I/O wait"/> 
+                <javafx.scene.chart.XYChart.Series fx:id="systemIRQUsage" name="IRQ"/> 
+                <javafx.scene.chart.XYChart.Series fx:id="systemSoftIRQUsage" name="soft IRQ"/> 
+                <javafx.scene.chart.XYChart.Series fx:id="systemStealUsage" name="steal"/> 
+                <javafx.scene.chart.XYChart.Series fx:id="systemGuestUsage" name="guest"/> 
+            </javafx.collections.FXCollections>
+        </data>
       </StackedAreaChart>
                                     <AnchorPane fx:id="systemCPUAnchor" minHeight="0.0" minWidth="0.0" mouseTransparent="true" />
                                  </children>
@@ -92,6 +116,12 @@
         <yAxis>
           <NumberAxis label="MB" side="LEFT" />
         </yAxis>
+        <data>
+            <javafx.collections.FXCollections fx:factory="observableArrayList">
+                <javafx.scene.chart.XYChart.Series fx:id="javaVSZUsage" name="VSZ"/> 
+                <javafx.scene.chart.XYChart.Series fx:id="javaRSSUsage" name="RSS"/> 
+            </javafx.collections.FXCollections>
+        </data>
       </LineChart>
                                     <AnchorPane fx:id="javaMemoryAnchor" minHeight="0.0" minWidth="0.0" mouseTransparent="true" />
                                  </children>
@@ -105,6 +135,11 @@
       <yAxis>
       <NumberAxis side="LEFT" />
       </yAxis>
+        <data>
+            <javafx.collections.FXCollections fx:factory="observableArrayList">
+                <javafx.scene.chart.XYChart.Series fx:id="safepoints" name="Safepoints"/> 
+            </javafx.collections.FXCollections>
+        </data>
       </LineChart>
                                     <AnchorPane fx:id="safepointAnchor" minHeight="0.0" minWidth="0.0" mouseTransparent="true" />
                                  </children>
@@ -118,6 +153,11 @@
       <yAxis>
       <NumberAxis label="ms" side="LEFT" />
       </yAxis>
+        <data>
+            <javafx.collections.FXCollections fx:factory="observableArrayList">
+                <javafx.scene.chart.XYChart.Series fx:id="safepointTime" name="Safepoint Time"/> 
+            </javafx.collections.FXCollections>
+        </data>
       </LineChart>
                                     <AnchorPane fx:id="safepointTimeAnchor" minHeight="0.0" minWidth="0.0" mouseTransparent="true" />
                                  </children>
@@ -131,6 +171,11 @@
                                       <yAxis>
                                         <NumberAxis side="LEFT" />
                                       </yAxis>
+                                      <data>
+                                        <javafx.collections.FXCollections fx:factory="observableArrayList">
+                                            <javafx.scene.chart.XYChart.Series fx:id="monitors" name="Monitors"/> 
+                                        </javafx.collections.FXCollections>
+                                      </data>
                                     </LineChart>
                                     <AnchorPane fx:id="monitorAnchor" minHeight="0.0" minWidth="0.0" mouseTransparent="true" />
                                  </children>

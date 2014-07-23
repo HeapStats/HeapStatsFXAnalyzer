@@ -23,50 +23,50 @@
 
 
 /* Java CPU */
-#javaCPUUserSeries .chart-series-area-fill { -fx-fill: red; }
-#javaCPUUserSeries .chart-series-area-line { -fx-stroke: red; }
+#javaCPUChart .default-color0.chart-series-area-fill { -fx-fill: red; }
+#javaCPUChart .default-color0.chart-series-area-line { -fx-stroke: red; }
 #javaCPUChart .default-color0.area-legend-symbol { -fx-background-color: red, white; }
 
-#javaCPUSysSeries  .chart-series-area-fill { -fx-fill: blue; }
-#javaCPUSysSeries  .chart-series-area-line { -fx-stroke: blue; }
+#javaCPUChart .default-color1.chart-series-area-fill { -fx-fill: blue; }
+#javaCPUChart .default-color1.chart-series-area-line { -fx-stroke: blue; }
 #javaCPUChart .default-color1.area-legend-symbol { -fx-background-color: blue, white; }
 
 
 /* System CPU */
-#systemCPUUserSeries .chart-series-area-fill { -fx-fill: red; }
-#systemCPUUserSeries .chart-series-area-line { -fx-stroke: red; }
+#systemCPUChart .default-color0.chart-series-area-fill { -fx-fill: red; }
+#systemCPUChart .default-color0.chart-series-area-line { -fx-stroke: red; }
 #systemCPUChart .default-color0.area-legend-symbol { -fx-background-color: red, white; }
 
-#systemCPUNiceSeries  .chart-series-area-fill { -fx-fill: lime; }
-#systemCPUNiceSeries  .chart-series-area-line { -fx-stroke: lime; }
+#systemCPUChart .default-color1.chart-series-area-fill { -fx-fill: lime; }
+#systemCPUChart .default-color1.chart-series-area-line { -fx-stroke: lime; }
 #systemCPUChart .default-color1.area-legend-symbol { -fx-background-color: lime, white; }
 
-#systemCPUSysSeries  .chart-series-area-fill { -fx-fill: blue; }
-#systemCPUSysSeries  .chart-series-area-line { -fx-stroke: blue; }
+#systemCPUChart .default-color2.chart-series-area-fill { -fx-fill: blue; }
+#systemCPUChart .default-color2.chart-series-area-line { -fx-stroke: blue; }
 #systemCPUChart .default-color2.area-legend-symbol { -fx-background-color: blue, white; }
 
-#systemCPUIdleSeries  .chart-series-area-fill { -fx-fill: yellow; }
-#systemCPUIdleSeries  .chart-series-area-line { -fx-stroke: yellow; }
+#systemCPUChart .default-color3.chart-series-area-fill { -fx-fill: yellow; }
+#systemCPUChart .default-color3.chart-series-area-line { -fx-stroke: yellow; }
 #systemCPUChart .default-color3.area-legend-symbol { -fx-background-color: yellow, white; }
 
-#systemCPUIOWaitSeries  .chart-series-area-fill { -fx-fill: pink; }
-#systemCPUIOWaitSeries  .chart-series-area-line { -fx-stroke: pink; }
+#systemCPUChart .default-color4.chart-series-area-fill { -fx-fill: pink; }
+#systemCPUChart .default-color4.chart-series-area-line { -fx-stroke: pink; }
 #systemCPUChart .default-color4.area-legend-symbol { -fx-background-color: pink, white; }
 
-#systemCPUIRQSeries  .chart-series-area-fill { -fx-fill: skyblue; }
-#systemCPUIRQSeries  .chart-series-area-line { -fx-stroke: skyblue; }
+#systemCPUChart .default-color5.chart-series-area-fill { -fx-fill: skyblue; }
+#systemCPUChart .default-color5.chart-series-area-line { -fx-stroke: skyblue; }
 #systemCPUChart .default-color5.area-legend-symbol { -fx-background-color: skyblue, white; }
 
-#systemCPUSoftIRQSeries  .chart-series-area-fill { -fx-fill: bisque; }
-#systemCPUSoftIRQSeries  .chart-series-area-line { -fx-stroke: bisque; }
+#systemCPUChart .default-color6.chart-series-area-fill { -fx-fill: bisque; }
+#systemCPUChart .default-color6.chart-series-area-line { -fx-stroke: bisque; }
 #systemCPUChart .default-color6.area-legend-symbol { -fx-background-color: bisque, white; }
 
-#systemCPUStealSeries  .chart-series-area-fill { -fx-fill: darkgray; }
-#systemCPUStealSeries  .chart-series-area-line { -fx-stroke: darkgray; }
+#systemCPUChart .default-color7.chart-series-area-fill { -fx-fill: darkgray; }
+#systemCPUChart .default-color7.chart-series-area-line { -fx-stroke: darkgray; }
 #systemCPUChart .default-color7.area-legend-symbol { -fx-background-color: darkgray, white; }
 
-#systemCPUGuestSeries  .chart-series-area-fill { -fx-fill: maroon; }
-#systemCPUGuestSeries  .chart-series-area-line { -fx-stroke: maroon; }
+#systemCPUChart .default-color8.chart-series-area-fill { -fx-fill: maroon; }
+#systemCPUChart .default-color8.chart-series-area-line { -fx-stroke: maroon; }
 #systemCPUChart .default-color8.area-legend-symbol { -fx-background-color: maroon, white; }
 
 

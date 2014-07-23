@@ -31,6 +31,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -89,43 +91,73 @@ public class LogController extends PluginController implements Initializable{
     private StackedAreaChart<String, Double> javaCPUChart;
     
     @FXML
-    private AnchorPane javaCPUAnchor;
+    private XYChart.Series<String, Double> javaUserUsage;
+    
+    @FXML
+    private XYChart.Series<String, Double> javaSysUsage;
     
     @FXML
     private StackedAreaChart<String, Double> systemCPUChart;
     
     @FXML
-    private AnchorPane systemCPUAnchor;
+    private XYChart.Series<String, Double> systemUserUsage;
+    
+    @FXML
+    private XYChart.Series<String, Double> systemNiceUsage;
+    
+    @FXML
+    private XYChart.Series<String, Double> systemSysUsage;
+    
+    @FXML
+    private XYChart.Series<String, Double> systemIdleUsage;
+    
+    @FXML
+    private XYChart.Series<String, Double> systemIOWaitUsage;
+    
+    @FXML
+    private XYChart.Series<String, Double> systemIRQUsage;
+    
+    @FXML
+    private XYChart.Series<String, Double> systemSoftIRQUsage;
+    
+    @FXML
+    private XYChart.Series<String, Double> systemStealUsage;
+    
+    @FXML
+    private XYChart.Series<String, Double> systemGuestUsage;
     
     @FXML
     private LineChart<String, Long> javaMemoryChart;
     
     @FXML
-    private AnchorPane javaMemoryAnchor;
+    private XYChart.Series<String, Long> javaVSZUsage;
+    
+    @FXML
+    private XYChart.Series<String, Long> javaRSSUsage;
     
     @FXML
     private LineChart<String, Long> safepointChart;
     
     @FXML
-    private AnchorPane safepointAnchor;
+    private XYChart.Series<String, Long> safepoints;
     
     @FXML
     private LineChart<String, Long> safepointTimeChart;
     
     @FXML
-    private AnchorPane safepointTimeAnchor;
+    private XYChart.Series<String, Long> safepointTime;
     
     @FXML
     private LineChart<String, Long> threadChart;
     
     @FXML
-    private AnchorPane threadsAnchor;
+    private XYChart.Series<String, Long> threads;
     
     @FXML
     private LineChart<String, Long> monitorChart;
     
     @FXML
-    private AnchorPane monitorAnchor;
+    private XYChart.Series<String, Long> monitors;
     
     @FXML
     private TableView<SummaryData.SummaryDataEntry> procSummary;
@@ -282,23 +314,6 @@ public class LogController extends PluginController implements Initializable{
                                                                                                   .collect(Collectors.toList());
                                                 anchor.getChildren().addAll(rectList);
                                              });
-        /*
-        threadsAnchor.getChildren().clear();
-        
-        archiveCombo.getItems().forEach(a -> {
-                                                CategoryAxis xAxis = (CategoryAxis)threadChart.getXAxis();
-                                                Axis yAxis = threadChart.getYAxis();
-                                                Label chartTitle = (Label)threadChart.getChildrenUnmodifiable().stream()
-                                                                                                               .filter(n -> n.getStyleClass().contains("chart-title"))
-                                                                                                               .findFirst()
-                                                                                                               .get();
-                                                double xPos = xAxis.getDisplayPosition(converter.toString(a.getDate())) + xAxis.getLayoutX() + xAxis.getStartMargin() - 1.0d;
-                                                double yPos = yAxis.getLayoutY() + chartTitle.getLayoutY() + chartTitle.getHeight();
-
-                                                Rectangle rect = new Rectangle(xPos, yPos, 2.0d, yAxis.getHeight());
-                                                threadsAnchor.getChildren().add(rect);
-                                             });
-        */
     }
 
     /**
@@ -317,16 +332,6 @@ public class LogController extends PluginController implements Initializable{
         
         LocalDateTimeConverter converter = new LocalDateTimeConverter();
         
-        /* Clear all data */
-        javaCPUChart.getData().clear();
-        systemCPUChart.getData().clear();
-        javaMemoryChart.getData().clear();
-        safepointChart.getData().clear();
-        safepointTimeChart.getData().clear();
-        threadChart.getData().clear();
-        monitorChart.getData().clear();
-        procSummary.getItems().clear();
-        
         /* Get range */
         LocalDateTime start = startCombo.getValue();
         LocalDateTime end   = endCombo.getValue();
@@ -338,116 +343,87 @@ public class LogController extends PluginController implements Initializable{
                                                         .collect(Collectors.toList());
         
         /* Java CPU */
-        XYChart.Series<String, Double> javaUserUsage = new XYChart.Series<>();
-        XYChart.Series<String, Double> javaSysUsage = new XYChart.Series<>();
-        javaUserUsage.setName("user");
-        javaSysUsage.setName("sys");
-        javaCPUChart.getData().addAll(javaUserUsage, javaSysUsage);
-        javaUserUsage.getNode().setId("javaCPUUserSeries");
-        javaSysUsage.getNode().setId("javaCPUSysSeries");
+        ObservableList<XYChart.Data<String, Double>> javaUserUsageBuf = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data<String, Double>> javaSysUsageBuf = FXCollections.observableArrayList();
 
         /* System CPU */
-        XYChart.Series<String, Double> systemUserUsage = new XYChart.Series<>();
-        XYChart.Series<String, Double> systemNiceUsage = new XYChart.Series<>();
-        XYChart.Series<String, Double> systemSysUsage = new XYChart.Series<>();
-        XYChart.Series<String, Double> systemIdleUsage = new XYChart.Series<>();
-        XYChart.Series<String, Double> systemIOWaitUsage = new XYChart.Series<>();
-        XYChart.Series<String, Double> systemIRQUsage = new XYChart.Series<>();
-        XYChart.Series<String, Double> systemSoftIRQUsage = new XYChart.Series<>();
-        XYChart.Series<String, Double> systemStealUsage = new XYChart.Series<>();
-        XYChart.Series<String, Double> systemGuestUsage = new XYChart.Series<>();
-        systemUserUsage.setName("user");
-        systemNiceUsage.setName("nice");
-        systemSysUsage.setName("sys");
-        systemIdleUsage.setName("idle");
-        systemIOWaitUsage.setName("I/O wait");
-        systemIRQUsage.setName("IRQ");
-        systemSoftIRQUsage.setName("soft IRQ");
-        systemStealUsage.setName("steal");
-        systemGuestUsage.setName("guest");
-        systemCPUChart.getData().addAll(systemUserUsage, systemNiceUsage, systemSysUsage,
-                                        systemIdleUsage, systemIOWaitUsage, systemIRQUsage,
-                                        systemSoftIRQUsage, systemStealUsage, systemGuestUsage);
-        systemUserUsage.getNode().setId("systemCPUUserSeries");
-        systemNiceUsage.getNode().setId("systemCPUNiceSeries");
-        systemSysUsage.getNode().setId("systemCPUSysSeries");
-        systemIdleUsage.getNode().setId("systemCPUIdleSeries");
-        systemIOWaitUsage.getNode().setId("systemCPUIOWaitSeries");
-        systemIRQUsage.getNode().setId("systemCPUIRQSeries");
-        systemSoftIRQUsage.getNode().setId("systemCPUSoftIRQSeries");
-        systemStealUsage.getNode().setId("systemCPUStealSeries");
-        systemGuestUsage.getNode().setId("systemCPUGuestSeries");
+        ObservableList<XYChart.Data<String, Double>> systemUserUsageBuf = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data<String, Double>> systemNiceUsageBuf = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data<String, Double>> systemSysUsageBuf = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data<String, Double>> systemIdleUsageBuf = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data<String, Double>> systemIOWaitUsageBuf = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data<String, Double>> systemIRQUsageBuf = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data<String, Double>> systemSoftIRQUsageBuf = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data<String, Double>> systemStealUsageBuf = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data<String, Double>> systemGuestUsageBuf = FXCollections.observableArrayList();
         
         /* Java Memory */
-        XYChart.Series<String, Long> javaVSZUsage = new XYChart.Series<>();
-        XYChart.Series<String, Long> javaRSSUsage = new XYChart.Series<>();
-        javaVSZUsage.setName("VSZ");
-        javaRSSUsage.setName("RSS");
-        javaMemoryChart.getData().addAll(javaVSZUsage, javaRSSUsage);
+        ObservableList<XYChart.Data<String, Long>> javaVSZUsageBuf = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data<String, Long>> javaRSSUsageBuf = FXCollections.observableArrayList();
 
-        /*
-         * This code does not work.
-         * I want to set color style to seies through CSS ID.
-         */
-        //javaVSZUsage.getNode().setId("javaVSZSeries");
-        //javaRSSUsage.getNode().setId("javaRSSSeries");
-        
         /* Safepoints */
-        XYChart.Series<String, Long> safepoints = new XYChart.Series<>();
-        XYChart.Series<String, Long> safepointTime = new XYChart.Series<>();
-        safepoints.setName("Safepoints");
-        safepointTime.setName("Safepoint Time");
-        safepointChart.getData().add(safepoints);
-        safepointTimeChart.getData().add(safepointTime);
+        ObservableList<XYChart.Data<String, Long>> safepointsBuf = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data<String, Long>> safepointTimeBuf = FXCollections.observableArrayList();
         
         /* Threads */
-        XYChart.Series<String, Long> threads = new XYChart.Series<>();
-        threads.setName("Threads");
-        threadChart.getData().add(threads);
+        ObservableList<XYChart.Data<String, Long>> threadsBuf = FXCollections.observableArrayList();
         
         /* Monitor contantion */
-        XYChart.Series<String, Long> monitors = new XYChart.Series<>();
-        monitors.setName("Monitors");
-        monitorChart.getData().add(monitors);
+        ObservableList<XYChart.Data<String, Long>> monitorsBuf = FXCollections.observableArrayList();
         
         /* Generate graph data */
         targetDiffData.stream()
                       .forEachOrdered(d -> {
                                               String time = converter.toString(d.getDateTime());
-                                              String label = archiveCombo.getItems().stream()
-                                                                                    .filter(a -> a.getDate().equals(d.getDateTime()))
-                                                                                    .findAny()
-                                                                                    .map(a -> String.format("(%s)", a.getEnvInfo().get("LogTrigger")))
-                                                                                    .orElse("");
                                               
-                                              addChartDataAsPercent(javaUserUsage, time, d.getJavaUserUsage(), label);
-                                              addChartDataAsPercent(javaSysUsage, time, d.getJavaSysUsage(), label);
-                                              addChartDataAsPercent(systemUserUsage, time, d.getCpuUserUsage(), label);
-                                              addChartDataAsPercent(systemNiceUsage, time, d.getCpuNiceUsage(), label);
-                                              addChartDataAsPercent(systemSysUsage, time, d.getCpuSysUsage(), label);
-                                              addChartDataAsPercent(systemIdleUsage, time, d.getCpuIdleUsage(), label);
-                                              addChartDataAsPercent(systemIOWaitUsage, time, d.getCpuIOWaitUsage(), label);
-                                              addChartDataAsPercent(systemIRQUsage, time, d.getCpuIRQUsage(), label);
-                                              addChartDataAsPercent(systemSoftIRQUsage, time, d.getCpuSoftIRQUsage(), label);
-                                              addChartDataAsPercent(systemStealUsage, time, d.getCpuStealUsage(), label);
-                                              addChartDataAsPercent(systemGuestUsage, time, d.getCpuGuestUsage(), label);
-                                              addChartDataLong(monitors, time, d.getJvmSyncPark(), label);
-                                              addChartDataLong(safepoints, time, d.getJvmSafepoints(), label);
-                                              addChartDataLong(safepointTime, time, d.getJvmSafepointTime(), "ms " + label);
+                                              javaUserUsageBuf.add(new XYChart.Data<>(time, d.getJavaUserUsage()));
+                                              javaSysUsageBuf.add(new XYChart.Data<>(time, d.getJavaSysUsage()));
+                                              systemUserUsageBuf.add(new XYChart.Data<>(time, d.getCpuUserUsage()));
+                                              systemNiceUsageBuf.add(new XYChart.Data<>(time, d.getCpuNiceUsage()));
+                                              systemSysUsageBuf.add(new XYChart.Data<>(time, d.getCpuSysUsage()));
+                                              systemIdleUsageBuf.add(new XYChart.Data<>(time, d.getCpuIdleUsage()));
+                                              systemIOWaitUsageBuf.add(new XYChart.Data<>(time, d.getCpuIOWaitUsage()));
+                                              systemIRQUsageBuf.add(new XYChart.Data<>(time, d.getCpuIRQUsage()));
+                                              systemSoftIRQUsageBuf.add(new XYChart.Data<>(time, d.getCpuSoftIRQUsage()));
+                                              systemStealUsageBuf.add(new XYChart.Data<>(time, d.getCpuStealUsage()));
+                                              systemGuestUsageBuf.add(new XYChart.Data<>(time, d.getCpuGuestUsage()));
+                                              monitorsBuf.add(new XYChart.Data<>(time, d.getJvmSyncPark()));
+                                              safepointsBuf.add(new XYChart.Data<>(time, d.getJvmSafepoints()));
+                                              safepointTimeBuf.add(new XYChart.Data<>(time, d.getJvmSafepointTime()));
                                            });
         targetLogData.stream()
                      .forEachOrdered(d -> {
                                              String time = converter.toString(d.getDateTime());
-                                             String label = archiveCombo.getItems().stream()
-                                                                                   .filter(a -> a.getDate().equals(d.getDateTime()))
-                                                                                   .findAny()
-                                                                                   .map(a -> String.format("(%s)", a.getEnvInfo().get("LogTrigger")))
-                                                                                   .orElse("");
 
-                                             addChartDataLong(javaVSZUsage, time, d.getJavaVSSize() / 1024 / 1024, "MB " + label);
-                                             addChartDataLong(javaRSSUsage, time, d.getJavaRSSize() / 1024 / 1024, "MB " + label);
-                                             addChartDataLong(threads, time, d.getJvmLiveThreads(), label);
+                                             javaVSZUsageBuf.add(new XYChart.Data<>(time, d.getJavaVSSize() / 1024 / 1024));
+                                             javaRSSUsageBuf.add(new XYChart.Data<>(time, d.getJavaRSSize() / 1024 / 1024));
+                                             threadsBuf.add(new XYChart.Data<>(time, d.getJvmLiveThreads()));
                                           });
+        
+        /* Replace new chart data */
+        javaUserUsage.setData(javaUserUsageBuf);
+        javaSysUsage.setData(javaSysUsageBuf);
+        
+        systemUserUsage.setData(systemUserUsageBuf);
+        systemNiceUsage.setData(systemNiceUsageBuf);
+        systemSysUsage.setData(systemSysUsageBuf);
+        systemIdleUsage.setData(systemIdleUsageBuf);
+        systemIOWaitUsage.setData(systemIOWaitUsageBuf);
+        systemIRQUsage.setData(systemIRQUsageBuf);
+        systemSoftIRQUsage.setData(systemSoftIRQUsageBuf);
+        systemStealUsage.setData(systemStealUsageBuf);
+        systemGuestUsage.setData(systemGuestUsageBuf);
+        
+        monitors.setData(monitorsBuf);
+        
+        safepoints.setData(safepointsBuf);
+        safepointTime.setData(safepointTimeBuf);
+        
+        javaVSZUsage.setData(javaVSZUsageBuf);
+        javaRSSUsage.setData(javaRSSUsageBuf);
+        
+        threads.setData(threadsBuf);
+        
         
         /* Put summary data to table */
         procSummary.getItems().addAll((new SummaryData(targetLogData, targetDiffData)).getSummaryAsList());
