@@ -114,40 +114,6 @@ public abstract class PluginController implements Initializable{
     }
  
     /**
-     * Comvenient method of chart.
-     * This method addes value to chart as percent and add Tooltip.
-     * 
-     * @param series Series to be added.
-     * @param xData X value.
-     * @param yData Y value. This value must be percentage.
-     * @param label Label of this plot.
-     */
-    protected void addChartDataAsPercent(XYChart.Series<String, Double> series, String xData, Double yData, String label){
-        XYChart.Data<String, Double> data = new XYChart.Data<>(xData, yData);
-        series.getData().add(data);
-
-        String tip = String.format("%s: %s, %.02f %% %s", series.getName(), xData, yData, label);
-        Tooltip.install(data.getNode(), new Tooltip(tip));
-    }
-    
-    /**
-     * Comvenient method of chart.
-     * This method addes value to chart as long value and add Tooltip.
-     * 
-     * @param series Series to be added.
-     * @param xData X value.
-     * @param yData Y value.
-     * @param unit Unit of this value.
-     */
-    protected void addChartDataLong(XYChart.Series<String, Long> series, String xData, Long yData, String unit){
-        XYChart.Data<String, Long> data = new XYChart.Data<>(xData, yData);
-        series.getData().add(data);
-
-        String tip = String.format("%s: %s, %d %s", series.getName(), xData, yData, unit);
-        Tooltip.install(data.getNode(), new Tooltip(tip));
-    }
-
-    /**
      * Get appliaction window owner
      * @return owner window
      */

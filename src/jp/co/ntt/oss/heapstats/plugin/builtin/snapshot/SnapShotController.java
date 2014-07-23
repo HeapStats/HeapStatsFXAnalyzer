@@ -31,6 +31,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -51,6 +52,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyEvent;
@@ -101,10 +103,28 @@ public class SnapShotController extends PluginController implements Initializabl
     private StackedAreaChart<String, Long> heapChart;
     
     @FXML
+    private XYChart.Series<String, Long> youngUsage;
+    
+    @FXML
+    private XYChart.Series<String, Long> oldUsage;
+    
+    @FXML
+    private XYChart.Series<String, Long> free;
+    
+    @FXML
     private LineChart<String, Long> gcTimeChart;
     
     @FXML
+    private XYChart.Series<String, Long> gcTime;
+    
+    @FXML
     private AreaChart<String, Long> metaspaceChart;
+    
+    @FXML
+    private XYChart.Series<String, Long> metaspaceUsage;
+    
+    @FXML
+    private XYChart.Series<String, Long> metaspaceCapacity;
     
     @FXML
     private TableView<Filter> excludeTable;
@@ -334,7 +354,12 @@ public class SnapShotController extends PluginController implements Initializabl
                                                                                                            }
 
                                                                                                            String time = converter.toString(h.getSnapShotDate());
-                                                                                                           addChartDataLong(series, time, o.getTotalSize() / 1024 / 1024, "MB");
+                                                                                                           long yValue = o.getTotalSize() / 1024 / 1024;
+                                                                                                           XYChart.Data<String, Long> data = new XYChart.Data<>(time, yValue);
+                                                                                                           
+                                                                                                           series.getData().add(data);
+                                                                                                           String tip = String.format("%s: %s, %d MB", series.getName(), time, yValue);
+                                                                                                           Tooltip.install(data.getNode(), new Tooltip(tip));
                                                                                                         });
                                                                             });
                                           lastDiffTable.getItems().addAll(diffTask.getLastDiffList());
@@ -355,46 +380,22 @@ public class SnapShotController extends PluginController implements Initializabl
     @FXML
     private void onOkClick(ActionEvent event){
         LocalDateTimeConverter converter = new LocalDateTimeConverter();
-        summaryTable.getItems().clear();
-        heapChart.getData().clear();
-        gcTimeChart.getData().clear();
-        metaspaceChart.getData().clear();
-        snapShotTimeCombo.getItems().clear();
         
         int startIdx = startCombo.getSelectionModel().getSelectedIndex();
         int endIdx = endCombo.getSelectionModel().getSelectedIndex();
         currentTarget = startCombo.getItems().subList(startIdx, endIdx + 1);
         
         /* Java Heap Usage Chart */
-        XYChart.Series<String, Long> youngUsage = new XYChart.Series<>();
-        XYChart.Series<String, Long> oldUsage = new XYChart.Series<>();
-        XYChart.Series<String, Long> free = new XYChart.Series<>();
-        youngUsage.setName("Young");
-        oldUsage.setName("Old");
-        free.setName("Free");
-        heapChart.getData().addAll(youngUsage, oldUsage, free);
-        youngUsage.getNode().setId("youngSeries");
-        oldUsage.getNode().setId("oldSeries");
-        free.getNode().setId("freeSeries");
+        ObservableList<XYChart.Data<String, Long>> youngUsageBuf = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data<String, Long>> oldUsageBuf = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data<String, Long>> freeBuf = FXCollections.observableArrayList();
         
         /* GC time Chart */
-        XYChart.Series<String, Long> gcTime = new XYChart.Series<>();
-        gcTime.setName("GC Time");
-        gcTimeChart.getData().add(gcTime);
-        /*
-         * This code does not work.
-         * I want to set color style to seies through CSS ID.
-         */
-        //gcTime.getNode().setId("gcTimeSeries");
+        ObservableList<XYChart.Data<String, Long>> gcTimeBuf = FXCollections.observableArrayList();
         
         /* Metaspace Chart */
-        XYChart.Series<String, Long> metaspaceUsage = new XYChart.Series<>();
-        XYChart.Series<String, Long> metaspaceCapacity = new XYChart.Series<>();
-        metaspaceUsage.setName("Usage");
-        metaspaceCapacity.setName("Capacity");
-        metaspaceChart.getData().addAll(metaspaceCapacity, metaspaceUsage);
-        metaspaceUsage.getNode().setId("usageSeries");
-        metaspaceCapacity.getNode().setId("capacitySeries");
+        ObservableList<XYChart.Data<String, Long>> metaspaceUsageBuf = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data<String, Long>> metaspaceCapacityBuf = FXCollections.observableArrayList();
 
         snapShotTimeCombo.getItems().addAll(currentTarget);
         SnapShotParseTask task = new SnapShotParseTask(currentTarget);
@@ -411,15 +412,26 @@ public class SnapShotController extends PluginController implements Initializabl
                      .forEachOrdered(d -> {
                                              String time = converter.toString(d.getSnapShotDate());
                                       
-                                             addChartDataLong(youngUsage, time, d.getNewHeap() / 1024 / 1024, "MB");
-                                             addChartDataLong(oldUsage, time, d.getOldHeap() / 1024 / 1024, "MB");
-                                             addChartDataLong(free, time, (d.getTotalCapacity() - d.getNewHeap() - d.getOldHeap()) / 1024 / 1024, "MB");
+                                             youngUsageBuf.add(new XYChart.Data<>(time, d.getNewHeap() / 1024 / 1024));
+                                             oldUsageBuf.add(new XYChart.Data<>(time, d.getOldHeap() / 1024 / 1024));
+                                             freeBuf.add(new XYChart.Data<>(time, (d.getTotalCapacity() - d.getNewHeap() - d.getOldHeap()) / 1024 / 1024));
                                       
-                                             addChartDataLong(gcTime, time, d.getGcTime(), "ms");
+                                             gcTimeBuf.add(new XYChart.Data<>(time, d.getGcTime()));
                                       
-                                             addChartDataLong(metaspaceUsage, time, d.getMetaspaceUsage() / 1024 / 1024, "MB");
-                                             addChartDataLong(metaspaceCapacity, time, d.getMetaspaceCapacity() / 1024 / 1024, "MB");
+                                             metaspaceUsageBuf.add(new XYChart.Data<>(time, d.getMetaspaceUsage() / 1024 / 1024));
+                                             metaspaceCapacityBuf.add(new XYChart.Data<>(time, d.getMetaspaceCapacity() / 1024 / 1024));
                                           });
+        
+        /* Replace new chart data */
+        youngUsage.setData(youngUsageBuf);
+        oldUsage.setData(oldUsageBuf);
+        free.setData(freeBuf);
+        
+        gcTime.setData(gcTimeBuf);
+        
+        metaspaceUsage.setData(metaspaceUsageBuf);
+        metaspaceCapacity.setData(metaspaceCapacityBuf);
+        
         
         summaryTable.getItems().addAll((new SummaryData(currentTarget)).getSummaryAsList());
     }
