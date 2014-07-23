@@ -70,6 +70,7 @@ import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.SnapShotParseTask
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.model.DiffData;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.model.SummaryData;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
+import jp.co.ntt.oss.heapstats.utils.InfoDialog;
 import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 import jp.co.ntt.oss.heapstats.xml.binding.Filter;
 import jp.co.ntt.oss.heapstats.xml.binding.Filters;
@@ -383,6 +384,13 @@ public class SnapShotController extends PluginController implements Initializabl
         
         int startIdx = startCombo.getSelectionModel().getSelectedIndex();
         int endIdx = endCombo.getSelectionModel().getSelectedIndex();
+        
+        if(startIdx >= endIdx){
+            InfoDialog dialog = new InfoDialog("Error", "Please select valid time range.", null);
+            dialog.show();
+            return;
+        }
+        
         currentTarget = startCombo.getItems().subList(startIdx, endIdx + 1);
         
         /* Java Heap Usage Chart */
@@ -397,7 +405,7 @@ public class SnapShotController extends PluginController implements Initializabl
         ObservableList<XYChart.Data<String, Long>> metaspaceUsageBuf = FXCollections.observableArrayList();
         ObservableList<XYChart.Data<String, Long>> metaspaceCapacityBuf = FXCollections.observableArrayList();
 
-        snapShotTimeCombo.getItems().addAll(currentTarget);
+        snapShotTimeCombo.setItems(FXCollections.observableArrayList(currentTarget));
         SnapShotParseTask task = new SnapShotParseTask(currentTarget);
         task.setOnSucceeded(evt -> {
                                      snapShots = task.getSnapShots();

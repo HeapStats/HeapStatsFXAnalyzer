@@ -335,6 +335,13 @@ public class LogController extends PluginController implements Initializable{
         /* Get range */
         LocalDateTime start = startCombo.getValue();
         LocalDateTime end   = endCombo.getValue();
+        
+        if(!end.isAfter(start)){
+            InfoDialog dialog = new InfoDialog("Error", "Please select valid time range.", null);
+            dialog.show();
+            return;
+        }
+        
         List<LogData> targetLogData = logEntries.parallelStream()
                                                      .filter(d -> ((d.getDateTime().compareTo(start) >= 0) && (d.getDateTime().compareTo(end) <= 0)))
                                                      .collect(Collectors.toList());
