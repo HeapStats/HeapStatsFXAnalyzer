@@ -555,17 +555,13 @@ public class SnapShotController extends PluginController implements Initializabl
                                             new ExtensionFilter("All files", "*.*"));
         
         List<File> excludeFilterList = dialog.showOpenMultipleDialog(((Node)event.getSource()).getScene().getWindow());
+        if(excludeFilterList != null){
+            excludeFilterList.stream()
+                             .map(f -> (Filters)JAXB.unmarshal(f, Filters.class))
+                             .filter(f -> f != null)
+                             .forEach(f -> excludeTable.getItems().addAll(f.getFilter()));
+        }
         
-        excludeFilterList.stream()
-                         .forEach(f -> {
-                                          Filters filters = (Filters)JAXB.unmarshal(f, Filters.class);
-
-                                          if(filters != null){
-                                            excludeTable.getItems().addAll(filters.getFilter());
-                                          }
-                                             
-                                       }); 
-            
     }
     
     /**
