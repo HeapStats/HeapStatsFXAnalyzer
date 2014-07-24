@@ -203,6 +203,14 @@ public class HeapStatsUtils {
         return prop.getProperty("bgcolor");
     }
     
+    public static String getLanguage(){
+        return prop.getProperty("language");
+    }
+    
+    public static ResourceBundle getResourceBundle(){
+        return ResourceBundle.getBundle("HeapStatsResources", new Locale(getLanguage()));
+    }
+    
     /**
      * Convert stack trace to String.
      * @param e Throwable object to convert.

@@ -39,7 +39,7 @@ public class HeapStatsFXAnalyzer extends Application {
     public void start(Stage stage) throws Exception {
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> (new InfoDialog("Error", e.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(e))).show()));
         HeapStatsUtils.load();
-        FXMLLoader mainWindowLoader = new FXMLLoader(getClass().getResource("window.fxml"));
+        FXMLLoader mainWindowLoader = new FXMLLoader(getClass().getResource("window.fxml"), HeapStatsUtils.getResourceBundle());
         
         Parent root = mainWindowLoader.load();
         Scene scene = new Scene(root);

@@ -60,7 +60,7 @@ public class DialogHelper {
         this.dialog = null;
         this.onShown = null;
 
-        loader = new FXMLLoader(getClass().getResource(fxmlName));
+        loader = new FXMLLoader(getClass().getResource(fxmlName), HeapStatsUtils.getResourceBundle());
         
         try {
             loader.load();

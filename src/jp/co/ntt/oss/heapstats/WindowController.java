@@ -28,7 +28,9 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -100,7 +102,16 @@ public class WindowController implements Initializable {
         String lastPackageName = packageName.substring(packageName.lastIndexOf('.') + 1);
         packageName = packageName.replace('.', '/');
         String fxmlName = packageName + "/" + lastPackageName + ".fxml";
-        FXMLLoader loader = new FXMLLoader(pluginClassLoader.getResource(fxmlName));
+        FXMLLoader loader;
+        
+        try{
+            ResourceBundle pluginResource = ResourceBundle.getBundle(lastPackageName + "Resources", new Locale(HeapStatsUtils.getLanguage()), pluginClassLoader);
+            loader = new FXMLLoader(pluginClassLoader.getResource(fxmlName), pluginResource);
+        }
+        catch(MissingResourceException e){
+            loader = new FXMLLoader(pluginClassLoader.getResource(fxmlName));
+        }
+        
         Parent root;
         
         try {
