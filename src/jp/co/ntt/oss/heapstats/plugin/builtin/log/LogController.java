@@ -24,6 +24,7 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.AbstractMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -235,7 +236,8 @@ public class LogController extends PluginController implements Initializable{
     @FXML
     public void onLogFileClick(ActionEvent event){
         FileChooser dialog = new FileChooser();
-        dialog.setTitle("Select log files");
+        ResourceBundle resource = ResourceBundle.getBundle("logResources", new Locale(HeapStatsUtils.getLanguage()));
+        dialog.setTitle(resource.getString("dialog.filechooser.title"));
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new ExtensionFilter("Log file (*.csv)", "*.csv"),
                                             new ExtensionFilter("All files", "*.*"));
@@ -323,10 +325,11 @@ public class LogController extends PluginController implements Initializable{
      */
     @FXML
     private void onOkClick(ActionEvent event){
+        ResourceBundle resource = ResourceBundle.getBundle("logResources", new Locale(HeapStatsUtils.getLanguage()));
         
         if(logEntries == null){
-            InfoDialog dialog1 = new InfoDialog("Error", "Please select log file.", null);
-            dialog1.show();
+            InfoDialog dialog = new InfoDialog("Error", resource.getString("dialog.logempty.message"), null);
+            dialog.show();
             return;
         }
         
@@ -337,7 +340,7 @@ public class LogController extends PluginController implements Initializable{
         LocalDateTime end   = endCombo.getValue();
         
         if(!end.isAfter(start)){
-            InfoDialog dialog = new InfoDialog("Error", "Please select valid time range.", null);
+            InfoDialog dialog = new InfoDialog("Error", resource.getString("dialog.timerange.message"), null);
             dialog.show();
             return;
         }

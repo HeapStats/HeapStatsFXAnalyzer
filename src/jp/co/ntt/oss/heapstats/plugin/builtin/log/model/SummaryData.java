@@ -21,9 +21,12 @@ package jp.co.ntt.oss.heapstats.plugin.builtin.log.model;
 import java.util.ArrayList;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
+import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
 /**
  * Summary data class.<br/>
@@ -133,15 +136,16 @@ public class SummaryData {
     
     public List<SummaryDataEntry> getSummaryAsList(){
         List<SummaryDataEntry> retarray = new ArrayList<>();
+        ResourceBundle resource = ResourceBundle.getBundle("logResources", new Locale(HeapStatsUtils.getLanguage()));
         
-        retarray.add(new SummaryDataEntry("Avarage of CPU usage", String.format("%.1f %%", averageCPUUsage)));
-        retarray.add(new SummaryDataEntry("Peak of CPU usage", String.format("%.1f %%", maxCPUUsage)));
-        retarray.add(new SummaryDataEntry("Avarage of VSZ", String.format("%.1f MB", averageVSZ)));
-        retarray.add(new SummaryDataEntry("Peak of VSZ", String.format("%.1f MB", maxVSZ)));
-        retarray.add(new SummaryDataEntry("Avarage of RSS", String.format("%.1f MB", averageRSS)));
-        retarray.add(new SummaryDataEntry("Peak of RSS", String.format("%.1f MB", maxRSS)));
-        retarray.add(new SummaryDataEntry("Avarage of live threads", String.format("%.1f", averageLiveThreads)));
-        retarray.add(new SummaryDataEntry("Peak of live threads", Long.toString(maxLiveThreads)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.cpu.average"), String.format("%.1f %%", averageCPUUsage)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.cpu.peak"), String.format("%.1f %%", maxCPUUsage)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.vsz.average"), String.format("%.1f MB", averageVSZ)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.vsz.peak"), String.format("%.1f MB", maxVSZ)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.rss.average"), String.format("%.1f MB", averageRSS)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.rss.peak"), String.format("%.1f MB", maxRSS)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.threads.average"), String.format("%.1f", averageLiveThreads)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.threads.peak"), Long.toString(maxLiveThreads)));
         
         return retarray;
     }
