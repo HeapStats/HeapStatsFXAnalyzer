@@ -25,6 +25,7 @@ import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -276,7 +277,9 @@ public class SnapShotController extends PluginController implements Initializabl
     @FXML
     public void onSnapshotFileClick(ActionEvent event){
         FileChooser dialog = new FileChooser();
-        dialog.setTitle("Select SnapShot files");
+        ResourceBundle resource = ResourceBundle.getBundle("snapshotResources", new Locale(HeapStatsUtils.getLanguage()));
+
+        dialog.setTitle(resource.getString("dialog.filechooser.title"));
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new ExtensionFilter("SnapShot file (*.dat)", "*.dat"),
                                             new ExtensionFilter("All files", "*.*"));
@@ -381,12 +384,13 @@ public class SnapShotController extends PluginController implements Initializabl
     @FXML
     private void onOkClick(ActionEvent event){
         LocalDateTimeConverter converter = new LocalDateTimeConverter();
+        ResourceBundle resource = ResourceBundle.getBundle("snapshotResources", new Locale(HeapStatsUtils.getLanguage()));
         
         int startIdx = startCombo.getSelectionModel().getSelectedIndex();
         int endIdx = endCombo.getSelectionModel().getSelectedIndex();
         
         if(startIdx >= endIdx){
-            InfoDialog dialog = new InfoDialog("Error", "Please select valid time range.", null);
+            InfoDialog dialog = new InfoDialog("Error", resource.getString("dialog.timerange.message"), null);
             dialog.show();
             return;
         }
@@ -474,14 +478,15 @@ public class SnapShotController extends PluginController implements Initializabl
         summaryList.clear();
         usagePieChart.getData().clear();
         objDataTable.getItems().clear();
+        ResourceBundle resource = ResourceBundle.getBundle("snapshotResources", new Locale(HeapStatsUtils.getLanguage()));
         
         summaryList.addAll(
-                new AbstractMap.SimpleEntry<>("Date", (new LocalDateTimeConverter()).toString(header.getSnapShotDate())),
-                new AbstractMap.SimpleEntry<>("Entries", Long.toString(header.getNumEntries())),
-                new AbstractMap.SimpleEntry<>("Total Java heap usage", String.format("%.02f MB", (double)(header.getNewHeap() + header.getOldHeap()) / 1024.0d /1024.0d)),
-                new AbstractMap.SimpleEntry<>("Total Metaspace usage", String.format("%.02f MB", (double)(header.getMetaspaceUsage()) / 1024.0d /1024.0d)),
-                new AbstractMap.SimpleEntry<>("SnapShot cause", header.getCauseString()),
-                new AbstractMap.SimpleEntry<>("GC cause", header.getGcCause()));
+                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.date"), (new LocalDateTimeConverter()).toString(header.getSnapShotDate())),
+                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.entries"), Long.toString(header.getNumEntries())),
+                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.heap"), String.format("%.02f MB", (double)(header.getNewHeap() + header.getOldHeap()) / 1024.0d /1024.0d)),
+                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.metaspace"), String.format("%.02f MB", (double)(header.getMetaspaceUsage()) / 1024.0d /1024.0d)),
+                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.cause"), header.getCauseString()),
+                new AbstractMap.SimpleEntry<>(resource.getString("GC cause"), header.getGcCause()));
         
         usagePieChart.getData().addAll(topNList.get(header.getSnapShotDate()).stream()
                                                                              .map(o -> new PieChart.Data(o.getName(), o.getTotalSize()))
@@ -542,7 +547,9 @@ public class SnapShotController extends PluginController implements Initializabl
     @FXML
     private void onAddClick(ActionEvent event){
         FileChooser dialog = new FileChooser();
-        dialog.setTitle("Filter files");
+        ResourceBundle resource = ResourceBundle.getBundle("snapshotResources", new Locale(HeapStatsUtils.getLanguage()));
+
+        dialog.setTitle(resource.getString("dialog.filterchooser.title"));
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new ExtensionFilter("Filter file (*.xml)", "*.xml"),
                                             new ExtensionFilter("All files", "*.*"));
@@ -679,7 +686,9 @@ public class SnapShotController extends PluginController implements Initializabl
      */
     public void dumpClassHistogramToCSV(boolean isSelected){
         FileChooser dialog = new FileChooser();
-        dialog.setTitle("Select CSV files");
+        ResourceBundle resource = ResourceBundle.getBundle("snapshotResources", new Locale(HeapStatsUtils.getLanguage()));
+
+        dialog.setTitle(resource.getString("dialog.csvchooser.title"));
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new ExtensionFilter("CSV file (*.csv)", "*.csv"),
                                             new ExtensionFilter("All files", "*.*"));
