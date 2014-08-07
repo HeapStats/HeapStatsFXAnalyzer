@@ -486,7 +486,8 @@ public class SnapShotController extends PluginController implements Initializabl
                 new AbstractMap.SimpleEntry<>(resource.getString("snapshot.heap"), String.format("%.02f MB", (double)(header.getNewHeap() + header.getOldHeap()) / 1024.0d /1024.0d)),
                 new AbstractMap.SimpleEntry<>(resource.getString("snapshot.metaspace"), String.format("%.02f MB", (double)(header.getMetaspaceUsage()) / 1024.0d /1024.0d)),
                 new AbstractMap.SimpleEntry<>(resource.getString("snapshot.cause"), header.getCauseString()),
-                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.gccause"), header.getGcCause()));
+                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.gccause"), header.getGcCause()),
+                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.gctime"), String.format("%d ms", header.getGcTime())));
         
         usagePieChart.getData().addAll(topNList.get(header.getSnapShotDate()).stream()
                                                                              .map(o -> new PieChart.Data(o.getName(), o.getTotalSize()))
