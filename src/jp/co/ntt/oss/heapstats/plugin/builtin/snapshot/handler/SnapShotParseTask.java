@@ -43,6 +43,28 @@ public class SnapShotParseTask extends Task<Void>{
     public SnapShotParseTask(List<SnapShotHeader> snapShotList) {
         this.snapShotList = snapShotList;
     }
+    
+    /**
+     * Parse SnapShot with given header.
+     * 
+     * @param progress Progress counter.
+     * @param header SnapShot header which you want to.
+     */
+    private void parseFile(LongAdder progress, SnapShotHeader header){
+        progress.increment();
+        SnapShotHandler handler = new SnapShotHandler();
+        HeapStatsParser parser = new HeapStatsParser();
+
+        try{
+            parser.parseSingle(header, handler);
+        }
+        catch(IOException e){
+            throw new UncheckedIOException(e);
+        }
+
+        snapShots.put(header, handler.getSnapShot());
+        updateProgress(progress.longValue(), snapShotList.size());
+    }
 
     @Override
     protected Void call() throws Exception {
@@ -52,21 +74,7 @@ public class SnapShotParseTask extends Task<Void>{
         LongAdder progress = new LongAdder();
 
         snapShotList.parallelStream()
-                    .forEach(d -> {
-                                     progress.increment();
-                                     SnapShotHandler handler = new SnapShotHandler();
-                                     HeapStatsParser parser = new HeapStatsParser();
-                                     
-                                     try{
-                                       parser.parseSingle(d, handler);
-                                     }
-                                     catch(IOException e){
-                                       throw new UncheckedIOException(e);
-                                     }
-                             
-                                     snapShots.put(d, handler.getSnapShot());
-                                     updateProgress(progress.longValue(), snapShotList.size());
-                                  });
+                    .forEach(d -> parseFile(progress, d));
         
         return null;
     }

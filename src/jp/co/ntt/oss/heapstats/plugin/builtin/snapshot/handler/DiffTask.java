@@ -51,6 +51,31 @@ public class DiffTask extends Task<Void>{
         this.lastDiffList = new ArrayList<>();
         this.rankLevel = rankLevel;
     }
+    
+    /**
+     * Build TopN data from givien snapshot header.
+     * 
+     * @param progress Progress counter.
+     * @param header SnapShot header to build.
+     * @param maxItrs Max iterations. This value uses updateProgress().
+     */
+    private void buildTopNData(LongAdder progress, SnapShotHeader header, long maxItrs){
+        Map<Long, ObjectData> current = snapShots.get(header);
+        List<ObjectData> buf = current.values().parallelStream()
+                                               .sorted(Comparator.reverseOrder())
+                                               .limit(rankLevel)
+                                               .collect(Collectors.toList());
+        ObjectData other = new ObjectData();
+        other.setName("Others");
+        other.setTotalSize(header.getNewHeap() + header.getOldHeap() - buf.stream()
+                                                                          .mapToLong(d -> d.getTotalSize())
+                                                                          .sum());
+        buf.add(other);
+
+        topNList.put(header.getSnapShotDate(), buf);
+        progress.increment();
+        updateProgress(progress.longValue(), maxItrs);
+    }
 
     @Override
     protected Void call() throws Exception {
@@ -62,23 +87,7 @@ public class DiffTask extends Task<Void>{
                                                          .collect(Collectors.toList());
         long maxItrs = keyList.size() - 1;
         keyList.stream()
-               .forEachOrdered(h -> {
-                                       Map<Long, ObjectData> current = snapShots.get(h);
-                                       List<ObjectData> buf = current.values().parallelStream()
-                                                                     .sorted(Comparator.reverseOrder())
-                                                                     .limit(rankLevel)
-                                                                     .collect(Collectors.toList());
-                                       ObjectData other = new ObjectData();
-                                       other.setName("Others");
-                                       other.setTotalSize(h.getNewHeap() + h.getOldHeap() - buf.stream()
-                                                                                               .mapToLong(d -> d.getTotalSize())
-                                                                                               .sum());
-                                       buf.add(other);
-
-                                       topNList.put(h.getSnapShotDate(), buf);
-                                       cnt.increment();
-                                       updateProgress(cnt.longValue(), maxItrs);
-                                    }); 
+               .forEachOrdered(h -> buildTopNData(cnt, h, maxItrs));
         
        List<Long> rankedTagList = topNList.values().stream()
                                                    .flatMap(c -> c.stream())

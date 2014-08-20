@@ -295,8 +295,8 @@ public class SnapShotController extends PluginController implements Initializabl
             snapshotList.setText(snapshotListStr);
             
             ParseHeaderTask task = new ParseHeaderTask(snapshotFileList.stream()
-                                                                             .map(File::getAbsolutePath)
-                                                                             .collect(Collectors.toList()));
+                                                                       .map(File::getAbsolutePath)
+                                                                       .collect(Collectors.toList()));
             task.setOnSucceeded(evt ->{
                                          startCombo.getItems().clear();
                                          endCombo.getItems().clear();
@@ -329,6 +329,51 @@ public class SnapShotController extends PluginController implements Initializabl
     }
     
     /**
+     * Build TopN Data for Chart with givien data.
+     * 
+     * @param header SnapShot header which you want to build.
+     * @param seriesMap Chart series map which is contains class name as key, chart series as value.
+     * @param objData  ObjectData which is you want to build.
+     */
+    private void buildTopNChartData(SnapShotHeader header, Map<String, XYChart.Series<String, Long>> seriesMap, ObjectData objData){
+        XYChart.Series<String, Long> series = seriesMap.get(objData.getName());
+
+        if(series == null){
+            series = new XYChart.Series<>();
+            series.setName(objData.getName());
+            topNChart.getData().add(series);
+            seriesMap.put(objData.getName(), series);
+        }
+
+        LocalDateTimeConverter converter = new LocalDateTimeConverter();
+        String time = converter.toString(header.getSnapShotDate());
+        long yValue = objData.getTotalSize() / 1024 / 1024;
+        XYChart.Data<String, Long> data = new XYChart.Data<>(time, yValue);
+
+        series.getData().add(data);
+        String tip = String.format("%s: %s, %d MB", series.getName(), time, yValue);
+        Tooltip.install(data.getNode(), new Tooltip(tip));
+    }
+    
+    /**
+     * onSucceeded event handler for DiffTask.
+     * 
+     * @param diffTask Target task.
+     * @param seriesMap Chart series map which is contains class name as key, chart series as value.
+     */
+    private void onDiffTaskSucceeded(DiffTask diffTask, Map<String, XYChart.Series<String, Long>> seriesMap){
+        topNList = diffTask.getTopNList();
+
+        currentTarget.stream()
+                     .forEachOrdered(h ->  topNList.get(h.getSnapShotDate()).stream()
+                                                                            .forEachOrdered(o -> buildTopNChartData(h, seriesMap, o)));
+        
+        lastDiffTable.getItems().addAll(diffTask.getLastDiffList());
+        snapShotTimeCombo.getSelectionModel().selectLast();
+        setTopNChartColor();
+    }
+    
+    /**
      * Drawing Top N data to Chart and Table.
      * 
      * @param target SnapShot to be drawed.
@@ -341,36 +386,7 @@ public class SnapShotController extends PluginController implements Initializabl
         Map<String, XYChart.Series<String, Long>> seriesMap = new HashMap<>();
         
         DiffTask diffTask = new DiffTask(target, HeapStatsUtils.getRankLevel());
-        diffTask.setOnSucceeded(evt -> {
-                                          topNList = diffTask.getTopNList();
-                                          currentTarget.stream()
-                                                       .forEachOrdered(h -> {
-                                                                               List<ObjectData> list = topNList.get(h.getSnapShotDate());
-                                                                               list.stream()
-                                                                                   .forEachOrdered(o -> {
-                                                                                                           XYChart.Series<String, Long> series = seriesMap.get(o.getName());
-
-                                                                                                           if(series == null){
-                                                                                                             series = new XYChart.Series<>();
-                                                                                                             series.setName(o.getName());
-                                                                                                             topNChart.getData().add(series);
-                                                                                                             seriesMap.put(o.getName(), series);
-                                                                                                           }
-
-                                                                                                           String time = converter.toString(h.getSnapShotDate());
-                                                                                                           long yValue = o.getTotalSize() / 1024 / 1024;
-                                                                                                           XYChart.Data<String, Long> data = new XYChart.Data<>(time, yValue);
-                                                                                                           
-                                                                                                           series.getData().add(data);
-                                                                                                           String tip = String.format("%s: %s, %d MB", series.getName(), time, yValue);
-                                                                                                           Tooltip.install(data.getNode(), new Tooltip(tip));
-                                                                                                        });
-                                                                            });
-                                          lastDiffTable.getItems().addAll(diffTask.getLastDiffList());
-                                          snapShotTimeCombo.getSelectionModel().selectLast();
-                                          setTopNChartColor();
-                                       });
-                                     
+        diffTask.setOnSucceeded(evt -> onDiffTaskSucceeded(diffTask, seriesMap));
         super.bindTask(diffTask);
         Thread diffThread = new Thread(diffTask);
         diffThread.start();

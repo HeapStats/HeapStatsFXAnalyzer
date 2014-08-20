@@ -22,10 +22,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -210,11 +210,11 @@ public class WindowController implements Initializable {
         Path appJarPath;
         
         try{
-            appJarPath = FileSystems.getDefault().getPath(appJarString);
+            appJarPath = Paths.get(appJarString);
         }
         catch(InvalidPathException e){
             if((appJarString.charAt(0) == '/') && (appJarString.length() > 2)){ // for Windows
-                appJarPath = FileSystems.getDefault().getPath(appJarString.substring(1));
+                appJarPath = Paths.get(appJarString.substring(1));
             }
             else{
                 throw e;

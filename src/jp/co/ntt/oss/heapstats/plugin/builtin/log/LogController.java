@@ -229,6 +229,38 @@ public class LogController extends PluginController implements Initializable{
     }
     
     /**
+     * onSucceeded event handler for LogFileParser.
+     * 
+     * @param parser Targeted LogFileParser.
+     */
+    private void onLogFileParserSucceeded(LogFileParser parser){
+        startCombo.getItems().clear();
+        endCombo.getItems().clear();
+        archiveCombo.getItems().clear();
+
+        logEntries  = parser.getLogEntries();
+        diffEntries = parser.getDiffEntries();
+        List<LocalDateTime> timeline = logEntries.stream()
+                                                 .map(d -> d.getDateTime())
+                                                 .collect(Collectors.toList());        
+        startCombo.getItems().addAll(timeline);
+        startCombo.getSelectionModel().selectFirst();
+        endCombo.getItems().addAll(timeline);
+        endCombo.getSelectionModel().selectLast();
+
+        List<ArchiveData> archiveList = logEntries.stream()
+                                                  .filter(d -> d.getArchivePath() != null)
+                                                  .map(d -> new ArchiveData(d))
+                                                  .collect(Collectors.toList());
+ 
+        if(archiveList.size() > 0){
+            archiveList.forEach(a -> a.parseArchive());
+            archiveCombo.getItems().addAll(archiveList);
+        }
+                                          
+    }
+    
+    /**
      * Event handler of LogFile button.
      * 
      * @param event ActionEvent of this event.
@@ -253,31 +285,7 @@ public class LogController extends PluginController implements Initializable{
             logFileList.setText(logListStr);
             
             final LogFileParser parser = new LogFileParser(logList);
-            parser.setOnSucceeded(evt ->{
-                                          startCombo.getItems().clear();
-                                          endCombo.getItems().clear();
-                                          archiveCombo.getItems().clear();
-                                          
-                                          logEntries  = parser.getLogEntries();
-                                          diffEntries = parser.getDiffEntries();
-                                          List<LocalDateTime> timeline = logEntries.stream()
-                                                                                   .map(d -> d.getDateTime())
-                                                                                   .collect(Collectors.toList());        
-                                          startCombo.getItems().addAll(timeline);
-                                          startCombo.getSelectionModel().selectFirst();
-                                          endCombo.getItems().addAll(timeline);
-                                          endCombo.getSelectionModel().selectLast();
-                                          
-                                          List<ArchiveData> archiveList = logEntries.stream()
-                                                                                     .filter(d -> d.getArchivePath() != null)
-                                                                                     .map(d -> new ArchiveData(d))
-                                                                                     .collect(Collectors.toList());
-                                          if(archiveList.size() > 0){
-                                            archiveList.forEach(a -> a.parseArchive());
-                                            archiveCombo.getItems().addAll(archiveList);
-                                          }
-                                          
-                                        });
+            parser.setOnSucceeded(evt -> onLogFileParserSucceeded(parser));
             super.bindTask(parser);
             
             Thread parseThread = new Thread(parser);
