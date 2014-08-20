@@ -20,6 +20,7 @@ package jp.co.ntt.oss.heapstats.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
@@ -158,6 +159,17 @@ public class HeapStatsUtils {
         
         /* Load resource bundle */
         resource = ResourceBundle.getBundle("HeapStatsResources", new Locale(prop.getProperty("language")));
+        
+        /* Add shutdown hook for saving current settings. */
+        Runnable savePropImpl = () -> {
+                                         try(OutputStream out = Files.newOutputStream(properties, StandardOpenOption.TRUNCATE_EXISTING)){
+                                            prop.store(out, null);
+                                         }
+                                         catch(IOException ex){
+                                             Logger.getLogger(HeapStatsUtils.class.getName()).log(Level.SEVERE, null, ex);
+                                         }
+                                      };
+        Runtime.getRuntime().addShutdownHook(new Thread(savePropImpl));
     }
     
     public static List<String> getPlugins(){
