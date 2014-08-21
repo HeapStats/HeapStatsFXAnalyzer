@@ -174,27 +174,28 @@ public class ArchiveData {
     }
     
     /**
-     * Write IPv4 data.
+     * Get IPv4 data.
      * 
      * @param data String data in procfs.
-     * @param writer PrintWriter to write.
+     * @return IPv4 address.
      */
-    private void writeIPv4(String data, PrintWriter writer){
+    private String getIPv4(String data){
         StringJoiner joiner = (new StringJoiner("."))
                                  .add(Integer.valueOf(data.substring(6, 8), 16).toString())
                                  .add(Integer.valueOf(data.substring(4, 6), 16).toString())
                                  .add(Integer.valueOf(data.substring(2, 4), 16).toString())
                                  .add(Integer.valueOf(data.substring(0, 2), 16).toString());
-        writer.print(joiner.toString());
+        
+        return joiner.toString();
     }
     
     /**
-     * Write IPv6 data.
+     * Get IPv6 data.
      * 
      * @param data String data in procfs.
-     * @param writer PrintWrite to write.
+     * @return IPv4 address.
      */
-    private void writeIPv6(String data, PrintWriter writer){
+    private String getIPv6(String data){
         StringJoiner joiner = (new StringJoiner(":"))
                                  .add(data.substring(6, 8) + data.substring(4, 6))
                                  .add(data.substring(2, 4) + data.substring(0, 2))
@@ -204,7 +205,7 @@ public class ArchiveData {
                                  .add(data.substring(18, 20) + data.substring(16, 18))
                                  .add(data.substring(26, 28) + data.substring(24, 26));
 
-        writer.print(joiner.toString());
+        return joiner.toString();
     }
     
     /**
@@ -216,36 +217,34 @@ public class ArchiveData {
      * @param isIPv4  true if this arguments represent IPv4.
      */
     private void writeSockDataInternal(String proto, String[] data, PrintWriter writer, boolean isIPv4){
-        writer.print(sockOwner.contains(data[INDEX_INODE]) ? "jvm\t " : "\t"); // owner
-        writer.print(proto + "\t");
+        writer.print(String.format("%-7s", sockOwner.contains(data[INDEX_INODE]) ? "jvm" : "")); // owner
+        writer.print(String.format("%-7s", proto));
         
         String[] queueData = data[INDEX_QUEUE].split(":");
-        writer.print(Integer.parseInt(queueData[1], 16)); // Recv-Q
-        writer.print("\t");
-        writer.print(Integer.parseInt(queueData[0], 16)); // Send-Q
-        writer.print("\t");
+        writer.print(String.format("%-8d", Integer.parseInt(queueData[1], 16))); // Recv-Q
+        writer.print(String.format("%-8d", Integer.parseInt(queueData[0], 16))); // Send-Q
         
         String[] localAddr = data[INDEX_LOCAL_ADDR].split(":"); // local address
+        String localAddrStr;
         if(isIPv4){
-            writeIPv4(localAddr[0], writer);
+            localAddrStr = getIPv4(localAddr[0]);
         }
         else{
-            writeIPv6(localAddr[0], writer);
+            localAddrStr = getIPv6(localAddr[0]);
         }
-        writer.print(':');
-        writer.print(Integer.parseInt(localAddr[1], 16));
-        writer.print("\t");
+        localAddrStr += String.format(":%d", Integer.parseInt(localAddr[1], 16));
+        writer.print(String.format("%-42s", localAddrStr));
         
         String[] foreignAddr = data[INDEX_FOREIGN_ADDR].split(":"); // foreign address
+        String foreignAddrStr;
         if(isIPv4){
-            writeIPv4(foreignAddr[0], writer);
+            foreignAddrStr = getIPv4(foreignAddr[0]);
         }
         else{
-            writeIPv6(foreignAddr[0], writer);
+            foreignAddrStr = getIPv6(foreignAddr[0]);
         }
-        writer.print(':');
-        writer.print(Integer.parseInt(foreignAddr[1], 16));
-        writer.print("\t");
+        foreignAddrStr += String.format(":%d", Integer.parseInt(foreignAddr[1], 16));
+        writer.print(String.format("%-42s", foreignAddrStr));
         
         try{
             String[] states = {"ESTABLISHED", "SYN_SENT", "SYN_RECV", "FIN_WAIT1", "FIN_WAIT2",
@@ -267,7 +266,13 @@ public class ArchiveData {
         Path sockfile = Paths.get(tmpPath.getAbsolutePath(), "socket");
         
         try(PrintWriter writer = new PrintWriter(Files.newOutputStream(sockfile, StandardOpenOption.CREATE))){
-            writer.println("Owner\tProto\tRecv-Q\tSend-Q\tLocal Address\tForeign Address\tState");
+            writer.print(String.format("%-7s", "Owner"));
+            writer.print(String.format("%-7s", "Proto"));
+            writer.print(String.format("%-8s", "Recv-Q"));
+            writer.print(String.format("%-8s", "Send-Q"));
+            writer.print(String.format("%-42s", "Local Address"));
+            writer.print(String.format("%-42s", "Foreign Address"));
+            writer.println("State");
         
             tcp.stream().map(s -> s.split("\\s+"))
                         .forEach(d -> writeSockDataInternal("tcp", d, writer, true));
