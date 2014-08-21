@@ -196,13 +196,13 @@ public class ArchiveData {
      */
     private void writeIPv6(String data, PrintWriter writer){
         StringJoiner joiner = (new StringJoiner(":"))
-                                 .add(Integer.valueOf(data.substring(6, 8) + data.substring(4, 6), 16).toString())
-                                 .add(Integer.valueOf(data.substring(2, 4) + data.substring(0, 2), 16).toString())
-                                 .add(Integer.valueOf(data.substring(14, 16) + data.substring(12, 14), 16).toString())
-                                 .add(Integer.valueOf(data.substring(10, 12) + data.substring(8, 10), 16).toString())
-                                 .add(Integer.valueOf(data.substring(22, 24) + data.substring(20, 22), 16).toString())
-                                 .add(Integer.valueOf(data.substring(18, 20) + data.substring(16, 18), 16).toString())
-                                 .add(Integer.valueOf(data.substring(26, 28) + data.substring(24, 26), 16).toString());
+                                 .add(data.substring(6, 8) + data.substring(4, 6))
+                                 .add(data.substring(2, 4) + data.substring(0, 2))
+                                 .add(data.substring(14, 16) + data.substring(12, 14))
+                                 .add(data.substring(10, 12) + data.substring(8, 10))
+                                 .add(data.substring(22, 24) + data.substring(20, 22))
+                                 .add(data.substring(18, 20) + data.substring(16, 18))
+                                 .add(data.substring(26, 28) + data.substring(24, 26));
 
         writer.print(joiner.toString());
     }
