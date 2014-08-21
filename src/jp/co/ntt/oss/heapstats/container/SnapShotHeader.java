@@ -55,8 +55,11 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
     /** Time the snapshot was taken. */
     private LocalDateTime snapShotDate;
 
-    /** Number of Objects. */
+    /** Number of live classes. */
     private long numEntries;
+    
+    /** Number of Instances. */
+    private long numInstances;
 
     /** SnapShot Cause. */
     private int cause;
@@ -97,7 +100,7 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
     private long snapShotHeaderSize;
     
     private long snapShotSize;
-
+    
     /**
      * Creates a SnapShotHeader.
      */
@@ -105,6 +108,7 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
         byteOrderMark = ByteOrder.nativeOrder();
         snapShotDate = null;
         numEntries = 0;
+        numInstances = 0;
         cause = 0;
         fullCount = 0;
         yngCount = 0;
@@ -178,6 +182,24 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
      */
     public final long getNumEntries() {
         return numEntries;
+    }
+
+    /**
+     * To get the Number of Instances.
+     *
+     * @return Return the Number of Instances.
+     */
+    public long getNumInstances() {
+        return numInstances;
+    }
+
+    /**
+     * To set the Number of Instances.
+     *
+     * @param numInstances the Number of Instances.
+     */
+    public void setNumInstances(long numInstances) {
+        this.numInstances = numInstances;
     }
 
     /**
