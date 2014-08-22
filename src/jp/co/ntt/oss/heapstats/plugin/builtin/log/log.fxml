@@ -187,13 +187,13 @@
     </Tab>
     <Tab text="%tab.detail">
       <content>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" stylesheets="@/jp/co/ntt/oss/heapstats/plugin/builtin/log/log.css">
 <children><Label text="%label.archive.time" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" /><ComboBox fx:id="archiveCombo" onAction="#onArchiveComboAction" prefWidth="176.0" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="6.0" /><TableView fx:id="archiveEnvInfoTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="40.0">
   <columns>
     <TableColumn fx:id="archiveKeyColumn" editable="false" prefWidth="200.0" sortable="false" />
     <TableColumn fx:id="archiveVauleColumn" editable="false" prefWidth="500.0" sortable="false" />
   </columns>
-</TableView><Label text="%label.archive.file" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="250.0" /><ComboBox fx:id="fileCombo" onAction="#onFileComboAction" prefWidth="176.0" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="247.0" /><TextArea fx:id="logArea" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="280.0" />
+</TableView><Label text="%label.archive.file" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="250.0" /><ComboBox fx:id="fileCombo" onAction="#onFileComboAction" prefWidth="176.0" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="247.0" /><TextArea id="logArea" fx:id="logArea" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="280.0" />
 </children></AnchorPane>
       </content>
     </Tab>

@@ -92,3 +92,6 @@
 /* Monitor chart */
 #monitorChart .chart-series-line { -fx-stroke: blue; }
 
+/* Archive file area */
+#logArea { -fx-font-family: monospace ; }
+
