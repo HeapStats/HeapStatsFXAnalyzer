@@ -557,5 +557,10 @@ public class LogController extends PluginController implements Initializable{
     public Map<String, String> getLibraryLicense() {
         return null;
     }
+
+    @Override
+    public Runnable getOnCloseRequest() {
+        return null;
+    }
     
 }

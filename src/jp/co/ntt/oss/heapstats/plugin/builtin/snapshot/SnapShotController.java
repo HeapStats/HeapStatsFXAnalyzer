@@ -717,5 +717,10 @@ public class SnapShotController extends PluginController implements Initializabl
         }
         
     }
+
+    @Override
+    public Runnable getOnCloseRequest() {
+        return null;
+    }
     
 }

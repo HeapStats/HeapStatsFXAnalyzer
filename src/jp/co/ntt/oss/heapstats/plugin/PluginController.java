@@ -74,6 +74,13 @@ public abstract class PluginController implements Initializable{
      * @return Event handler of this plugin.
      */
     public abstract EventHandler<Event> getOnPluginTabSelected();
+   
+    /**
+     * Event andler when main window is closed.
+     * 
+     * @return Event handler of this plugin.
+     */
+    public abstract Runnable getOnCloseRequest();
 
     /**
      * Setter of veil region.

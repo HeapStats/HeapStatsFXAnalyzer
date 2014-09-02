@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -270,6 +271,7 @@ public class WindowController implements Initializable {
 
     public void setOwner(Window owner) {
         this.owner = owner;
+        this.owner.setOnCloseRequest(e -> pluginList.values().forEach(c -> Optional.ofNullable(c.getOnCloseRequest()).ifPresent(r -> r.run())));
     }
     
 }
