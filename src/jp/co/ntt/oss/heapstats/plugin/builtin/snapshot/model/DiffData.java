@@ -53,7 +53,7 @@ public class DiffData implements Comparable<DiffData>{
         this.className = current.getName();
         this.classLoaderName = current.getLoaderName();
         this.instances = current.getCount() - prev.getCount();
-        this.totalSize = current.getTotalSize() - prev.getCount();
+        this.totalSize = current.getTotalSize() - prev.getTotalSize();
         this.ranked = isRanked;
     }
 
