@@ -391,6 +391,7 @@ public class LogController extends PluginController implements Initializable{
         
         /* Generate graph data */
         targetDiffData.stream()
+                      .filter(d -> !d.hasMinusData())
                       .forEachOrdered(d -> {
                                               String time = converter.toString(d.getDateTime());
                                               

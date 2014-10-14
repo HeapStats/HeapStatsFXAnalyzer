@@ -56,6 +56,8 @@ public class DiffData {
     
     private final long jvmSafepoints;
     
+    private final boolean minusData;
+    
     /**
      * Constructor of DiffData.
      * Each fields is based on "current - prev" .
@@ -100,6 +102,13 @@ public class DiffData {
         jvmSyncPark      = current.getJvmSyncPark() - prev.getJvmSyncPark();
         jvmSafepointTime = current.getJvmSafepointTime() - prev.getJvmSafepointTime();
         jvmSafepoints    = current.getJvmSafepoints() - prev.getJvmSafepoints();
+        
+        minusData = (systemUserTime < 0.0d) || (systemNiceTime < 0.0d) ||
+                    (systemSysTime < 0.0d) || (systemIdleTime < 0.0d) ||
+                    (systemIOWaitTime < 0.0d) || (systemIRQTime < 0.0d) ||
+                    (systemSoftIRQTime < 0.0d) || (systemStealTime < 0.0d) ||
+                    (systemGuestTime < 0.0d) ||
+                    (jvmSyncPark < 0) || (jvmSafepointTime < 0) || (jvmSafepoints < 0);
     }
 
     public LocalDateTime getDateTime() {
@@ -169,6 +178,10 @@ public class DiffData {
     
     public static double getCPUTotalUsage(DiffData instance){
         return instance.getCpuTotalUsage();
+    }
+    
+    public boolean hasMinusData(){
+        return minusData;
     }
     
 }
