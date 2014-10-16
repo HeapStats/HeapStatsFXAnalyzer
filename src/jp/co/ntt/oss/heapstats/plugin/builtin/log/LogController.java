@@ -28,12 +28,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -325,6 +327,150 @@ public class LogController extends PluginController implements Initializable{
                                                 anchor.getChildren().addAll(rectList);
                                              });
     }
+    
+    /**
+     * Task class for drawing log chart data.
+     */
+    private class DrawLogChartTask extends Task<Void>{
+        
+        /**
+         * Start time which is drawn.
+         */
+        private final LocalDateTime start;
+        
+        /**
+         * End time which is drawn.
+         */
+        private final  LocalDateTime end;
+
+        /**
+         * Constructor of DrawLogChartTask.
+         * 
+         * @param start Start Time
+         * @param end End time
+         */
+        public DrawLogChartTask(LocalDateTime start, LocalDateTime end) {
+            this.start = start;
+            this.end = end;
+        }
+        
+        @Override
+        protected Void call() throws Exception {
+            LocalDateTimeConverter converter = new LocalDateTimeConverter();
+            List<LogData> targetLogData = logEntries.parallelStream()
+                                                    .filter(d -> ((d.getDateTime().compareTo(start) >= 0) && (d.getDateTime().compareTo(end) <= 0)))
+                                                    .collect(Collectors.toList());
+            List<DiffData> targetDiffData = diffEntries.parallelStream()
+                                                       .filter(d -> ((d.getDateTime().compareTo(start) >= 0) && (d.getDateTime().compareTo(end) <= 0)))
+                                                       .collect(Collectors.toList());
+        
+            /* Java CPU */
+            ObservableList<XYChart.Data<String, Double>> javaUserUsageBuf = FXCollections.observableArrayList();
+            ObservableList<XYChart.Data<String, Double>> javaSysUsageBuf = FXCollections.observableArrayList();
+
+            /* System CPU */
+            ObservableList<XYChart.Data<String, Double>> systemUserUsageBuf = FXCollections.observableArrayList();
+            ObservableList<XYChart.Data<String, Double>> systemNiceUsageBuf = FXCollections.observableArrayList();
+            ObservableList<XYChart.Data<String, Double>> systemSysUsageBuf = FXCollections.observableArrayList();
+            ObservableList<XYChart.Data<String, Double>> systemIdleUsageBuf = FXCollections.observableArrayList();
+            ObservableList<XYChart.Data<String, Double>> systemIOWaitUsageBuf = FXCollections.observableArrayList();
+            ObservableList<XYChart.Data<String, Double>> systemIRQUsageBuf = FXCollections.observableArrayList();
+            ObservableList<XYChart.Data<String, Double>> systemSoftIRQUsageBuf = FXCollections.observableArrayList();
+            ObservableList<XYChart.Data<String, Double>> systemStealUsageBuf = FXCollections.observableArrayList();
+            ObservableList<XYChart.Data<String, Double>> systemGuestUsageBuf = FXCollections.observableArrayList();
+
+            /* Java Memory */
+            ObservableList<XYChart.Data<String, Long>> javaVSZUsageBuf = FXCollections.observableArrayList();
+            ObservableList<XYChart.Data<String, Long>> javaRSSUsageBuf = FXCollections.observableArrayList();
+
+            /* Safepoints */
+            ObservableList<XYChart.Data<String, Long>> safepointsBuf = FXCollections.observableArrayList();
+            ObservableList<XYChart.Data<String, Long>> safepointTimeBuf = FXCollections.observableArrayList();
+
+            /* Threads */
+            ObservableList<XYChart.Data<String, Long>> threadsBuf = FXCollections.observableArrayList();
+
+            /* Monitor contantion */
+            ObservableList<XYChart.Data<String, Long>> monitorsBuf = FXCollections.observableArrayList();
+            
+            LongAdder counter = new LongAdder();
+            long totalLoopCount = targetDiffData.size() + targetLogData.size();
+        
+            /* Generate graph data */
+            targetDiffData.stream()
+                          .filter(d -> !d.hasMinusData())
+                          .forEachOrdered(d -> {
+                                                  String time = converter.toString(d.getDateTime());
+                                              
+                                                  javaUserUsageBuf.add(new XYChart.Data<>(time, d.getJavaUserUsage()));
+                                                  javaSysUsageBuf.add(new XYChart.Data<>(time, d.getJavaSysUsage()));
+                                                  systemUserUsageBuf.add(new XYChart.Data<>(time, d.getCpuUserUsage()));
+                                                  systemNiceUsageBuf.add(new XYChart.Data<>(time, d.getCpuNiceUsage()));
+                                                  systemSysUsageBuf.add(new XYChart.Data<>(time, d.getCpuSysUsage()));
+                                                  systemIdleUsageBuf.add(new XYChart.Data<>(time, d.getCpuIdleUsage()));
+                                                  systemIOWaitUsageBuf.add(new XYChart.Data<>(time, d.getCpuIOWaitUsage()));
+                                                  systemIRQUsageBuf.add(new XYChart.Data<>(time, d.getCpuIRQUsage()));
+                                                  systemSoftIRQUsageBuf.add(new XYChart.Data<>(time, d.getCpuSoftIRQUsage()));
+                                                  systemStealUsageBuf.add(new XYChart.Data<>(time, d.getCpuStealUsage()));
+                                                  systemGuestUsageBuf.add(new XYChart.Data<>(time, d.getCpuGuestUsage()));
+                                                  monitorsBuf.add(new XYChart.Data<>(time, d.getJvmSyncPark()));
+                                                  safepointsBuf.add(new XYChart.Data<>(time, d.getJvmSafepoints()));
+                                                  safepointTimeBuf.add(new XYChart.Data<>(time, d.getJvmSafepointTime()));
+                                                  
+                                                  counter.increment();
+                                                  updateProgress(counter.longValue(), totalLoopCount);
+                                               });
+            targetLogData.stream()
+                         .forEachOrdered(d -> {
+                                                 String time = converter.toString(d.getDateTime());
+
+                                                 javaVSZUsageBuf.add(new XYChart.Data<>(time, d.getJavaVSSize() / 1024 / 1024));
+                                                 javaRSSUsageBuf.add(new XYChart.Data<>(time, d.getJavaRSSize() / 1024 / 1024));
+                                                 threadsBuf.add(new XYChart.Data<>(time, d.getJvmLiveThreads()));
+
+                                                 counter.increment();
+                                                 updateProgress(counter.longValue(), totalLoopCount);
+                                              });
+        
+            Platform.runLater(() -> {
+                                       /* Replace new chart data */
+                                       javaUserUsage.setData(javaUserUsageBuf);
+                                       javaSysUsage.setData(javaSysUsageBuf);
+
+                                       systemUserUsage.setData(systemUserUsageBuf);
+                                       systemNiceUsage.setData(systemNiceUsageBuf);
+                                       systemSysUsage.setData(systemSysUsageBuf);
+                                       systemIdleUsage.setData(systemIdleUsageBuf);
+                                       systemIOWaitUsage.setData(systemIOWaitUsageBuf);
+                                       systemIRQUsage.setData(systemIRQUsageBuf);
+                                       systemSoftIRQUsage.setData(systemSoftIRQUsageBuf);
+                                       systemStealUsage.setData(systemStealUsageBuf);
+                                       systemGuestUsage.setData(systemGuestUsageBuf);
+
+                                       monitors.setData(monitorsBuf);
+
+                                       safepoints.setData(safepointsBuf);
+                                       safepointTime.setData(safepointTimeBuf);
+
+                                       javaVSZUsage.setData(javaVSZUsageBuf);
+                                       javaRSSUsage.setData(javaRSSUsageBuf);
+
+                                       threads.setData(threadsBuf);
+
+                                       /* Put summary data to table */
+                                       procSummary.getItems().addAll((new SummaryData(targetLogData, targetDiffData)).getSummaryAsList());
+                                       
+                                       /*
+                                        * drawArchiveLine() needs positions in each chart.
+                                        * So I call it next event.
+                                        */
+                                       Platform.runLater(() -> drawArchiveLine());
+                                    });
+            
+            return null;
+        }
+        
+    }
 
     /**
      * Event handler of OK button.
@@ -353,101 +499,10 @@ public class LogController extends PluginController implements Initializable{
             return;
         }
         
-        List<LogData> targetLogData = logEntries.parallelStream()
-                                                     .filter(d -> ((d.getDateTime().compareTo(start) >= 0) && (d.getDateTime().compareTo(end) <= 0)))
-                                                     .collect(Collectors.toList());
-        List<DiffData> targetDiffData = diffEntries.parallelStream()
-                                                        .filter(d -> ((d.getDateTime().compareTo(start) >= 0) && (d.getDateTime().compareTo(end) <= 0)))
-                                                        .collect(Collectors.toList());
-        
-        /* Java CPU */
-        ObservableList<XYChart.Data<String, Double>> javaUserUsageBuf = FXCollections.observableArrayList();
-        ObservableList<XYChart.Data<String, Double>> javaSysUsageBuf = FXCollections.observableArrayList();
-
-        /* System CPU */
-        ObservableList<XYChart.Data<String, Double>> systemUserUsageBuf = FXCollections.observableArrayList();
-        ObservableList<XYChart.Data<String, Double>> systemNiceUsageBuf = FXCollections.observableArrayList();
-        ObservableList<XYChart.Data<String, Double>> systemSysUsageBuf = FXCollections.observableArrayList();
-        ObservableList<XYChart.Data<String, Double>> systemIdleUsageBuf = FXCollections.observableArrayList();
-        ObservableList<XYChart.Data<String, Double>> systemIOWaitUsageBuf = FXCollections.observableArrayList();
-        ObservableList<XYChart.Data<String, Double>> systemIRQUsageBuf = FXCollections.observableArrayList();
-        ObservableList<XYChart.Data<String, Double>> systemSoftIRQUsageBuf = FXCollections.observableArrayList();
-        ObservableList<XYChart.Data<String, Double>> systemStealUsageBuf = FXCollections.observableArrayList();
-        ObservableList<XYChart.Data<String, Double>> systemGuestUsageBuf = FXCollections.observableArrayList();
-        
-        /* Java Memory */
-        ObservableList<XYChart.Data<String, Long>> javaVSZUsageBuf = FXCollections.observableArrayList();
-        ObservableList<XYChart.Data<String, Long>> javaRSSUsageBuf = FXCollections.observableArrayList();
-
-        /* Safepoints */
-        ObservableList<XYChart.Data<String, Long>> safepointsBuf = FXCollections.observableArrayList();
-        ObservableList<XYChart.Data<String, Long>> safepointTimeBuf = FXCollections.observableArrayList();
-        
-        /* Threads */
-        ObservableList<XYChart.Data<String, Long>> threadsBuf = FXCollections.observableArrayList();
-        
-        /* Monitor contantion */
-        ObservableList<XYChart.Data<String, Long>> monitorsBuf = FXCollections.observableArrayList();
-        
-        /* Generate graph data */
-        targetDiffData.stream()
-                      .filter(d -> !d.hasMinusData())
-                      .forEachOrdered(d -> {
-                                              String time = converter.toString(d.getDateTime());
-                                              
-                                              javaUserUsageBuf.add(new XYChart.Data<>(time, d.getJavaUserUsage()));
-                                              javaSysUsageBuf.add(new XYChart.Data<>(time, d.getJavaSysUsage()));
-                                              systemUserUsageBuf.add(new XYChart.Data<>(time, d.getCpuUserUsage()));
-                                              systemNiceUsageBuf.add(new XYChart.Data<>(time, d.getCpuNiceUsage()));
-                                              systemSysUsageBuf.add(new XYChart.Data<>(time, d.getCpuSysUsage()));
-                                              systemIdleUsageBuf.add(new XYChart.Data<>(time, d.getCpuIdleUsage()));
-                                              systemIOWaitUsageBuf.add(new XYChart.Data<>(time, d.getCpuIOWaitUsage()));
-                                              systemIRQUsageBuf.add(new XYChart.Data<>(time, d.getCpuIRQUsage()));
-                                              systemSoftIRQUsageBuf.add(new XYChart.Data<>(time, d.getCpuSoftIRQUsage()));
-                                              systemStealUsageBuf.add(new XYChart.Data<>(time, d.getCpuStealUsage()));
-                                              systemGuestUsageBuf.add(new XYChart.Data<>(time, d.getCpuGuestUsage()));
-                                              monitorsBuf.add(new XYChart.Data<>(time, d.getJvmSyncPark()));
-                                              safepointsBuf.add(new XYChart.Data<>(time, d.getJvmSafepoints()));
-                                              safepointTimeBuf.add(new XYChart.Data<>(time, d.getJvmSafepointTime()));
-                                           });
-        targetLogData.stream()
-                     .forEachOrdered(d -> {
-                                             String time = converter.toString(d.getDateTime());
-
-                                             javaVSZUsageBuf.add(new XYChart.Data<>(time, d.getJavaVSSize() / 1024 / 1024));
-                                             javaRSSUsageBuf.add(new XYChart.Data<>(time, d.getJavaRSSize() / 1024 / 1024));
-                                             threadsBuf.add(new XYChart.Data<>(time, d.getJvmLiveThreads()));
-                                          });
-        
-        /* Replace new chart data */
-        javaUserUsage.setData(javaUserUsageBuf);
-        javaSysUsage.setData(javaSysUsageBuf);
-        
-        systemUserUsage.setData(systemUserUsageBuf);
-        systemNiceUsage.setData(systemNiceUsageBuf);
-        systemSysUsage.setData(systemSysUsageBuf);
-        systemIdleUsage.setData(systemIdleUsageBuf);
-        systemIOWaitUsage.setData(systemIOWaitUsageBuf);
-        systemIRQUsage.setData(systemIRQUsageBuf);
-        systemSoftIRQUsage.setData(systemSoftIRQUsageBuf);
-        systemStealUsage.setData(systemStealUsageBuf);
-        systemGuestUsage.setData(systemGuestUsageBuf);
-        
-        monitors.setData(monitorsBuf);
-        
-        safepoints.setData(safepointsBuf);
-        safepointTime.setData(safepointTimeBuf);
-        
-        javaVSZUsage.setData(javaVSZUsageBuf);
-        javaRSSUsage.setData(javaRSSUsageBuf);
-        
-        threads.setData(threadsBuf);
-        
-        
-        /* Put summary data to table */
-        procSummary.getItems().addAll((new SummaryData(targetLogData, targetDiffData)).getSummaryAsList());
-        
-        Platform.runLater(() -> drawArchiveLine());
+        DrawLogChartTask task = new DrawLogChartTask(start, end);
+        super.bindTask(task);
+        Thread drawChartThread = new Thread(task);
+        drawChartThread.start();        
     }
     
     /**
