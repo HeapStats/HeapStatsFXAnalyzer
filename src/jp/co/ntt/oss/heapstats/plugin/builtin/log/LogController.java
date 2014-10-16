@@ -197,6 +197,8 @@ public class LogController extends PluginController implements Initializable{
     
     private Text popupText;
     
+    private List<LocalDateTime> suspectList;
+    
     
     /**
      * Initializes the controller class.
@@ -227,7 +229,10 @@ public class LogController extends PluginController implements Initializable{
         popupText = new Text();
         chartPopup.getContent().add(popupText);
         
-        setOnWindowResize((v, o, n) -> Platform.runLater(() -> drawArchiveLine()));
+        setOnWindowResize((v, o, n) -> Platform.runLater(() -> {
+                                                                  drawArchiveLine();
+                                                                  drawRebootSuspectLine();
+                                                               }));
     }
     
     /**
@@ -329,6 +334,48 @@ public class LogController extends PluginController implements Initializable{
     }
     
     /**
+     * Draw line which represents to suspect to reboot.
+     * This method does not clear AnchorPane to draw lines.
+     * So this method must be called after drawArchiveLine().
+     */
+    private void drawRebootSuspectLine(){
+        
+        if((suspectList == null) || suspectList.isEmpty()){
+            return;
+        }
+        
+        LocalDateTimeConverter converter = new LocalDateTimeConverter();
+        
+        chartGrid.getChildren().stream()
+                               .filter(n -> n instanceof StackPane)
+                               .forEach(p -> {
+                                                AnchorPane anchor = (AnchorPane)((StackPane)p).getChildren().stream()
+                                                                                                            .filter(n -> n instanceof AnchorPane)
+                                                                                                            .findAny()
+                                                                                                            .get();
+                                                XYChart chart = (XYChart)((StackPane)p).getChildren().stream()
+                                                                                                     .filter(n -> n instanceof XYChart)
+                                                                                                     .findAny()
+                                                                                                     .get();
+                                                
+                                                CategoryAxis xAxis = (CategoryAxis)chart.getXAxis();
+                                                Axis yAxis = chart.getYAxis();
+                                                Label chartTitle = (Label)chart.getChildrenUnmodifiable().stream()
+                                                                                                         .filter(n -> n.getStyleClass().contains("chart-title"))
+                                                                                                         .findFirst()
+                                                                                                         .get();
+                                                
+                                                double startX = xAxis.getLayoutX() + xAxis.getStartMargin() - 1.0d;
+                                                double yPos = yAxis.getLayoutY() + chartTitle.getLayoutY() + chartTitle.getHeight();
+                                                List<Rectangle> rectList = suspectList.stream()
+                                                                                      .map(s -> new Rectangle(xAxis.getDisplayPosition(converter.toString(s)) + startX, yPos, 2.0d, yAxis.getHeight()))
+                                                                                      .peek(r -> ((Rectangle)r).setStyle("-fx-fill: goldenrod;"))
+                                                                                      .collect(Collectors.toList());
+                                                anchor.getChildren().addAll(rectList);
+                                             });
+    }
+    
+    /**
      * Task class for drawing log chart data.
      */
     private class DrawLogChartTask extends Task<Void>{
@@ -397,29 +444,27 @@ public class LogController extends PluginController implements Initializable{
             long totalLoopCount = targetDiffData.size() + targetLogData.size();
         
             /* Generate graph data */
-            targetDiffData.stream()
-                          .filter(d -> !d.hasMinusData())
-                          .forEachOrdered(d -> {
-                                                  String time = converter.toString(d.getDateTime());
+            targetDiffData.forEach(d -> {
+                                           String time = converter.toString(d.getDateTime());
                                               
-                                                  javaUserUsageBuf.add(new XYChart.Data<>(time, d.getJavaUserUsage()));
-                                                  javaSysUsageBuf.add(new XYChart.Data<>(time, d.getJavaSysUsage()));
-                                                  systemUserUsageBuf.add(new XYChart.Data<>(time, d.getCpuUserUsage()));
-                                                  systemNiceUsageBuf.add(new XYChart.Data<>(time, d.getCpuNiceUsage()));
-                                                  systemSysUsageBuf.add(new XYChart.Data<>(time, d.getCpuSysUsage()));
-                                                  systemIdleUsageBuf.add(new XYChart.Data<>(time, d.getCpuIdleUsage()));
-                                                  systemIOWaitUsageBuf.add(new XYChart.Data<>(time, d.getCpuIOWaitUsage()));
-                                                  systemIRQUsageBuf.add(new XYChart.Data<>(time, d.getCpuIRQUsage()));
-                                                  systemSoftIRQUsageBuf.add(new XYChart.Data<>(time, d.getCpuSoftIRQUsage()));
-                                                  systemStealUsageBuf.add(new XYChart.Data<>(time, d.getCpuStealUsage()));
-                                                  systemGuestUsageBuf.add(new XYChart.Data<>(time, d.getCpuGuestUsage()));
-                                                  monitorsBuf.add(new XYChart.Data<>(time, d.getJvmSyncPark()));
-                                                  safepointsBuf.add(new XYChart.Data<>(time, d.getJvmSafepoints()));
-                                                  safepointTimeBuf.add(new XYChart.Data<>(time, d.getJvmSafepointTime()));
+                                           javaUserUsageBuf.add(new XYChart.Data<>(time, d.getJavaUserUsage()));
+                                           javaSysUsageBuf.add(new XYChart.Data<>(time, d.getJavaSysUsage()));
+                                           systemUserUsageBuf.add(new XYChart.Data<>(time, d.getCpuUserUsage()));
+                                           systemNiceUsageBuf.add(new XYChart.Data<>(time, d.getCpuNiceUsage()));
+                                           systemSysUsageBuf.add(new XYChart.Data<>(time, d.getCpuSysUsage()));
+                                           systemIdleUsageBuf.add(new XYChart.Data<>(time, d.getCpuIdleUsage()));
+                                           systemIOWaitUsageBuf.add(new XYChart.Data<>(time, d.getCpuIOWaitUsage()));
+                                           systemIRQUsageBuf.add(new XYChart.Data<>(time, d.getCpuIRQUsage()));
+                                           systemSoftIRQUsageBuf.add(new XYChart.Data<>(time, d.getCpuSoftIRQUsage()));
+                                           systemStealUsageBuf.add(new XYChart.Data<>(time, d.getCpuStealUsage()));
+                                           systemGuestUsageBuf.add(new XYChart.Data<>(time, d.getCpuGuestUsage()));
+                                           monitorsBuf.add(new XYChart.Data<>(time, d.getJvmSyncPark()));
+                                           safepointsBuf.add(new XYChart.Data<>(time, d.getJvmSafepoints()));
+                                           safepointTimeBuf.add(new XYChart.Data<>(time, d.getJvmSafepointTime()));
                                                   
-                                                  counter.increment();
-                                                  updateProgress(counter.longValue(), totalLoopCount);
-                                               });
+                                           counter.increment();
+                                           updateProgress(counter.longValue(), totalLoopCount);
+                                        });
             targetLogData.stream()
                          .forEachOrdered(d -> {
                                                  String time = converter.toString(d.getDateTime());
@@ -464,7 +509,14 @@ public class LogController extends PluginController implements Initializable{
                                         * drawArchiveLine() needs positions in each chart.
                                         * So I call it next event.
                                         */
-                                       Platform.runLater(() -> drawArchiveLine());
+                                       suspectList = targetDiffData.stream()
+                                                                   .filter(d -> d.hasMinusData())
+                                                                   .map(d -> d.getDateTime())
+                                                                   .collect(Collectors.toList());
+                                       Platform.runLater(() -> {
+                                                                  drawArchiveLine();
+                                                                  drawRebootSuspectLine();
+                                                               });
                                     });
             
             return null;
