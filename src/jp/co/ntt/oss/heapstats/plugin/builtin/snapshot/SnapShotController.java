@@ -378,14 +378,14 @@ public class SnapShotController extends PluginController implements Initializabl
      * 
      * @param target SnapShot to be drawed.
      */
-    private void drawTopNData(Map<SnapShotHeader, Map<Long, ObjectData>> target){                                     
+    private void drawTopNData(Map<SnapShotHeader, Map<Long, ObjectData>> target, boolean includeOthers){                                     
         topNChart.getData().clear();
         lastDiffTable.getItems().clear();
 
         LocalDateTimeConverter converter = new LocalDateTimeConverter();
         Map<String, XYChart.Series<String, Long>> seriesMap = new HashMap<>();
         
-        DiffTask diffTask = new DiffTask(target, HeapStatsUtils.getRankLevel());
+        DiffTask diffTask = new DiffTask(target, HeapStatsUtils.getRankLevel(), includeOthers);
         diffTask.setOnSucceeded(evt -> onDiffTaskSucceeded(diffTask, seriesMap));
         super.bindTask(diffTask);
         Thread diffThread = new Thread(diffTask);
@@ -429,7 +429,7 @@ public class SnapShotController extends PluginController implements Initializabl
         SnapShotParseTask task = new SnapShotParseTask(currentTarget);
         task.setOnSucceeded(evt -> {
                                      snapShots = task.getSnapShots();
-                                     drawTopNData(snapShots);
+                                     drawTopNData(snapShots, true);
                                    });
         super.bindTask(task);
             
@@ -533,7 +533,7 @@ public class SnapShotController extends PluginController implements Initializabl
                                        target.put(h, objectList);
                                     });
         
-        drawTopNData(target);
+        drawTopNData(target, false);
     }
     
     /**
@@ -554,7 +554,7 @@ public class SnapShotController extends PluginController implements Initializabl
      */
     @FXML
     private void onSelectFilterClear(ActionEvent event){
-        drawTopNData(snapShots);
+        drawTopNData(snapShots, true);
     }
     
     /**

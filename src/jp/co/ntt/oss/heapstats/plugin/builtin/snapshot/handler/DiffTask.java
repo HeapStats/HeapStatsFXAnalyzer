@@ -44,12 +44,15 @@ public class DiffTask extends Task<Void>{
     private final List<DiffData> lastDiffList;
     
     private final int rankLevel;
+    
+    private final boolean includeOthers;
 
-    public DiffTask(Map<SnapShotHeader, Map<Long, ObjectData>> snapShots, int rankLevel) {
+    public DiffTask(Map<SnapShotHeader, Map<Long, ObjectData>> snapShots, int rankLevel, boolean includeOthers) {
         this.snapShots = snapShots;
         this.topNList = new HashMap<>();
         this.lastDiffList = new ArrayList<>();
         this.rankLevel = rankLevel;
+        this.includeOthers = includeOthers;
     }
     
     /**
@@ -65,12 +68,15 @@ public class DiffTask extends Task<Void>{
                                                .sorted(Comparator.reverseOrder())
                                                .limit(rankLevel)
                                                .collect(Collectors.toList());
-        ObjectData other = new ObjectData();
-        other.setName("Others");
-        other.setTotalSize(header.getNewHeap() + header.getOldHeap() - buf.stream()
-                                                                          .mapToLong(d -> d.getTotalSize())
-                                                                          .sum());
-        buf.add(other);
+        
+        if(includeOthers){
+            ObjectData other = new ObjectData();
+            other.setName("Others");
+            other.setTotalSize(header.getNewHeap() + header.getOldHeap() - buf.stream()
+                                                                              .mapToLong(d -> d.getTotalSize())
+                                                                              .sum());
+            buf.add(other);
+        }
 
         topNList.put(header.getSnapShotDate(), buf);
         progress.increment();
