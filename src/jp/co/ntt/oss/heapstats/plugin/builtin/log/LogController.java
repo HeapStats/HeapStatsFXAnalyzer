@@ -93,73 +93,56 @@ public class LogController extends PluginController implements Initializable{
     @FXML
     private StackedAreaChart<String, Double> javaCPUChart;
     
-    @FXML
     private XYChart.Series<String, Double> javaUserUsage;
     
-    @FXML
     private XYChart.Series<String, Double> javaSysUsage;
     
     @FXML
     private StackedAreaChart<String, Double> systemCPUChart;
     
-    @FXML
     private XYChart.Series<String, Double> systemUserUsage;
     
-    @FXML
     private XYChart.Series<String, Double> systemNiceUsage;
     
-    @FXML
     private XYChart.Series<String, Double> systemSysUsage;
     
-    @FXML
     private XYChart.Series<String, Double> systemIdleUsage;
     
-    @FXML
     private XYChart.Series<String, Double> systemIOWaitUsage;
     
-    @FXML
     private XYChart.Series<String, Double> systemIRQUsage;
     
-    @FXML
     private XYChart.Series<String, Double> systemSoftIRQUsage;
     
-    @FXML
     private XYChart.Series<String, Double> systemStealUsage;
     
-    @FXML
     private XYChart.Series<String, Double> systemGuestUsage;
     
     @FXML
     private LineChart<String, Long> javaMemoryChart;
     
-    @FXML
     private XYChart.Series<String, Long> javaVSZUsage;
     
-    @FXML
     private XYChart.Series<String, Long> javaRSSUsage;
     
     @FXML
     private LineChart<String, Long> safepointChart;
     
-    @FXML
     private XYChart.Series<String, Long> safepoints;
     
     @FXML
     private LineChart<String, Long> safepointTimeChart;
     
-    @FXML
     private XYChart.Series<String, Long> safepointTime;
     
     @FXML
     private LineChart<String, Long> threadChart;
     
-    @FXML
     private XYChart.Series<String, Long> threads;
     
     @FXML
     private LineChart<String, Long> monitorChart;
     
-    @FXML
     private XYChart.Series<String, Long> monitors;
     
     @FXML
@@ -201,6 +184,64 @@ public class LogController extends PluginController implements Initializable{
     
     
     /**
+     * Initialize Series in Chart.
+     * This method uses to avoid RuntimeException which is related to:
+     *   RT-37994: [FXML] ProxyBuilder does not support read-only collections
+     *   https://javafx-jira.kenai.com/browse/RT-37994
+     */
+    private void initializeChartSeries(){
+        threads = new XYChart.Series<>();
+        threads.setName("Threads");
+        threadChart.getData().add(threads);
+
+        javaUserUsage = new XYChart.Series<>();
+        javaUserUsage.setName("user");
+        javaSysUsage = new XYChart.Series<>();
+        javaSysUsage.setName("sys");
+        javaCPUChart.getData().addAll(javaUserUsage, javaSysUsage);
+        
+        systemUserUsage = new XYChart.Series<>();
+        systemUserUsage.setName("user");
+        systemNiceUsage = new XYChart.Series<>();
+        systemNiceUsage.setName("nice");
+        systemSysUsage = new XYChart.Series<>();
+        systemSysUsage.setName("sys");
+        systemIdleUsage = new XYChart.Series<>();
+        systemIdleUsage.setName("idle");
+        systemIOWaitUsage = new XYChart.Series<>();
+        systemIOWaitUsage.setName("I/O wait");
+        systemIRQUsage = new XYChart.Series<>();
+        systemIRQUsage.setName("IRQ");
+        systemSoftIRQUsage = new XYChart.Series<>();
+        systemSoftIRQUsage.setName("soft IRQ");
+        systemStealUsage = new XYChart.Series<>();
+        systemStealUsage.setName("steal");
+        systemGuestUsage = new XYChart.Series<>();
+        systemGuestUsage.setName("guest");
+        systemCPUChart.getData().addAll(systemUserUsage, systemNiceUsage, systemSysUsage,
+                                         systemIdleUsage, systemIOWaitUsage, systemIRQUsage,
+                                         systemSoftIRQUsage, systemStealUsage, systemGuestUsage);
+        
+        javaVSZUsage = new XYChart.Series<>();
+        javaVSZUsage.setName("VSZ");
+        javaRSSUsage = new XYChart.Series<>();
+        javaRSSUsage.setName("RSS");
+        javaMemoryChart.getData().addAll(javaVSZUsage, javaRSSUsage);
+        
+        safepoints = new XYChart.Series<>();
+        safepoints.setName("Safepoints");
+        safepointChart.getData().add(safepoints);
+        
+        safepointTime = new XYChart.Series<>();
+        safepointTime.setName("Safepoint Time");
+        safepointTimeChart.getData().add(safepointTime);
+        
+        monitors = new XYChart.Series<>();
+        monitors.setName("Monitors");
+        monitorChart.getData().add(monitors);
+    }
+    
+    /**
      * Initializes the controller class.
      */
     @Override
@@ -224,6 +265,8 @@ public class LogController extends PluginController implements Initializable{
         safepointTimeChart.lookup(".chart").setStyle(bgcolor);
         threadChart.lookup(".chart").setStyle(bgcolor);
         monitorChart.lookup(".chart").setStyle(bgcolor);
+        
+        initializeChartSeries();
         
         chartPopup = new Popup();
         popupText = new Text();

@@ -104,28 +104,22 @@ public class SnapShotController extends PluginController implements Initializabl
     @FXML
     private StackedAreaChart<String, Long> heapChart;
     
-    @FXML
     private XYChart.Series<String, Long> youngUsage;
     
-    @FXML
     private XYChart.Series<String, Long> oldUsage;
     
-    @FXML
     private XYChart.Series<String, Long> free;
     
     @FXML
     private LineChart<String, Long> gcTimeChart;
     
-    @FXML
     private XYChart.Series<String, Long> gcTime;
     
     @FXML
     private AreaChart<String, Long> metaspaceChart;
     
-    @FXML
     private XYChart.Series<String, Long> metaspaceUsage;
     
-    @FXML
     private XYChart.Series<String, Long> metaspaceCapacity;
     
     @FXML
@@ -206,6 +200,33 @@ public class SnapShotController extends PluginController implements Initializabl
     
     private Map<SnapShotHeader, Map<Long, ObjectData>> snapShots;
     
+    
+    /**
+     * Initialize Series in Chart.
+     * This method uses to avoid RuntimeException which is related to:
+     *   RT-37994: [FXML] ProxyBuilder does not support read-only collections
+     *   https://javafx-jira.kenai.com/browse/RT-37994
+     */
+    private void initializeChartSeries(){
+        youngUsage = new XYChart.Series<>();
+        youngUsage.setName("Young");
+        oldUsage = new XYChart.Series<>();
+        oldUsage.setName("Old");
+        free = new XYChart.Series<>();
+        free.setName("Free");
+        heapChart.getData().addAll(youngUsage, oldUsage, free);
+        
+        gcTime = new XYChart.Series<>();
+        gcTime.setName("GC Time");
+        gcTimeChart.getData().add(gcTime);
+        
+        metaspaceCapacity = new XYChart.Series<>();
+        metaspaceCapacity.setName("Capacity");
+        metaspaceUsage = new XYChart.Series<>();
+        metaspaceUsage.setName("Usage");
+        metaspaceChart.getData().addAll(metaspaceCapacity, metaspaceUsage);
+    }
+    
     /**
      * Initializes the controller class.
      */
@@ -267,6 +288,8 @@ public class SnapShotController extends PluginController implements Initializabl
         gcTimeChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
         metaspaceChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
         topNChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
+        
+        initializeChartSeries();
     }
     
     /**

@@ -47,13 +47,6 @@
   <yAxis>
     <NumberAxis label="MB" side="LEFT" />
   </yAxis>
-  <data>
-    <javafx.collections.FXCollections fx:factory="observableArrayList">
-      <javafx.scene.chart.XYChart.Series fx:id="youngUsage" name="Young"/> 
-      <javafx.scene.chart.XYChart.Series fx:id="oldUsage" name="Old"/> 
-      <javafx.scene.chart.XYChart.Series fx:id="free" name="Free"/> 
-    </javafx.collections.FXCollections>
-  </data>
 </StackedAreaChart>
 </children></AnchorPane><AnchorPane prefHeight="200.0" prefWidth="200.0">
 <children><LineChart id="gcTimeChart" fx:id="gcTimeChart" animated="false" createSymbols="false" layoutX="-169.0" layoutY="-120.0" legendVisible="false" minHeight="0.0" title="GC Time" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -63,11 +56,6 @@
   <yAxis>
     <NumberAxis label="ms" side="LEFT" />
   </yAxis>
-  <data>
-    <javafx.collections.FXCollections fx:factory="observableArrayList">
-      <javafx.scene.chart.XYChart.Series fx:id="gcTime" name="GC Time"/> 
-    </javafx.collections.FXCollections>
-  </data>
 </LineChart>
 </children></AnchorPane><AnchorPane prefHeight="200.0" prefWidth="200.0">
 <children><AreaChart id="metaspaceChart" fx:id="metaspaceChart" animated="false" createSymbols="false" layoutX="-174.0" layoutY="-166.0" minHeight="0.0" title="Metaspace" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -77,12 +65,6 @@
   <yAxis>
     <NumberAxis label="MB" side="LEFT" />
   </yAxis>
-  <data>
-    <javafx.collections.FXCollections fx:factory="observableArrayList">
-      <javafx.scene.chart.XYChart.Series fx:id="metaspaceCapacity" name="Capacity"/> 
-      <javafx.scene.chart.XYChart.Series fx:id="metaspaceUsage" name="Usage"/> 
-    </javafx.collections.FXCollections>
-  </data>
 </AreaChart>
 </children></AnchorPane>
 </items></SplitPane>
