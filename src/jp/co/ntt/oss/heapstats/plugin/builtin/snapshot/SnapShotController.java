@@ -32,6 +32,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -45,6 +46,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -194,6 +196,12 @@ public class SnapShotController extends PluginController implements Initializabl
     @FXML
     private Tab histogramTab;
     
+    @FXML
+    private Button okBtn;
+    
+    @FXML
+    private Button selectFilterApplyBtn;
+    
     private List<SnapShotHeader> currentTarget;
 
     private Map<LocalDateTime, List<ObjectData>> topNList;
@@ -290,6 +298,9 @@ public class SnapShotController extends PluginController implements Initializabl
         topNChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
         
         initializeChartSeries();
+        
+        okBtn.disableProperty().bind(Bindings.and(startCombo.valueProperty().isNull(), endCombo.valueProperty().isNull()));
+        selectFilterApplyBtn.disableProperty().bind(searchList.selectionModelProperty().getValue().selectedItemProperty().isNull());
     }
     
     /**

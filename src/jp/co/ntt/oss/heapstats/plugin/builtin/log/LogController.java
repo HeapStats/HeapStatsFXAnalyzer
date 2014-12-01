@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -46,6 +47,7 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -171,6 +173,9 @@ public class LogController extends PluginController implements Initializable{
     
     @FXML
     private TextArea logArea;
+    
+    @FXML
+    private Button okBtn;
 
     List<LogData> logEntries;
     
@@ -271,6 +276,8 @@ public class LogController extends PluginController implements Initializable{
         chartPopup = new Popup();
         popupText = new Text();
         chartPopup.getContent().add(popupText);
+        
+        okBtn.disableProperty().bind(Bindings.and(startCombo.valueProperty().isNull(), endCombo.valueProperty().isNull()));
         
         setOnWindowResize((v, o, n) -> Platform.runLater(() -> {
                                                                   drawArchiveLine();
