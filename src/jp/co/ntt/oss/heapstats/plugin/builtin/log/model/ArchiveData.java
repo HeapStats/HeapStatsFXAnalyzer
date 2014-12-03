@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
-import jp.co.ntt.oss.heapstats.utils.InfoDialog;
 import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 
 /**
@@ -95,7 +94,7 @@ public class ArchiveData {
         try {
             tmpPath = Files.createTempDirectory("heapstats_archive").toFile();
         } catch (IOException ex) {
-            (new InfoDialog("Error", ex.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(ex))).show();
+            HeapStatsUtils.showExceptionDialog(ex);
         }
         
         tmpPath.deleteOnExit();
@@ -124,7 +123,7 @@ public class ArchiveData {
             prop.forEach((k, v) -> envInfo.put((String)k, (String)v));
         }
         catch (IOException ex) {
-            (new InfoDialog("Error", ex.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(ex))).show();
+            HeapStatsUtils.showExceptionDialog(ex);
         }
 
     }
@@ -145,7 +144,7 @@ public class ArchiveData {
                          .collect(Collectors.toList());
         }
         catch (IOException ex) {
-            (new InfoDialog("Error", ex.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(ex))).show();
+            HeapStatsUtils.showExceptionDialog(ex);
         }
     
         return null;
@@ -168,7 +167,7 @@ public class ArchiveData {
                   .forEach(s -> writer.println(s));
         }
         catch (IOException ex) {
-            (new InfoDialog("Error", ex.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(ex))).show();
+            HeapStatsUtils.showExceptionDialog(ex);
         }
 
     }
@@ -338,7 +337,7 @@ public class ArchiveData {
             buildSockData();
         }
         catch (IOException ex) {
-            (new InfoDialog("Error", ex.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(ex))).show();
+            HeapStatsUtils.showExceptionDialog(ex);
         }
         
         parsed = true;

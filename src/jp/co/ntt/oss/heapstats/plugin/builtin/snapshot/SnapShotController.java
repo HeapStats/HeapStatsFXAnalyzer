@@ -46,7 +46,9 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -73,7 +75,6 @@ import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.SnapShotParseTask
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.model.DiffData;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.model.SummaryData;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
-import jp.co.ntt.oss.heapstats.utils.InfoDialog;
 import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 import jp.co.ntt.oss.heapstats.xml.binding.Filter;
 import jp.co.ntt.oss.heapstats.xml.binding.Filters;
@@ -440,8 +441,8 @@ public class SnapShotController extends PluginController implements Initializabl
         int endIdx = endCombo.getSelectionModel().getSelectedIndex();
         
         if(startIdx >= endIdx){
-            InfoDialog dialog = new InfoDialog("Error", resource.getString("dialog.timerange.message"), null);
-            dialog.show();
+            Alert dialog = new Alert(Alert.AlertType.ERROR, resource.getString("dialog.timerange.message"), ButtonType.OK);
+            dialog.showAndWait();
             return;
         }
         

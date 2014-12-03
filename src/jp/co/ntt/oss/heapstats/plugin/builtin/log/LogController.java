@@ -47,7 +47,10 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -70,7 +73,6 @@ import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.DiffData;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.LogData;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.SummaryData;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
-import jp.co.ntt.oss.heapstats.utils.InfoDialog;
 import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 
 /**
@@ -582,13 +584,6 @@ public class LogController extends PluginController implements Initializable{
     @FXML
     private void onOkClick(ActionEvent event){
         ResourceBundle resource = ResourceBundle.getBundle("logResources", new Locale(HeapStatsUtils.getLanguage()));
-        
-        if(logEntries == null){
-            InfoDialog dialog = new InfoDialog("Error", resource.getString("dialog.logempty.message"), null);
-            dialog.show();
-            return;
-        }
-        
         LocalDateTimeConverter converter = new LocalDateTimeConverter();
         
         /* Get range */
@@ -596,8 +591,8 @@ public class LogController extends PluginController implements Initializable{
         LocalDateTime end   = endCombo.getValue();
         
         if(!end.isAfter(start)){
-            InfoDialog dialog = new InfoDialog("Error", resource.getString("dialog.timerange.message"), null);
-            dialog.show();
+            Alert dialog = new Alert(AlertType.ERROR, resource.getString("dialog.timerange.message"), ButtonType.OK);
+            dialog.showAndWait();
             return;
         }
         

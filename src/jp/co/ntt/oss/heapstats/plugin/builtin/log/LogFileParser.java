@@ -30,7 +30,6 @@ import javafx.concurrent.Task;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.DiffData;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.LogData;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
-import jp.co.ntt.oss.heapstats.utils.InfoDialog;
 
 /**
  * HeapStats log file (CSV) parser.
@@ -68,8 +67,7 @@ public class LogFileParser extends Task<Void>{
             element.parseFromCSV(csvLine, logdir);
         }
         catch(IllegalArgumentException ex){
-            InfoDialog dialog = new InfoDialog("Error", ex.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(ex));
-            dialog.show();
+            HeapStatsUtils.showExceptionDialog(ex);
             return;
         }
         
@@ -89,8 +87,7 @@ public class LogFileParser extends Task<Void>{
             Files.lines(logPath).forEach(s -> addEntry(s, logdir));
         }
         catch (IOException ex){
-            InfoDialog dialog = new InfoDialog("Error", ex.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(ex));
-            dialog.show();
+            HeapStatsUtils.showExceptionDialog(ex);
         }
         
     }

@@ -46,6 +46,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
@@ -56,7 +57,6 @@ import jp.co.ntt.oss.heapstats.plugin.PluginClassLoader;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.LogController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.SnapShotController;
-import jp.co.ntt.oss.heapstats.utils.DialogHelper;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
 /**
@@ -97,8 +97,13 @@ public class WindowController implements Initializable {
     
     @FXML
     private void onRankLevelClick(ActionEvent event){
-        DialogHelper rankDialog = new DialogHelper("/jp/co/ntt/oss/heapstats/rankDialog.fxml", "Rank Level setting");
-        rankDialog.show();
+        TextInputDialog dialog = new TextInputDialog(Integer.toString(HeapStatsUtils.getRankLevel()));
+        dialog.setTitle("Rank Level setting");
+        dialog.setHeaderText("Rank Level setting");
+        ResourceBundle resource = ResourceBundle.getBundle("HeapStatsResources", new Locale(HeapStatsUtils.getLanguage()));
+        dialog.setContentText(resource.getString("rank.label"));
+        dialog.showAndWait()
+              .ifPresent(v -> HeapStatsUtils.setRankLevel(Integer.parseInt(v)));
     }
 
     @FXML
@@ -209,7 +214,7 @@ public class WindowController implements Initializable {
             aboutDialogScene = new Scene(loader.getRoot());        
         }
         catch (IOException ex) {
-            Logger.getLogger(DialogHelper.class.getName()).log(Level.SEVERE, null, ex);
+            HeapStatsUtils.showExceptionDialog(ex);
         }
         
     }

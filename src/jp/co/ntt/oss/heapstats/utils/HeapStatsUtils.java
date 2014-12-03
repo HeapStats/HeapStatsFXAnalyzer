@@ -37,6 +37,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TextArea;
 import javafx.scene.paint.Color;
 
 /**
@@ -244,4 +246,20 @@ public class HeapStatsUtils {
         return result;
     }
     
+    /**
+     * Show alert dialog.
+     * 
+     * @param e Throwable instance to show.
+     */
+    public static void showExceptionDialog(Throwable e){
+        TextArea details = new TextArea(HeapStatsUtils.stackTarceToString(e));
+        details.setEditable(false);
+        
+        Alert dialog = new Alert(Alert.AlertType.ERROR);
+        dialog.setTitle("Error");
+        dialog.setHeaderText(e.getLocalizedMessage());
+        dialog.getDialogPane().setExpandableContent(details);
+        dialog.showAndWait();
+    }
+
 }
