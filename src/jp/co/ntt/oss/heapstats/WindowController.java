@@ -42,11 +42,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import jp.co.ntt.oss.heapstats.plugin.PluginClassLoader;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
@@ -78,6 +82,10 @@ public class WindowController implements Initializable {
     @FXML
     private TabPane tabPane;
     
+    private AboutDialogController aboutDialogController;
+    
+    private Scene aboutDialogScene;
+    
     static{
         pluginList = new ConcurrentHashMap<>();
     }
@@ -95,8 +103,14 @@ public class WindowController implements Initializable {
 
     @FXML
     private void onAboutMenuClick(ActionEvent event){
-        DialogHelper aboutDialog = new DialogHelper("/jp/co/ntt/oss/heapstats/aboutDialog.fxml", "about HeapStatsFXAnalyzer");
-        aboutDialog.show();
+        Stage dialog = new Stage(StageStyle.UTILITY);
+        aboutDialogController.setStage(dialog);
+        
+        dialog.setScene(aboutDialogScene);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setResizable(false);
+        dialog.setTitle("about HeapStatsFXAnalyzer");
+        dialog.showAndWait();
     }
 
     private void addPlugin(String packageName){
@@ -185,6 +199,20 @@ public class WindowController implements Initializable {
         
         logController.onLogFileClick(event);
     }
+    
+    private void initializeAboutDialog(){
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/jp/co/ntt/oss/heapstats/aboutDialog.fxml"), HeapStatsUtils.getResourceBundle());
+        
+        try {
+            loader.load();
+            aboutDialogController = (AboutDialogController)loader.getController();
+            aboutDialogScene = new Scene(loader.getRoot());        
+        }
+        catch (IOException ex) {
+            Logger.getLogger(DialogHelper.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -198,6 +226,8 @@ public class WindowController implements Initializable {
         
         stackPane.getChildren().add(veil);
         stackPane.getChildren().add(progress);
+        
+        initializeAboutDialog();
     }
 
     /**
@@ -244,6 +274,8 @@ public class WindowController implements Initializable {
             
         List<String> plugins = HeapStatsUtils.getPlugins();
         plugins.stream().forEach(s -> addPlugin(s));
+        
+        aboutDialogController.setPluginInfo();
     }
 
     /**
