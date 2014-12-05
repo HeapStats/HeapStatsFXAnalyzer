@@ -33,7 +33,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -47,10 +46,7 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -279,7 +275,7 @@ public class LogController extends PluginController implements Initializable{
         popupText = new Text();
         chartPopup.getContent().add(popupText);
         
-        okBtn.disableProperty().bind(Bindings.and(startCombo.valueProperty().isNull(), endCombo.valueProperty().isNull()));
+        okBtn.disableProperty().bind(startCombo.getSelectionModel().selectedIndexProperty().greaterThanOrEqualTo(endCombo.getSelectionModel().selectedIndexProperty()));
         
         setOnWindowResize((v, o, n) -> Platform.runLater(() -> {
                                                                   drawArchiveLine();
@@ -583,18 +579,9 @@ public class LogController extends PluginController implements Initializable{
      */
     @FXML
     private void onOkClick(ActionEvent event){
-        ResourceBundle resource = ResourceBundle.getBundle("logResources", new Locale(HeapStatsUtils.getLanguage()));
-        LocalDateTimeConverter converter = new LocalDateTimeConverter();
-        
         /* Get range */
         LocalDateTime start = startCombo.getValue();
         LocalDateTime end   = endCombo.getValue();
-        
-        if(!end.isAfter(start)){
-            Alert dialog = new Alert(AlertType.ERROR, resource.getString("dialog.timerange.message"), ButtonType.OK);
-            dialog.showAndWait();
-            return;
-        }
         
         DrawLogChartTask task = new DrawLogChartTask(start, end);
         super.bindTask(task);

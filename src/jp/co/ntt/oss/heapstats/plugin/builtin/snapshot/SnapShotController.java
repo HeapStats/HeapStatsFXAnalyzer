@@ -32,7 +32,6 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -46,9 +45,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -300,7 +297,7 @@ public class SnapShotController extends PluginController implements Initializabl
         
         initializeChartSeries();
         
-        okBtn.disableProperty().bind(Bindings.and(startCombo.valueProperty().isNull(), endCombo.valueProperty().isNull()));
+        okBtn.disableProperty().bind(startCombo.getSelectionModel().selectedIndexProperty().greaterThanOrEqualTo(endCombo.getSelectionModel().selectedIndexProperty()));
         selectFilterApplyBtn.disableProperty().bind(searchList.selectionModelProperty().getValue().selectedItemProperty().isNull());
     }
     
@@ -435,17 +432,9 @@ public class SnapShotController extends PluginController implements Initializabl
     @FXML
     private void onOkClick(ActionEvent event){
         LocalDateTimeConverter converter = new LocalDateTimeConverter();
-        ResourceBundle resource = ResourceBundle.getBundle("snapshotResources", new Locale(HeapStatsUtils.getLanguage()));
         
         int startIdx = startCombo.getSelectionModel().getSelectedIndex();
         int endIdx = endCombo.getSelectionModel().getSelectedIndex();
-        
-        if(startIdx >= endIdx){
-            Alert dialog = new Alert(Alert.AlertType.ERROR, resource.getString("dialog.timerange.message"), ButtonType.OK);
-            dialog.showAndWait();
-            return;
-        }
-        
         currentTarget = startCombo.getItems().subList(startIdx, endIdx + 1);
         
         /* Java Heap Usage Chart */
