@@ -62,6 +62,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javax.xml.bind.JAXB;
+import jp.co.ntt.oss.heapstats.WindowController;
 import jp.co.ntt.oss.heapstats.container.ObjectData;
 import jp.co.ntt.oss.heapstats.container.SnapShotHeader;
 import jp.co.ntt.oss.heapstats.csv.CSVDumpGCTask;
@@ -318,7 +319,7 @@ public class SnapShotController extends PluginController implements Initializabl
         dialog.getExtensionFilters().addAll(new ExtensionFilter("SnapShot file (*.dat)", "*.dat"),
                                             new ExtensionFilter("All files", "*.*"));
         
-        List<File> snapshotFileList = dialog.showOpenMultipleDialog(getOwner());
+        List<File> snapshotFileList = dialog.showOpenMultipleDialog(WindowController.getInstance().getOwner());
         
         if(snapshotFileList != null){
             HeapStatsUtils.setDefaultDirectory(snapshotFileList.get(0).getParent());
@@ -706,7 +707,7 @@ public class SnapShotController extends PluginController implements Initializabl
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new ExtensionFilter("CSV file (*.csv)", "*.csv"),
                                             new ExtensionFilter("All files", "*.*"));
-        File csvFile = dialog.showSaveDialog(getOwner());
+        File csvFile = dialog.showSaveDialog(WindowController.getInstance().getOwner());
         
         if(csvFile != null){
             CSVDumpGCTask task = new CSVDumpGCTask(csvFile, isSelected ? currentTarget : startCombo.getItems());
@@ -732,7 +733,7 @@ public class SnapShotController extends PluginController implements Initializabl
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new ExtensionFilter("CSV file (*.csv)", "*.csv"),
                                             new ExtensionFilter("All files", "*.*"));
-        File csvFile = dialog.showSaveDialog(getOwner());
+        File csvFile = dialog.showSaveDialog(WindowController.getInstance().getOwner());
         
         if(csvFile != null){
             CSVDumpHeapTask task = new CSVDumpHeapTask(csvFile, snapShots, isSelected ? new HashSet<>(searchList.getSelectionModel().getSelectedItems()) : null);

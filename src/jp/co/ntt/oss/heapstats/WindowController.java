@@ -141,7 +141,6 @@ public class WindowController implements Initializable {
         }
         
         PluginController controller = (PluginController)loader.getController();
-        controller.setOwner(owner);
         controller.setVeil(veil);
         controller.setProgress(progress);
 

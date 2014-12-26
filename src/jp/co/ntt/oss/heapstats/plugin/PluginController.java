@@ -48,8 +48,6 @@ public abstract class PluginController implements Initializable{
     
     private ProgressIndicator progress;
     
-    private Window owner;
-    
     private ChangeListener windowResizeEvent;
     
     public abstract String getPluginName();
@@ -119,36 +117,10 @@ public abstract class PluginController implements Initializable{
         progress.progressProperty().bind(task.progressProperty());
     }
  
-    /**
-     * Get appliaction window owner
-     * @return owner window
-     */
-    public Window getOwner() {
-        return owner;
-    }
-
-    /**
-     * Set application window owner
-     * @param owner owner window
-     */
-    public void setOwner(Window owner) {
-        this.owner = owner;
-        
-        if(this.windowResizeEvent != null){
-            this.owner.widthProperty().addListener(this.windowResizeEvent);
-            this.owner.heightProperty().addListener(this.windowResizeEvent);
-        }
-        
-    }
-
     public void setOnWindowResize(ChangeListener event){
         this.windowResizeEvent = event;
-        
-        if(this.owner != null){
-            this.owner.widthProperty().addListener(event);
-            this.owner.heightProperty().addListener(event);
-        }
-        
+        WindowController.getInstance().getOwner().widthProperty().addListener(event);
+        WindowController.getInstance().getOwner().heightProperty().addListener(event);
     }
     
     /**

@@ -64,6 +64,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Popup;
+import jp.co.ntt.oss.heapstats.WindowController;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.ArchiveData;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.DiffData;
@@ -330,7 +331,7 @@ public class LogController extends PluginController implements Initializable{
         dialog.getExtensionFilters().addAll(new ExtensionFilter("Log file (*.csv)", "*.csv"),
                                             new ExtensionFilter("All files", "*.*"));
         
-        List<File> logList = dialog.showOpenMultipleDialog(getOwner());
+        List<File> logList = dialog.showOpenMultipleDialog(WindowController.getInstance().getOwner());
         
         if(logList != null){
             HeapStatsUtils.setDefaultDirectory(logList.get(0).getParent());
