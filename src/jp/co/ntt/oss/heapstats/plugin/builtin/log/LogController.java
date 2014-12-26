@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -701,6 +702,19 @@ public class LogController extends PluginController implements Initializable{
     @Override
     public Runnable getOnCloseRequest() {
         return null;
+    }
+
+    @Override
+    public void setData(Object data, boolean select) {
+        super.setData(data, select);
+        logFileList.setText((String)data);
+        
+        final LogFileParser parser = new LogFileParser(Arrays.asList(new File((String)data)));
+        parser.setOnSucceeded(evt -> onLogFileParserSucceeded(parser));
+        super.bindTask(parser);
+        
+        Thread parseThread = new Thread(parser);
+        parseThread.start();
     }
     
 }

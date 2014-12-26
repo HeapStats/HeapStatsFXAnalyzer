@@ -97,13 +97,13 @@ public class AboutDialogController implements Initializable {
          * Thus I create array of AbstractMap.SimpleEntry .
          */
         List<AbstractMap.SimpleEntry<String, String>> plugins = new ArrayList<>();
-        WindowController.getPluginList().forEach((k, v) -> plugins.add(new AbstractMap.SimpleEntry<>(k, v.getLicense())));
+        WindowController.getInstance().getPluginList().forEach((k, v) -> plugins.add(new AbstractMap.SimpleEntry<>(k, v.getLicense())));
         pluginTable.getItems().addAll(plugins);
         
         /* Set library license to libraryTable */
         List<PluginController.LibraryLicense> libraryList = new ArrayList<>();
-        WindowController.getPluginList().forEach((n, c) -> Optional.ofNullable(c.getLibraryLicense())
-                                                                   .ifPresent(l -> l.forEach((k, v) -> libraryList.add(new PluginController.LibraryLicense(n, k, v)))));
+        WindowController.getInstance().getPluginList().forEach((n, c) -> Optional.ofNullable(c.getLibraryLicense())
+                                                                                 .ifPresent(l -> l.forEach((k, v) -> libraryList.add(new PluginController.LibraryLicense(n, k, v)))));
         libraryTable.getItems().addAll(libraryList);
     }
 

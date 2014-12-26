@@ -22,6 +22,7 @@ import java.io.File;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -66,6 +67,7 @@ import jp.co.ntt.oss.heapstats.container.SnapShotHeader;
 import jp.co.ntt.oss.heapstats.csv.CSVDumpGCTask;
 import jp.co.ntt.oss.heapstats.csv.CSVDumpHeapTask;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
+import jp.co.ntt.oss.heapstats.plugin.builtin.log.LogFileParser;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.DiffTask;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.ParseHeaderTask;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.SnapShotParseTask;
@@ -745,6 +747,27 @@ public class SnapShotController extends PluginController implements Initializabl
     @Override
     public Runnable getOnCloseRequest() {
         return null;
+    }
+    
+    @Override
+    public void setData(Object data, boolean select) {
+        super.setData(data, select);
+        snapshotList.setText((String)data);
+        
+        ParseHeaderTask task = new ParseHeaderTask(Arrays.asList((String)data));
+        task.setOnSucceeded(evt ->{
+                                     startCombo.getItems().clear();
+                                     endCombo.getItems().clear();
+                                      
+                                     startCombo.getItems().addAll(task.getSnapShotList());
+                                     startCombo.getSelectionModel().selectFirst();
+                                     endCombo.getItems().addAll(task.getSnapShotList());
+                                     endCombo.getSelectionModel().selectLast();
+                                  });
+        super.bindTask(task);
+        
+        Thread parseThread = new Thread(task);
+        parseThread.start();
     }
     
 }

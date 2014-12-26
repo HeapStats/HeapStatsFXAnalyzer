@@ -29,6 +29,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.Region;
 import javafx.stage.Window;
+import jp.co.ntt.oss.heapstats.WindowController;
 
 /**
  * Base class for HeapStats FX Analyzer plugin.
@@ -148,6 +149,19 @@ public abstract class PluginController implements Initializable{
             this.owner.heightProperty().addListener(event);
         }
         
+    }
+    
+    /**
+     * Set data to another plugin.
+     * This method will be overrided by each plugins.
+     * 
+     * @param data Data to set.
+     * @param select Plugin tab will be actived if this value is true.
+     */
+    public void setData(Object data, boolean select){
+        if(select){
+            WindowController.getInstance().selectTab(getPluginName());
+        }
     }
 
     /**

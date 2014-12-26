@@ -66,7 +66,7 @@ import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
  */
 public class WindowController implements Initializable {
     
-    private static final Map<String, PluginController> pluginList;
+    private Map<String, PluginController> pluginList;
         
     private Region veil;
     
@@ -86,9 +86,7 @@ public class WindowController implements Initializable {
     
     private Scene aboutDialogScene;
     
-    static{
-        pluginList = new ConcurrentHashMap<>();
-    }
+    private static WindowController thisController;
     
     @FXML
     private void onExitClick(ActionEvent event) {
@@ -157,27 +155,31 @@ public class WindowController implements Initializable {
         pluginList.put(controller.getPluginName(), controller);
     }
     
+    public static WindowController getInstance(){
+        return thisController;
+    }
+    
     @FXML
     private void onGCAllClick(ActionEvent event) {
-        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        SnapShotController snapShotController = (SnapShotController)getPluginController("SnapShot Data");
         snapShotController.dumpGCStatisticsToCSV(false);
     }
 
     @FXML
     private void onGCSelectedClick(ActionEvent event) {
-        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        SnapShotController snapShotController = (SnapShotController)getPluginController("SnapShot Data");
         snapShotController.dumpGCStatisticsToCSV(true);
     }
 
     @FXML
     private void onHeapAllClick(ActionEvent event) {
-        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        SnapShotController snapShotController = (SnapShotController)getPluginController("SnapShot Data");
         snapShotController.dumpClassHistogramToCSV(false);
     }
 
     @FXML
     private void onHeapSelectedClick(ActionEvent event) {
-        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        SnapShotController snapShotController = (SnapShotController)getPluginController("SnapShot Data");
         snapShotController.dumpClassHistogramToCSV(true);
     }
 
@@ -188,7 +190,7 @@ public class WindowController implements Initializable {
                                  .findAny()
                                  .orElseThrow(() -> new IllegalStateException("SnapShot plugin must be loaded."));
         tabPane.getSelectionModel().select(snapShotTab);
-        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        SnapShotController snapShotController = (SnapShotController)getPluginController("SnapShot Data");
         
         snapShotController.onSnapshotFileClick(event);
     }
@@ -200,7 +202,7 @@ public class WindowController implements Initializable {
                                  .findAny()
                                  .orElseThrow(() -> new IllegalStateException("Log plugin must be loaded."));
         tabPane.getSelectionModel().select(snapShotTab);
-        LogController logController = (LogController)WindowController.getPluginController("Log Data");
+        LogController logController = (LogController)getPluginController("Log Data");
         
         logController.onLogFileClick(event);
     }
@@ -221,6 +223,8 @@ public class WindowController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        thisController = this;
+        pluginList = new ConcurrentHashMap<>();
         veil = new Region();
         veil.setStyle("-fx-background-color: rgba(0, 0, 0, 0.2)");
         veil.setVisible(false);
@@ -289,7 +293,7 @@ public class WindowController implements Initializable {
      * @param pluginName Plugin name which you want.
      * @return Controller of Plugin. If it does not exist, return null.
      */
-    public static PluginController getPluginController(String pluginName){
+    public PluginController getPluginController(String pluginName){
         return pluginList.get(pluginName);
     }
 
@@ -298,8 +302,21 @@ public class WindowController implements Initializable {
      * 
      * @return Loaded plugin list.
      */
-    public static Map<String, PluginController> getPluginList() {
+    public Map<String, PluginController> getPluginList() {
         return pluginList;
+    }
+    
+    /**
+     * Select plugin tab
+     * 
+     * @param pluginName Name of plugin to active. 
+     */
+    public void selectTab(String pluginName) throws IllegalArgumentException{
+        Tab target = tabPane.getTabs().stream()
+                            .filter(t -> t.getText().equals(pluginName))
+                            .findAny()
+                            .orElseThrow(() -> new IllegalArgumentException(pluginName + " is not loaded."));
+        tabPane.getSelectionModel().select(target);
     }
 
     public Window getOwner() {
