@@ -26,11 +26,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javafx.concurrent.Task;
 import jp.co.ntt.oss.heapstats.container.ObjectData;
 import jp.co.ntt.oss.heapstats.container.SnapShotHeader;
+import static java.util.stream.Collectors.*;
 
 /**
  * CSV writer class for GC statistics and heap histogram.
@@ -65,18 +65,17 @@ public class CSVDumpHeapTask extends Task<Void>{
         try(PrintWriter writer = new PrintWriter(csvFile)){
             
             /* Collect all class tags and names from target snapshots. */
-            Map<Long, String> targetClasses = new ConcurrentHashMap<>();
+           Map<Long, String> targetClasses;
             if((filter == null) || filter.isEmpty()){
-                snapShots.values().parallelStream()
-                                  .forEach(m -> m.forEach((k, v) -> targetClasses.put(k, v.getName())));
+                targetClasses = snapShots.values().parallelStream()
+                                                  .flatMap(m -> m.entrySet().stream())
+                                                  .collect(toConcurrentMap(e -> e.getKey(), e -> e.getValue().getName()));
             }
             else{
-                snapShots.values().parallelStream()
-                                  .forEach(m -> m.forEach((k, v) -> {
-                                                                       if(filter.contains(v.getName())){
-                                                                         targetClasses.put(k, v.getName());
-                                                                       }
-                                                                    }));
+                targetClasses = snapShots.values().parallelStream()
+                                                  .flatMap(m -> m.entrySet().stream())
+                                                  .filter(e -> filter.contains(e.getValue().getName()))
+                                                  .collect(toConcurrentMap(e -> e.getKey(), e -> e.getValue().getName()));
             }
             
             /* Sorted SnapShot DateTime List */
