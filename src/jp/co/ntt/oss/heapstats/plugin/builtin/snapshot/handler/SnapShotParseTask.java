@@ -28,6 +28,7 @@ import javafx.concurrent.Task;
 import jp.co.ntt.oss.heapstats.container.ObjectData;
 import jp.co.ntt.oss.heapstats.container.SnapShotHeader;
 import jp.co.ntt.oss.heapstats.parser.HeapStatsParser;
+import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
 /**
  * Task to parse SnapSHot.
@@ -53,7 +54,7 @@ public class SnapShotParseTask extends Task<Void>{
     private void parseFile(LongAdder progress, SnapShotHeader header){
         progress.increment();
         SnapShotHandler handler = new SnapShotHandler();
-        HeapStatsParser parser = new HeapStatsParser();
+        HeapStatsParser parser = new HeapStatsParser(HeapStatsUtils.getReplaceClassName());
 
         try{
             parser.parseSingle(header, handler);

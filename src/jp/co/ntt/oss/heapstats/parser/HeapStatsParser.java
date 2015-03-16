@@ -35,7 +35,6 @@ import jp.co.ntt.oss.heapstats.container.ChildObjectData;
 import jp.co.ntt.oss.heapstats.container.ObjectData;
 import jp.co.ntt.oss.heapstats.container.SnapShotHeader;
 import jp.co.ntt.oss.heapstats.parser.ParserEventHandler.ParseResult;
-import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
 /**
  * This class loads a file java heap information.
@@ -56,10 +55,16 @@ public class HeapStatsParser {
     private final ByteBuffer longBuffer;
     
     private final ByteBuffer intBuffer;
+    
+    /**
+     * Whether JNI style classname should be replaced.
+     */
+    private final boolean replace;
 
-    public HeapStatsParser() {
+    public HeapStatsParser(boolean replace) {
         longBuffer = ByteBuffer.allocate(48);
         intBuffer = ByteBuffer.allocate(4);
+        this.replace = replace;
     }
     
     /**
@@ -314,7 +319,7 @@ public class HeapStatsParser {
                 throw new IOException("Could not get the Class name.");
             }
 
-            if (HeapStatsUtils.getReplaceClassName()) {
+            if (replace) {
                 String tmp = new String(classNameInBytes)
                                   .replaceAll("^L|(^\\[*)L|;$", "$1")
                                   .replaceAll("(^\\[*)B$", "$1byte")
