@@ -28,7 +28,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.Region;
-import javafx.stage.Window;
 import jp.co.ntt.oss.heapstats.WindowController;
 
 /**

@@ -68,7 +68,6 @@ import jp.co.ntt.oss.heapstats.container.SnapShotHeader;
 import jp.co.ntt.oss.heapstats.csv.CSVDumpGCTask;
 import jp.co.ntt.oss.heapstats.csv.CSVDumpHeapTask;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
-import jp.co.ntt.oss.heapstats.plugin.builtin.log.LogFileParser;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.DiffTask;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.ParseHeaderTask;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.SnapShotParseTask;
