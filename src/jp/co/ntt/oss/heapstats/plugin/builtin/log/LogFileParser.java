@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 import javafx.concurrent.Task;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.DiffData;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.model.LogData;
@@ -83,8 +84,8 @@ public class LogFileParser extends Task<Void>{
         Path logPath = Paths.get(logfile);
         String logdir =logPath.getParent().toString();
         
-        try{
-            Files.lines(logPath).forEach(s -> addEntry(s, logdir));
+        try(Stream<String> paths = Files.lines(logPath)){
+            paths.forEach(s -> addEntry(s, logdir));
         }
         catch (IOException ex){
             HeapStatsUtils.showExceptionDialog(ex);

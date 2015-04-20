@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
@@ -389,7 +390,11 @@ public class ArchiveData {
      */
     public String getFileContents(String file) throws IOException{
         Path filePath = Paths.get(tmpPath.getAbsolutePath(), file);
-        return Files.lines(filePath).collect(Collectors.joining("\n"));
+        
+        try(Stream<String> paths = Files.lines(filePath)){
+            return paths.collect(Collectors.joining("\n"));
+        }
+        
     }
     
 }
