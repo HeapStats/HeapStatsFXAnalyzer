@@ -322,22 +322,17 @@ public class SnapShotController extends PluginController implements Initializabl
         
         if(snapshotFileList != null){
             HeapStatsUtils.setDefaultDirectory(snapshotFileList.get(0).getParent());
-            String snapshotListStr = snapshotFileList.stream()
-                                                     .map(File::getAbsolutePath)
-                                                     .collect(Collectors.joining("; "));
-
-            snapshotList.setText(snapshotListStr);
+            List<String> files = snapshotFileList.stream()
+                                                 .map(File::getAbsolutePath)
+                                                 .collect(Collectors.toList());
+            snapshotList.setText(files.stream().collect(Collectors.joining("; ")));
             
-            ParseHeaderTask task = new ParseHeaderTask(snapshotFileList.stream()
-                                                                       .map(File::getAbsolutePath)
-                                                                       .collect(Collectors.toList()));
+            ParseHeaderTask task = new ParseHeaderTask(files);
             task.setOnSucceeded(evt ->{
-                                         startCombo.getItems().clear();
-                                         endCombo.getItems().clear();
-                                          
-                                         startCombo.getItems().addAll(task.getSnapShotList());
+                                         ObservableList<SnapShotHeader> list = FXCollections.observableArrayList(task.getSnapShotList());
+                                         startCombo.setItems(list);
+                                         endCombo.setItems(list);
                                          startCombo.getSelectionModel().selectFirst();
-                                         endCombo.getItems().addAll(task.getSnapShotList());
                                          endCombo.getSelectionModel().selectLast();
                                       });
             super.bindTask(task);
