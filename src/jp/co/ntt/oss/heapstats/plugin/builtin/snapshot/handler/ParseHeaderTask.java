@@ -18,8 +18,6 @@
 
 package jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,14 +46,7 @@ public class ParseHeaderTask extends Task<Void>{
         SnapShotListHandler handler = new SnapShotListHandler();
         HeapStatsParser parser = new HeapStatsParser(HeapStatsUtils.getReplaceClassName());
         
-        files.stream().forEach(f -> {
-                                      try{
-                                          parser.parse(f, handler);
-                                      }
-                                      catch(IOException e){
-                                          throw new UncheckedIOException(e);
-                                      }
-                                    });
+        files.forEach(f -> parser.parse2(f, handler));
         
         snapShotList = handler.getHeaders().parallelStream()
                                            .sorted(Comparator.naturalOrder())

@@ -24,6 +24,7 @@ package jp.co.ntt.oss.heapstats.parser;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -142,8 +143,7 @@ public class HeapStatsParser {
     }
 
     /**
-     * Output to a temporary file and then parse the data in the snapshot agent
-     * output.
+     * Parse HeapStats SnapShot file.
      *
      * @param fname the file java heap information.
      * @param handler the ParserEventHandler.
@@ -179,6 +179,22 @@ public class HeapStatsParser {
         return true;
     }
 
+    /**
+     * Parse HeapStats SnapShot file.
+     * This method may raise UncheckedIOException.
+     *
+     * @param fname the file java heap information.
+     * @param handler the ParserEventHandler.
+     * @return Return the Reading results file
+     */
+    public boolean parse2(String fname, ParserEventHandler handler) {
+        try {
+            return parse(fname, handler);
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
+        }
+    }
+    
     /**
      * Extracting the header information of the snapshot.
      *
