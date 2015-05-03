@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Yasumasa Suenaga
+ * Copyright (C) 2014-2015 Yasumasa Suenaga
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -30,7 +30,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
@@ -70,7 +69,6 @@ import jp.co.ntt.oss.heapstats.csv.CSVDumpHeapTask;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.DiffTask;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.ParseHeaderTask;
-import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.SnapShotParseTask;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.model.DiffData;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.model.SummaryData;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
@@ -205,8 +203,6 @@ public class SnapShotController extends PluginController implements Initializabl
     private List<SnapShotHeader> currentTarget;
 
     private Map<LocalDateTime, List<ObjectData>> topNList;
-    
-    private Map<SnapShotHeader, Map<Long, ObjectData>> snapShots;
     
     
     /**
@@ -406,15 +402,17 @@ public class SnapShotController extends PluginController implements Initializabl
      * Drawing Top N data to Chart and Table.
      * 
      * @param target SnapShot to be drawed.
+     * @param includeOthers *Others* data should be included in this Top N data.
+     * @param predicate Filter function.
      */
-    private void drawTopNData(Map<SnapShotHeader, Map<Long, ObjectData>> target, boolean includeOthers){                                     
+    private void drawTopNData(List<SnapShotHeader> target, boolean includeOthers, Predicate<? super ObjectData> predicate){                                     
         topNChart.getData().clear();
         lastDiffTable.getItems().clear();
 
         LocalDateTimeConverter converter = new LocalDateTimeConverter();
         Map<String, XYChart.Series<String, Long>> seriesMap = new HashMap<>();
         
-        DiffTask diffTask = new DiffTask(target, HeapStatsUtils.getRankLevel(), includeOthers);
+        DiffTask diffTask = new DiffTask(target, HeapStatsUtils.getRankLevel(), includeOthers, predicate);
         diffTask.setOnSucceeded(evt -> onDiffTaskSucceeded(diffTask, seriesMap));
         super.bindTask(diffTask);
         Thread diffThread = new Thread(diffTask);
@@ -447,15 +445,7 @@ public class SnapShotController extends PluginController implements Initializabl
         ObservableList<XYChart.Data<String, Long>> metaspaceCapacityBuf = FXCollections.observableArrayList();
 
         snapShotTimeCombo.setItems(FXCollections.observableArrayList(currentTarget));
-        SnapShotParseTask task = new SnapShotParseTask(currentTarget);
-        task.setOnSucceeded(evt -> {
-                                     snapShots = task.getSnapShots();
-                                     drawTopNData(snapShots, true);
-                                   });
-        super.bindTask(task);
-            
-        Thread parseThread = new Thread(task);
-        parseThread.start();
+        drawTopNData(currentTarget, true, null);
 
         currentTarget.stream()
                      .forEachOrdered(d -> {
@@ -481,8 +471,7 @@ public class SnapShotController extends PluginController implements Initializabl
         metaspaceUsage.setData(metaspaceUsageBuf);
         metaspaceCapacity.setData(metaspaceCapacityBuf);
         
-        
-        summaryTable.getItems().addAll((new SummaryData(currentTarget)).getSummaryAsList());
+        summaryTable.setItems(FXCollections.observableArrayList((new SummaryData(currentTarget)).getSummaryAsList()));
     }
     
     /**
@@ -533,28 +522,43 @@ public class SnapShotController extends PluginController implements Initializabl
         usagePieChart.getData().stream()
                                .forEach(d -> d.getNode().setStyle(String.format("-fx-pie-color: #%06X;", d.getName().hashCode() & 0xFFFFFF)));
         
-        objDataTable.getItems().addAll(snapShots.get(header).values().stream().collect(Collectors.toList()));
+        objDataTable.setItems(FXCollections.observableArrayList(
+                header.getSnapShot().values().stream().collect(Collectors.toList())));
     }
     
     /**
      * Drawing and Showing table with beging selected value.
      * 
-     * @param predicate This value is used as filter in SnapShot.
+     * @param enableSearch Search filter should be enabled.
+     * @param enableHide Hide filter should be enabled.
      */
-    private void applyFilter(Predicate<? super ObjectData> predicate){
-        Map<SnapShotHeader, Map<Long, ObjectData>> target = new HashMap<>();
-
-        snapShots.forEach((h, m) -> {
-                                       Map<Long, ObjectData> objectList = new ConcurrentHashMap<>();
-                                       
-                                       m.values().parallelStream()
-                                                 .filter(predicate)
-                                                 .forEach(o -> objectList.put(o.getTag(), o));
-                                       
-                                       target.put(h, objectList);
-                                    });
+    private void applyFilter(boolean enableSearch, boolean enableHide){
+        HashSet<String> targetSet = new HashSet<>(searchList.getSelectionModel().getSelectedItems());
+        Predicate<ObjectData> searchFilter = o -> targetSet.contains(o.getName());
         
-        drawTopNData(target, false);
+        List<String> hideRegexList = excludeTable.getItems().stream()
+                                                 .filter(f -> f.isHide())
+                                                 .flatMap(f -> f.getClasses().getName().stream())
+                                                 .map(s -> ".*" + s + ".*")
+                                                 .collect(Collectors.toList());
+        Predicate<ObjectData> hideFilter = o -> hideRegexList.stream().noneMatch(s -> o.getName().matches(s));
+        
+        Predicate<ObjectData> filter;
+        
+        if(enableSearch && enableHide){
+            filter = searchFilter.and(hideFilter);
+        }
+        else if(enableSearch){
+            filter = searchFilter;
+        }
+        else if(enableHide){
+            filter = hideFilter;
+        }
+        else{
+            filter = null;
+        }
+        
+        drawTopNData(currentTarget, false, filter);
     }
     
     /**
@@ -564,8 +568,7 @@ public class SnapShotController extends PluginController implements Initializabl
      */
     @FXML
     private void onSelectFilterApply(ActionEvent event){
-        HashSet<String> targetSet = new HashSet<>(searchList.getSelectionModel().getSelectedItems());
-        applyFilter(o -> targetSet.contains(o.getName()));
+        applyFilter(true, false);
     }
     
     /**
@@ -575,7 +578,7 @@ public class SnapShotController extends PluginController implements Initializabl
      */
     @FXML
     private void onSelectFilterClear(ActionEvent event){
-        drawTopNData(snapShots, true);
+        drawTopNData(currentTarget, true, null);
     }
     
     /**
@@ -610,12 +613,7 @@ public class SnapShotController extends PluginController implements Initializabl
      */
     @FXML
     private void onHiddenFilterApply(ActionEvent event){
-        List<String> hideRegexList = excludeTable.getItems().stream()
-                                                 .filter(f -> f.isHide())
-                                                 .flatMap(f -> f.getClasses().getName().stream())
-                                                 .map(s -> ".*" + s + ".*")
-                                                 .collect(Collectors.toList());
-        applyFilter(o -> hideRegexList.stream().noneMatch(s -> o.getName().matches(s)));
+        applyFilter(false, true);
     }
     
     /**
@@ -646,7 +644,7 @@ public class SnapShotController extends PluginController implements Initializabl
      * @return selected snapshot.
      */
     public Map<Long, ObjectData> getSelectedSnapShot(){
-        return snapShots.get(snapShotTimeCombo.getSelectionModel().getSelectedItem());
+        return snapShotTimeCombo.getSelectionModel().getSelectedItem().getSnapShot();
     }
     
     /**
@@ -730,7 +728,7 @@ public class SnapShotController extends PluginController implements Initializabl
         File csvFile = dialog.showSaveDialog(WindowController.getInstance().getOwner());
         
         if(csvFile != null){
-            CSVDumpHeapTask task = new CSVDumpHeapTask(csvFile, snapShots, isSelected ? new HashSet<>(searchList.getSelectionModel().getSelectedItems()) : null);
+            CSVDumpHeapTask task = new CSVDumpHeapTask(csvFile, currentTarget, isSelected ? new HashSet<>(searchList.getSelectionModel().getSelectedItems()) : null);
             super.bindTask(task);
             
             Thread parseThread = new Thread(task);

@@ -2,7 +2,7 @@
  * SnapShotHeader.java
  * Created on 2011/10/13
  *
- * Copyright (C) 2011-2014 Nippon Telegraph and Telephone Corporation
+ * Copyright (C) 2011-2015 Nippon Telegraph and Telephone Corporation
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,13 +22,21 @@
 
 package jp.co.ntt.oss.heapstats.container;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
+import java.lang.ref.SoftReference;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import jp.co.ntt.oss.heapstats.parser.HeapStatsParser;
+import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.handler.SnapShotHandler;
+import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
 /**
  * implements {@link Serializable} <br>
@@ -101,6 +109,8 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
     
     private long snapShotSize;
     
+    private SoftReference<Map<Long, ObjectData>> snapShotCache;
+    
     /**
      * Creates a SnapShotHeader.
      */
@@ -118,6 +128,7 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
         totalCapacity = 0;
         metaspaceUsage = 0;
         metaspaceCapacity = 0;
+        snapShotCache = new SoftReference<>(null);
     }
 
     /**
@@ -490,6 +501,47 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
      */
     public void setSnapShotSize(long snapShotSize) {
         this.snapShotSize = snapShotSize;
+    }
+
+    /**
+     * Get SnapShot data from file.
+     * 
+     * @return SnapShot which is related to this header.
+     */
+    private Map<Long, ObjectData> getSnapShotDirectly(){
+        SnapShotHandler handler = new SnapShotHandler();
+        HeapStatsParser parser = new HeapStatsParser(HeapStatsUtils.getReplaceClassName());
+        
+        try {
+            parser.parseSingle(this, handler);
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
+        }
+        
+        Map<Long, ObjectData> result = handler.getSnapShot();
+        setSnapShot(result);
+        
+        return result;
+    }
+
+    /**
+     * Get SnapShot in this header.
+     * 
+     * @return SnapShot in this header.
+     */
+    public Map<Long, ObjectData> getSnapShot() {
+        return Optional.ofNullable(snapShotCache.get())
+                       .orElseGet(() -> getSnapShotDirectly());
+    }
+
+    /**
+     * Set SnapShot in this header.
+     * This SnapShot is managed as SoftReference.
+     * 
+     * @param snapShot SnapShot to be managed.
+     */
+    public void setSnapShot(Map<Long, ObjectData> snapShot) {
+        this.snapShotCache = new SoftReference<>(snapShot);
     }
     
     @Override

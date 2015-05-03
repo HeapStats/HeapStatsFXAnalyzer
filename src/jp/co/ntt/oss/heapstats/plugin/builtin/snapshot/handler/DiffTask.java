@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Yasumasa Suenaga
+ * Copyright (C) 2014-2015 Yasumasa Suenaga
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,7 +24,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.LongAdder;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javafx.concurrent.Task;
 import jp.co.ntt.oss.heapstats.container.ObjectData;
@@ -37,7 +39,7 @@ import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.model.DiffData;
  */
 public class DiffTask extends Task<Void>{
     
-    private final Map<SnapShotHeader, Map<Long, ObjectData>> snapShots;
+    private final List<SnapShotHeader> snapShots;
 
     private final Map<LocalDateTime, List<ObjectData>> topNList;
 
@@ -46,28 +48,32 @@ public class DiffTask extends Task<Void>{
     private final int rankLevel;
     
     private final boolean includeOthers;
+    
+    private final Optional<Predicate<? super ObjectData>> filter;
 
-    public DiffTask(Map<SnapShotHeader, Map<Long, ObjectData>> snapShots, int rankLevel, boolean includeOthers) {
+    public DiffTask(List<SnapShotHeader> snapShots, int rankLevel, boolean includeOthers, Predicate<? super ObjectData> filter) {
         this.snapShots = snapShots;
         this.topNList = new HashMap<>();
         this.lastDiffList = new ArrayList<>();
         this.rankLevel = rankLevel;
         this.includeOthers = includeOthers;
+        this.filter = Optional.ofNullable(filter);
     }
-    
+        
     /**
      * Build TopN data from givien snapshot header.
      * 
-     * @param progress Progress counter.
      * @param header SnapShot header to build.
-     * @param maxItrs Max iterations. This value uses updateProgress().
+     * @param counter Counter for progress indicator.
      */
-    private void buildTopNData(LongAdder progress, SnapShotHeader header, long maxItrs){
-        Map<Long, ObjectData> current = snapShots.get(header);
-        List<ObjectData> buf = current.values().parallelStream()
-                                               .sorted(Comparator.reverseOrder())
-                                               .limit(rankLevel)
-                                               .collect(Collectors.toList());
+    private void buildTopNData(SnapShotHeader header, AtomicLong counter){
+        List<ObjectData> buf = header.getSnapShot()
+                                     .values()
+                                     .parallelStream()
+                                     .filter(filter.orElse(o -> true))
+                                     .sorted(Comparator.reverseOrder())
+                                     .limit(rankLevel)
+                                     .collect(Collectors.toList());
         
         if(includeOthers){
             ObjectData other = new ObjectData();
@@ -77,38 +83,45 @@ public class DiffTask extends Task<Void>{
                                                                               .sum());
             buf.add(other);
         }
-
+        
         topNList.put(header.getSnapShotDate(), buf);
-        progress.increment();
-        updateProgress(progress.longValue(), maxItrs);
+        updateProgress(counter.incrementAndGet(), snapShots.size());
     }
 
     @Override
     protected Void call() throws Exception {
-
-        /* Calculate top N data */
-        LongAdder cnt = new LongAdder();
-        List<SnapShotHeader> keyList = snapShots.keySet().parallelStream()
-                                                         .sorted(Comparator.naturalOrder())
-                                                         .collect(Collectors.toList());
-        long maxItrs = keyList.size() - 1;
-        keyList.stream()
-               .forEachOrdered(h -> buildTopNData(cnt, h, maxItrs));
+        AtomicLong counter = new AtomicLong();
         
-       List<Long> rankedTagList = topNList.values().stream()
-                                                   .flatMap(c -> c.stream())
-                                                   .mapToLong(o -> o.getTag())
-                                                   .filter(t -> t != 0L)
-                                                   .distinct()
-                                                   .boxed()
-                                                   .collect(Collectors.toList());
+        /* Calculate top N data */
+        snapShots.stream()
+                 .forEachOrdered(h -> buildTopNData(h, counter));
+        
+        List<Long> rankedTagList = topNList.values().stream()
+                                                    .flatMap(c -> c.stream())
+                                                    .mapToLong(o -> o.getTag())
+                                                    .filter(t -> t != 0L)
+                                                    .distinct()
+                                                    .boxed()
+                                                    .collect(Collectors.toList());
         
         /* Calculate summarize diff */
-        Map<Long, ObjectData> start = snapShots.get(keyList.get(0));
-        SnapShotHeader endHeader = keyList.get(keyList.size() - 1);
-        Map<Long, ObjectData> end = snapShots.get(endHeader);
+        SnapShotHeader startHeader = snapShots.get(0);
+        SnapShotHeader endHeader = snapShots.get(snapShots.size() - 1);
+        
+        Map<Long, ObjectData> start = startHeader.getSnapShot();
+        Map<Long, ObjectData> end = endHeader.getSnapShot();
         start.forEach((k, v) -> end.putIfAbsent(k, new ObjectData(k, v.getName(), v.getClassLoader(), v.getClassLoaderTag(), 0, 0, v.getLoaderName(), null)));
-        end.forEach((k, v) -> lastDiffList.add(new DiffData(endHeader.getSnapShotDate(), start.get(k), v, rankedTagList.contains(v.getTag()))));
+        
+        if(filter.isPresent()){
+            end.forEach((k, v) -> {
+                                     if(filter.get().test(v)){
+                                         lastDiffList.add(new DiffData(endHeader.getSnapShotDate(), start.get(k), v, rankedTagList.contains(v.getTag())));
+                                     }
+                                  });
+        }
+        else{
+            end.forEach((k, v) -> lastDiffList.add(new DiffData(endHeader.getSnapShotDate(), start.get(k), v, rankedTagList.contains(v.getTag()))));
+        }
         
         return null;
     }
