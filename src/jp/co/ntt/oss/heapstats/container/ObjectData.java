@@ -220,10 +220,10 @@ public class ObjectData implements Serializable, Cloneable, Comparable<ObjectDat
      */
     public void setLoaderName(Map<Long, ObjectData> snapShotData){
         
-        if(classLoaderTag< 0){
+        if(classLoaderTag < 0){
             loaderName = "-";
         }
-        else if(classLoaderTag== 0){
+        else if(classLoaderTag == 0){
             loaderName = "<SystemClassLoader>";
         }
         else{

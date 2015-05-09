@@ -22,12 +22,16 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -38,17 +42,21 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import jp.co.ntt.oss.heapstats.plugin.PluginClassLoader;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.LogController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.SnapShotController;
-import jp.co.ntt.oss.heapstats.utils.DialogHelper;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
 /**
@@ -58,7 +66,7 @@ import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
  */
 public class WindowController implements Initializable {
     
-    private static final Map<String, PluginController> pluginList;
+    private Map<String, PluginController> pluginList;
         
     private Region veil;
     
@@ -74,9 +82,11 @@ public class WindowController implements Initializable {
     @FXML
     private TabPane tabPane;
     
-    static{
-        pluginList = new ConcurrentHashMap<>();
-    }
+    private AboutDialogController aboutDialogController;
+    
+    private Scene aboutDialogScene;
+    
+    private static WindowController thisController;
     
     @FXML
     private void onExitClick(ActionEvent event) {
@@ -85,21 +95,41 @@ public class WindowController implements Initializable {
     
     @FXML
     private void onRankLevelClick(ActionEvent event){
-        DialogHelper rankDialog = new DialogHelper("/jp/co/ntt/oss/heapstats/rankDialog.fxml", "Rank Level setting");
-        rankDialog.show();
+        TextInputDialog dialog = new TextInputDialog(Integer.toString(HeapStatsUtils.getRankLevel()));
+        dialog.setTitle("Rank Level setting");
+        dialog.setHeaderText("Rank Level setting");
+        ResourceBundle resource = ResourceBundle.getBundle("HeapStatsResources", new Locale(HeapStatsUtils.getLanguage()));
+        dialog.setContentText(resource.getString("rank.label"));
+        dialog.showAndWait()
+              .ifPresent(v -> HeapStatsUtils.setRankLevel(Integer.parseInt(v)));
     }
 
     @FXML
     private void onAboutMenuClick(ActionEvent event){
-        DialogHelper aboutDialog = new DialogHelper("/jp/co/ntt/oss/heapstats/aboutDialog.fxml", "about HeapStatsFXAnalyzer");
-        aboutDialog.show();
+        Stage dialog = new Stage(StageStyle.UTILITY);
+        aboutDialogController.setStage(dialog);
+        
+        dialog.setScene(aboutDialogScene);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setResizable(false);
+        dialog.setTitle("about HeapStatsFXAnalyzer");
+        dialog.showAndWait();
     }
 
     private void addPlugin(String packageName){
         String lastPackageName = packageName.substring(packageName.lastIndexOf('.') + 1);
         packageName = packageName.replace('.', '/');
         String fxmlName = packageName + "/" + lastPackageName + ".fxml";
-        FXMLLoader loader = new FXMLLoader(pluginClassLoader.getResource(fxmlName));
+        FXMLLoader loader;
+        
+        try{
+            ResourceBundle pluginResource = ResourceBundle.getBundle(lastPackageName + "Resources", new Locale(HeapStatsUtils.getLanguage()), pluginClassLoader);
+            loader = new FXMLLoader(pluginClassLoader.getResource(fxmlName), pluginResource);
+        }
+        catch(MissingResourceException e){
+            loader = new FXMLLoader(pluginClassLoader.getResource(fxmlName));
+        }
+        
         Parent root;
         
         try {
@@ -111,7 +141,6 @@ public class WindowController implements Initializable {
         }
         
         PluginController controller = (PluginController)loader.getController();
-        controller.setOwner(owner);
         controller.setVeil(veil);
         controller.setProgress(progress);
 
@@ -125,27 +154,31 @@ public class WindowController implements Initializable {
         pluginList.put(controller.getPluginName(), controller);
     }
     
+    public static WindowController getInstance(){
+        return thisController;
+    }
+    
     @FXML
     private void onGCAllClick(ActionEvent event) {
-        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        SnapShotController snapShotController = (SnapShotController)getPluginController("SnapShot Data");
         snapShotController.dumpGCStatisticsToCSV(false);
     }
 
     @FXML
     private void onGCSelectedClick(ActionEvent event) {
-        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        SnapShotController snapShotController = (SnapShotController)getPluginController("SnapShot Data");
         snapShotController.dumpGCStatisticsToCSV(true);
     }
 
     @FXML
     private void onHeapAllClick(ActionEvent event) {
-        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        SnapShotController snapShotController = (SnapShotController)getPluginController("SnapShot Data");
         snapShotController.dumpClassHistogramToCSV(false);
     }
 
     @FXML
     private void onHeapSelectedClick(ActionEvent event) {
-        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        SnapShotController snapShotController = (SnapShotController)getPluginController("SnapShot Data");
         snapShotController.dumpClassHistogramToCSV(true);
     }
 
@@ -156,7 +189,7 @@ public class WindowController implements Initializable {
                                  .findAny()
                                  .orElseThrow(() -> new IllegalStateException("SnapShot plugin must be loaded."));
         tabPane.getSelectionModel().select(snapShotTab);
-        SnapShotController snapShotController = (SnapShotController)WindowController.getPluginController("SnapShot Data");
+        SnapShotController snapShotController = (SnapShotController)getPluginController("SnapShot Data");
         
         snapShotController.onSnapshotFileClick(event);
     }
@@ -168,13 +201,29 @@ public class WindowController implements Initializable {
                                  .findAny()
                                  .orElseThrow(() -> new IllegalStateException("Log plugin must be loaded."));
         tabPane.getSelectionModel().select(snapShotTab);
-        LogController logController = (LogController)WindowController.getPluginController("Log Data");
+        LogController logController = (LogController)getPluginController("Log Data");
         
         logController.onLogFileClick(event);
+    }
+    
+    private void initializeAboutDialog(){
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/jp/co/ntt/oss/heapstats/aboutDialog.fxml"), HeapStatsUtils.getResourceBundle());
+        
+        try {
+            loader.load();
+            aboutDialogController = (AboutDialogController)loader.getController();
+            aboutDialogScene = new Scene(loader.getRoot());        
+        }
+        catch (IOException ex) {
+            HeapStatsUtils.showExceptionDialog(ex);
+        }
+        
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        thisController = this;
+        pluginList = new ConcurrentHashMap<>();
         veil = new Region();
         veil.setStyle("-fx-background-color: rgba(0, 0, 0, 0.2)");
         veil.setVisible(false);
@@ -185,6 +234,8 @@ public class WindowController implements Initializable {
         
         stackPane.getChildren().add(veil);
         stackPane.getChildren().add(progress);
+        
+        initializeAboutDialog();
     }
 
     /**
@@ -193,9 +244,22 @@ public class WindowController implements Initializable {
     public void loadPlugin(){
         String resourceName = "/" + this.getClass().getName().replace('.', '/') + ".class";
         String appJarString = this.getClass().getResource(resourceName).getPath();
-        appJarString = appJarString.substring(0, appJarString.indexOf('!')).replaceFirst("file:/", "");
-
-        Path appJarPath = FileSystems.getDefault().getPath(appJarString);
+        appJarString = appJarString.substring(0, appJarString.indexOf('!')).replaceFirst("file:", "");
+        
+        Path appJarPath;
+        
+        try{
+            appJarPath = Paths.get(appJarString);
+        }
+        catch(InvalidPathException e){
+            if((appJarString.charAt(0) == '/') && (appJarString.length() > 2)){ // for Windows
+                appJarPath = Paths.get(appJarString.substring(1));
+            }
+            else{
+                throw e;
+            }
+        }
+        
         Path libPath = appJarPath.getParent().resolve("lib");
         List<URL> jarURLList = new ArrayList<>();
         
@@ -218,6 +282,8 @@ public class WindowController implements Initializable {
             
         List<String> plugins = HeapStatsUtils.getPlugins();
         plugins.stream().forEach(s -> addPlugin(s));
+        
+        aboutDialogController.setPluginInfo();
     }
 
     /**
@@ -226,7 +292,7 @@ public class WindowController implements Initializable {
      * @param pluginName Plugin name which you want.
      * @return Controller of Plugin. If it does not exist, return null.
      */
-    public static PluginController getPluginController(String pluginName){
+    public PluginController getPluginController(String pluginName){
         return pluginList.get(pluginName);
     }
 
@@ -235,8 +301,21 @@ public class WindowController implements Initializable {
      * 
      * @return Loaded plugin list.
      */
-    public static Map<String, PluginController> getPluginList() {
+    public Map<String, PluginController> getPluginList() {
         return pluginList;
+    }
+    
+    /**
+     * Select plugin tab
+     * 
+     * @param pluginName Name of plugin to active. 
+     */
+    public void selectTab(String pluginName) throws IllegalArgumentException{
+        Tab target = tabPane.getTabs().stream()
+                            .filter(t -> t.getText().equals(pluginName))
+                            .findAny()
+                            .orElseThrow(() -> new IllegalArgumentException(pluginName + " is not loaded."));
+        tabPane.getSelectionModel().select(target);
     }
 
     public Window getOwner() {
@@ -245,6 +324,7 @@ public class WindowController implements Initializable {
 
     public void setOwner(Window owner) {
         this.owner = owner;
+        this.owner.setOnCloseRequest(e -> pluginList.values().forEach(c -> Optional.ofNullable(c.getOnCloseRequest()).ifPresent(r -> r.run())));
     }
-
+    
 }

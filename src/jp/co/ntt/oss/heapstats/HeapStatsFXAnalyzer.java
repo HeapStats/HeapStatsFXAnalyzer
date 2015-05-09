@@ -25,7 +25,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
-import jp.co.ntt.oss.heapstats.utils.InfoDialog;
 
 /**
  * Main class of HeapStats FX Analyzer.
@@ -34,12 +33,12 @@ import jp.co.ntt.oss.heapstats.utils.InfoDialog;
  * @author Yasumasa Suenaga
  */
 public class HeapStatsFXAnalyzer extends Application {
-    
+        
     @Override
     public void start(Stage stage) throws Exception {
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> (new InfoDialog("Error", e.getLocalizedMessage(), HeapStatsUtils.stackTarceToString(e))).show()));
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> HeapStatsUtils.showExceptionDialog(e)));
         HeapStatsUtils.load();
-        FXMLLoader mainWindowLoader = new FXMLLoader(getClass().getResource("window.fxml"));
+        FXMLLoader mainWindowLoader = new FXMLLoader(getClass().getResource("window.fxml"), HeapStatsUtils.getResourceBundle());
         
         Parent root = mainWindowLoader.load();
         Scene scene = new Scene(root);

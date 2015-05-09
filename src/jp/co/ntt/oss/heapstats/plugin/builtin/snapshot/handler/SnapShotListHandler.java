@@ -33,15 +33,18 @@ public class SnapShotListHandler implements ParserEventHandler{
     
     private final List<SnapShotHeader> headers;
     
+    private long instances;
+    
     private SnapShotHeader currentHeader;
 
     public SnapShotListHandler() {
         this.headers = new ArrayList<>();
+        this.instances = 0;
     }
 
     @Override
     public ParseResult onStart(long off) {
-        /* Nothing to do */
+        this.instances = 0;
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
@@ -54,7 +57,7 @@ public class SnapShotListHandler implements ParserEventHandler{
 
     @Override
     public ParseResult onEntry(ObjectData data) {
-        /* Nothing to do */
+        instances += data.getCount();
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
@@ -67,6 +70,7 @@ public class SnapShotListHandler implements ParserEventHandler{
     @Override
     public ParseResult onFinish(long off) {
         currentHeader.setSnapShotSize(off - currentHeader.getFileOffset());
+        currentHeader.setNumInstances(instances);
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 

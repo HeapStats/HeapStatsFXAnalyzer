@@ -20,6 +20,7 @@ package jp.co.ntt.oss.heapstats.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
@@ -36,6 +37,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TextArea;
 import javafx.scene.paint.Color;
 
 /**
@@ -158,6 +161,17 @@ public class HeapStatsUtils {
         
         /* Load resource bundle */
         resource = ResourceBundle.getBundle("HeapStatsResources", new Locale(prop.getProperty("language")));
+        
+        /* Add shutdown hook for saving current settings. */
+        Runnable savePropImpl = () -> {
+                                         try(OutputStream out = Files.newOutputStream(properties, StandardOpenOption.TRUNCATE_EXISTING)){
+                                            prop.store(out, null);
+                                         }
+                                         catch(IOException ex){
+                                             Logger.getLogger(HeapStatsUtils.class.getName()).log(Level.SEVERE, null, ex);
+                                         }
+                                      };
+        Runtime.getRuntime().addShutdownHook(new Thread(savePropImpl));
     }
     
     public static List<String> getPlugins(){
@@ -203,6 +217,14 @@ public class HeapStatsUtils {
         return prop.getProperty("bgcolor");
     }
     
+    public static String getLanguage(){
+        return prop.getProperty("language");
+    }
+    
+    public static ResourceBundle getResourceBundle(){
+        return ResourceBundle.getBundle("HeapStatsResources", new Locale(getLanguage()));
+    }
+    
     /**
      * Convert stack trace to String.
      * @param e Throwable object to convert.
@@ -224,4 +246,20 @@ public class HeapStatsUtils {
         return result;
     }
     
+    /**
+     * Show alert dialog.
+     * 
+     * @param e Throwable instance to show.
+     */
+    public static void showExceptionDialog(Throwable e){
+        TextArea details = new TextArea(HeapStatsUtils.stackTarceToString(e));
+        details.setEditable(false);
+        
+        Alert dialog = new Alert(Alert.AlertType.ERROR);
+        dialog.setTitle("Error");
+        dialog.setHeaderText(e.getLocalizedMessage());
+        dialog.getDialogPane().setExpandableContent(details);
+        dialog.showAndWait();
+    }
+
 }

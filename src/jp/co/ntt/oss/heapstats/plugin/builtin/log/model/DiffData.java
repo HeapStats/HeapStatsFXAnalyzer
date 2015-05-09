@@ -28,33 +28,35 @@ public class DiffData {
     
     private final LocalDateTime dateTime;
     
-    private final double javaUserUsage;
+    private double javaUserUsage;
     
-    private final double javaSysUsage;
+    private double javaSysUsage;
     
-    private final double cpuUserUsage;
+    private double cpuUserUsage;
     
-    private final double cpuNiceUsage;
+    private double cpuNiceUsage;
     
-    private final double cpuSysUsage;
+    private double cpuSysUsage;
     
-    private final double cpuIdleUsage;
+    private double cpuIdleUsage;
     
-    private final double cpuIOWaitUsage;
+    private double cpuIOWaitUsage;
     
-    private final double cpuIRQUsage;
+    private double cpuIRQUsage;
     
-    private final double cpuSoftIRQUsage;
+    private double cpuSoftIRQUsage;
     
-    private final double cpuStealUsage;
+    private double cpuStealUsage;
     
-    private final double cpuGuestUsage;
+    private double cpuGuestUsage;
     
-    private final long jvmSyncPark;
+    private long jvmSyncPark;
     
-    private final long jvmSafepointTime;
+    private long jvmSafepointTime;
     
-    private final long jvmSafepoints;
+    private long jvmSafepoints;
+    
+    private final boolean minusData;
     
     /**
      * Constructor of DiffData.
@@ -100,6 +102,35 @@ public class DiffData {
         jvmSyncPark      = current.getJvmSyncPark() - prev.getJvmSyncPark();
         jvmSafepointTime = current.getJvmSafepointTime() - prev.getJvmSafepointTime();
         jvmSafepoints    = current.getJvmSafepoints() - prev.getJvmSafepoints();
+        
+        minusData = (systemUserTime < 0.0d) || (systemNiceTime < 0.0d) ||
+                    (systemSysTime < 0.0d) || (systemIdleTime < 0.0d) ||
+                    (systemIOWaitTime < 0.0d) || (systemIRQTime < 0.0d) ||
+                    (systemSoftIRQTime < 0.0d) || (systemStealTime < 0.0d) ||
+                    (systemGuestTime < 0.0d) ||
+                    (jvmSyncPark < 0) || (jvmSafepointTime < 0) || (jvmSafepoints < 0);
+
+        /*
+         * If this data have minus entry, it is suspected reboot.
+         * So I clear to all fields.
+         */
+        if(minusData){
+            javaUserUsage   = 0.0d;
+            javaSysUsage    = 0.0d;
+            cpuUserUsage    = 0.0d;
+            cpuNiceUsage    = 0.0d;
+            cpuSysUsage     = 0.0d;
+            cpuIdleUsage    = 0.0d;
+            cpuIOWaitUsage  = 0.0d;
+            cpuIRQUsage     = 0.0d;
+            cpuSoftIRQUsage = 0.0d;
+            cpuStealUsage   = 0.0d;
+            cpuGuestUsage   = 0.0d;
+            jvmSyncPark      = 0;
+            jvmSafepointTime = 0;
+            jvmSafepoints    = 0;
+        }
+        
     }
 
     public LocalDateTime getDateTime() {
@@ -169,6 +200,10 @@ public class DiffData {
     
     public static double getCPUTotalUsage(DiffData instance){
         return instance.getCpuTotalUsage();
+    }
+    
+    public boolean hasMinusData(){
+        return minusData;
     }
     
 }

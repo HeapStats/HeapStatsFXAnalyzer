@@ -26,42 +26,42 @@
 <children><AnchorPane prefHeight="200.0" prefWidth="200.0">
 <children><MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" StackPane.alignment="TOP_LEFT">
   <menus>
-    <Menu mnemonicParsing="false" text="File">
+    <Menu mnemonicParsing="false" text="%menu.file">
       <items>
-<Menu mnemonicParsing="false" text="Open">
+<Menu mnemonicParsing="false" text="%menu.file.open">
 <items>
-<MenuItem mnemonicParsing="false" onAction="#onSnapShotOpenClick" text="SnapShot" />
-        <MenuItem mnemonicParsing="false" onAction="#onLogOpenClick" text="Log" />
+<MenuItem mnemonicParsing="false" onAction="#onSnapShotOpenClick" text="%menu.file.open.snapshot" />
+        <MenuItem mnemonicParsing="false" onAction="#onLogOpenClick" text="%menu.file.open.log" />
 </items>
 </Menu>
-<MenuItem mnemonicParsing="false" onAction="#onExitClick" text="Exit" />
+<MenuItem mnemonicParsing="false" onAction="#onExitClick" text="%menu.file.exit" />
       </items>
     </Menu>
-    <Menu mnemonicParsing="false" text="Option">
+    <Menu mnemonicParsing="false" text="%menu.option">
       <items>
-        <MenuItem mnemonicParsing="false" onAction="#onRankLevelClick" text="Rank Level" />
-<Menu mnemonicParsing="false" text="Write to CSV">
+        <MenuItem mnemonicParsing="false" onAction="#onRankLevelClick" text="%menu.option.ranklevel" />
+<Menu mnemonicParsing="false" text="%menu.option.csv">
 <items>
-<Menu mnemonicParsing="false" text="Heap Usage">
+<Menu mnemonicParsing="false" text="%menu.option.csv.heap">
 <items>
-<MenuItem mnemonicParsing="false" onAction="#onHeapAllClick" text="All" />
-<MenuItem mnemonicParsing="false" onAction="#onHeapSelectedClick" text="Selected" />
+<MenuItem mnemonicParsing="false" onAction="#onHeapAllClick" text="%menu.option.csv.heap.all" />
+<MenuItem mnemonicParsing="false" onAction="#onHeapSelectedClick" text="%menu.option.csv.heap.selected" />
 </items>
 </Menu>
-<Menu mnemonicParsing="false" text="GC Statistics">
+<Menu mnemonicParsing="false" text="%menu.option.csv.gc">
 <items>
-<MenuItem mnemonicParsing="false" onAction="#onGCAllClick" text="All" />
-<MenuItem mnemonicParsing="false" onAction="#onGCSelectedClick" text="Selected" />
+<MenuItem mnemonicParsing="false" onAction="#onGCAllClick" text="%menu.option.csv.gc.all" />
+<MenuItem mnemonicParsing="false" onAction="#onGCSelectedClick" text="%menu.option.csv.gc.selected" />
 </items>
 </Menu>
 </items>
 </Menu>
       </items>
     </Menu>
-    <Menu mnemonicParsing="false" text="Help">
+    <Menu mnemonicParsing="false" text="%menu.help">
       <items>
-        <MenuItem mnemonicParsing="false" text="How to use" />
-<MenuItem mnemonicParsing="false" onAction="#onAboutMenuClick" text="About" />
+        <MenuItem mnemonicParsing="false" text="%menu.help.howto" />
+<MenuItem mnemonicParsing="false" onAction="#onAboutMenuClick" text="%menu.help.about" />
       </items>
     </Menu>
   </menus>

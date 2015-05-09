@@ -20,8 +20,11 @@ package jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicLong;
 import jp.co.ntt.oss.heapstats.container.SnapShotHeader;
+import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
 /**
  * Summary data class.<br/>
@@ -100,14 +103,15 @@ public class SummaryData {
     
     public List<SummaryDataEntry> getSummaryAsList(){
         List<SummaryDataEntry> retarray = new ArrayList<>();
+        ResourceBundle resource = ResourceBundle.getBundle("snapshotResources", new Locale(HeapStatsUtils.getLanguage()));
         
-        retarray.add(new SummaryDataEntry("SnapShot Count", Integer.toString(count)));
-        retarray.add(new SummaryDataEntry("GC Count", String.format("%d (Full: %d, Young: %d)", fullCount + yngCount, fullCount, yngCount)));
-        retarray.add(new SummaryDataEntry("Latest Java heap usage", String.format("%.1f MB", latestHeapUsage / 1024.0d / 1024.0d)));
-        retarray.add(new SummaryDataEntry("Latest Metaspace usage", String.format("%.1f MB", latestMetaspaceUsage / 1024.0d / 1024.0d)));
-        retarray.add(new SummaryDataEntry("Max GCTime", String.format("%d ms", maxGCTime)));
-        retarray.add(new SummaryDataEntry("Max SnapShot size", String.format("%.1f KB", maxSnapshotSize / 1024.0d)));
-        retarray.add(new SummaryDataEntry("Max entry count", Long.toString(maxEntryCount)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.snapshot.count"), Integer.toString(count)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.gc.count"), String.format("%d (Full: %d, Young: %d)", fullCount + yngCount, fullCount, yngCount)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.heap.usage"), String.format("%.1f MB", latestHeapUsage / 1024.0d / 1024.0d)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.metaspace.usage"), String.format("%.1f MB", latestMetaspaceUsage / 1024.0d / 1024.0d)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.gc.time"), String.format("%d ms", maxGCTime)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.snapshot.size"), String.format("%.1f KB", maxSnapshotSize / 1024.0d)));
+        retarray.add(new SummaryDataEntry(resource.getString("summary.snapshot.entrycount"), Long.toString(maxEntryCount)));
         
         return retarray;
     }

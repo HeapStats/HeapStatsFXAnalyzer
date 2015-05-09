@@ -21,15 +21,14 @@ package jp.co.ntt.oss.heapstats.plugin;
 import java.net.URL;
 import java.util.Map;
 import java.util.ResourceBundle;
+import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Region;
-import javafx.stage.Window;
+import jp.co.ntt.oss.heapstats.WindowController;
 
 /**
  * Base class for HeapStats FX Analyzer plugin.
@@ -48,7 +47,7 @@ public abstract class PluginController implements Initializable{
     
     private ProgressIndicator progress;
     
-    private Window owner;
+    private ChangeListener windowResizeEvent;
     
     public abstract String getPluginName();
     
@@ -73,6 +72,13 @@ public abstract class PluginController implements Initializable{
      * @return Event handler of this plugin.
      */
     public abstract EventHandler<Event> getOnPluginTabSelected();
+   
+    /**
+     * Event andler when main window is closed.
+     * 
+     * @return Event handler of this plugin.
+     */
+    public abstract Runnable getOnCloseRequest();
 
     /**
      * Setter of veil region.
@@ -110,66 +116,23 @@ public abstract class PluginController implements Initializable{
         progress.progressProperty().bind(task.progressProperty());
     }
  
-    /**
-     * Comvenient method of chart.
-     * This method addes value to chart as percent and add Tooltip.
-     * 
-     * @param series Series to be added.
-     * @param xData X value.
-     * @param yData Y value. This value must be percentage.
-     * @param label Label of this plot.
-     * @param needHighlight Highlight plot if this value is set to true.
-     */
-    protected void addChartDataAsPercent(XYChart.Series<String, Double> series, String xData, Double yData, String label, boolean needHighlight){
-        XYChart.Data<String, Double> data = new XYChart.Data<>(xData, yData);
-        series.getData().add(data);
-
-        String tip = String.format("%s: %s, %.02f %% %s", series.getName(), xData, yData, label);
-        Tooltip.install(data.getNode(), new Tooltip(tip));
-
-        if(needHighlight){
-            data.getNode().setStyle("-fx-background-color: black, black;");
-        }
-        
+    public void setOnWindowResize(ChangeListener event){
+        this.windowResizeEvent = event;
+        WindowController.getInstance().getOwner().widthProperty().addListener(event);
+        WindowController.getInstance().getOwner().heightProperty().addListener(event);
     }
     
     /**
-     * Comvenient method of chart.
-     * This method addes value to chart as long value and add Tooltip.
+     * Set data to another plugin.
+     * This method will be overrided by each plugins.
      * 
-     * @param series Series to be added.
-     * @param xData X value.
-     * @param yData Y value.
-     * @param unit Unit of this value.
-     * @param needHighlight Highlight plot if this value is set to true.
+     * @param data Data to set.
+     * @param select Plugin tab will be actived if this value is true.
      */
-    protected void addChartDataLong(XYChart.Series<String, Long> series, String xData, Long yData, String unit, boolean needHighlight){
-        XYChart.Data<String, Long> data = new XYChart.Data<>(xData, yData);
-        series.getData().add(data);
-
-        String tip = String.format("%s: %s, %d %s", series.getName(), xData, yData, unit);
-        Tooltip.install(data.getNode(), new Tooltip(tip));
-        
-        if(needHighlight){
-            data.getNode().setStyle("-fx-background-color: black, black;");
+    public void setData(Object data, boolean select){
+        if(select){
+            WindowController.getInstance().selectTab(getPluginName());
         }
-        
-    }
-
-    /**
-     * Get appliaction window owner
-     * @return owner window
-     */
-    public Window getOwner() {
-        return owner;
-    }
-
-    /**
-     * Set application window owner
-     * @param owner owner window
-     */
-    public void setOwner(Window owner) {
-        this.owner = owner;
     }
 
     /**

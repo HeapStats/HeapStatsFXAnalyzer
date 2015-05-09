@@ -19,16 +19,14 @@
 package jp.co.ntt.oss.heapstats.plugin.builtin.log.model;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.UncheckedIOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -39,12 +37,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringJoiner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import jp.co.ntt.oss.heapstats.plugin.builtin.log.LogController;
+import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 
 /**
@@ -98,7 +95,7 @@ public class ArchiveData {
         try {
             tmpPath = Files.createTempDirectory("heapstats_archive").toFile();
         } catch (IOException ex) {
-            Logger.getLogger(ArchiveData.class.getName()).log(Level.SEVERE, null, ex);
+            HeapStatsUtils.showExceptionDialog(ex);
         }
         
         tmpPath.deleteOnExit();
@@ -119,31 +116,15 @@ public class ArchiveData {
             prop.computeIfPresent("CollectionDate", (k, v) -> (new LocalDateTimeConverter())
                                                                  .toString(LocalDateTime.ofInstant(Instant.ofEpochMilli(
                                                                          Long.parseLong((String)v)), ZoneId.systemDefault())));
-            prop.computeIfPresent("LogTrigger", (k, v) -> {
-                                                             switch(Integer.parseInt((String)v)){
-                                                                 case 1:
-                                                                     return "Resource Exhausted";
-                                                                         
-                                                                 case 2:
-                                                                     return "Signal";
-                                                                         
-                                                                 case 3:
-                                                                     return "Interval";
-                                                                         
-                                                                 case 4:
-                                                                     return "Deadlock";
-                                                                         
-                                                                 default:
-                                                                     return "Unknown";
-                                                          }
-                                                        });
+            String[] triggers = {"Resource Exhausted", "Signal", "Interval", "Deadlock"};
+            prop.computeIfPresent("LogTrigger", (k, v) -> triggers[Integer.parseInt((String)v) - 1]);
                 
             envInfo = new HashMap<>();
             envInfo.put("archive", archivePath);
             prop.forEach((k, v) -> envInfo.put((String)k, (String)v));
         }
         catch (IOException ex) {
-            Logger.getLogger(ArchiveData.class.getName()).log(Level.SEVERE, null, ex);
+            HeapStatsUtils.showExceptionDialog(ex);
         }
 
     }
@@ -164,7 +145,7 @@ public class ArchiveData {
                          .collect(Collectors.toList());
         }
         catch (IOException ex) {
-            Logger.getLogger(ArchiveData.class.getName()).log(Level.SEVERE, null, ex);
+            HeapStatsUtils.showExceptionDialog(ex);
         }
     
         return null;
@@ -177,61 +158,54 @@ public class ArchiveData {
      * @param entry ZipEntry to be deflated.
      */
     private void deflateFileData(ZipFile archive, ZipEntry entry){
-        Path destPath = FileSystems.getDefault().getPath(tmpPath.getAbsolutePath(), entry.getName());
+        Path destPath = Paths.get(tmpPath.getAbsolutePath(), entry.getName());
         
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(archive.getInputStream(entry)));
-            BufferedWriter writer = Files.newBufferedWriter(destPath, StandardOpenOption.CREATE);){
+            PrintWriter writer = new PrintWriter(Files.newBufferedWriter(destPath, StandardOpenOption.CREATE));){
             
             reader.lines()
                   .map(s -> s.replace('\0', ' '))
-                  .forEach(s -> {
-                                   try{
-                                       writer.write(s);
-                                       writer.newLine();
-                                   }
-                                   catch(IOException e){
-                                       throw new UncheckedIOException(e);
-                                   }
-                                });
+                  .forEach(s -> writer.println(s));
         }
         catch (IOException ex) {
-            Logger.getLogger(ArchiveData.class.getName()).log(Level.SEVERE, null, ex);
+            HeapStatsUtils.showExceptionDialog(ex);
         }
 
     }
     
     /**
-     * Write IPv4 data.
+     * Get IPv4 data.
      * 
      * @param data String data in procfs.
-     * @param writer PrintWriter to write.
+     * @return IPv4 address.
      */
-    private void writeIPv4(String data, PrintWriter writer){
+    private String getIPv4(String data){
         StringJoiner joiner = (new StringJoiner("."))
                                  .add(Integer.valueOf(data.substring(6, 8), 16).toString())
                                  .add(Integer.valueOf(data.substring(4, 6), 16).toString())
                                  .add(Integer.valueOf(data.substring(2, 4), 16).toString())
                                  .add(Integer.valueOf(data.substring(0, 2), 16).toString());
-        writer.print(joiner.toString());
+        
+        return joiner.toString();
     }
     
     /**
-     * Write IPv6 data.
+     * Get IPv6 data.
      * 
      * @param data String data in procfs.
-     * @param writer PrintWrite to write.
+     * @return IPv4 address.
      */
-    private void writeIPv6(String data, PrintWriter writer){
+    private String getIPv6(String data){
         StringJoiner joiner = (new StringJoiner(":"))
-                                 .add(Integer.valueOf(data.substring(6, 8) + data.substring(4, 6), 16).toString())
-                                 .add(Integer.valueOf(data.substring(2, 4) + data.substring(0, 2), 16).toString())
-                                 .add(Integer.valueOf(data.substring(14, 16) + data.substring(12, 14), 16).toString())
-                                 .add(Integer.valueOf(data.substring(10, 12) + data.substring(8, 10), 16).toString())
-                                 .add(Integer.valueOf(data.substring(22, 24) + data.substring(20, 22), 16).toString())
-                                 .add(Integer.valueOf(data.substring(18, 20) + data.substring(16, 18), 16).toString())
-                                 .add(Integer.valueOf(data.substring(26, 28) + data.substring(24, 26), 16).toString());
+                                 .add(data.substring(6, 8) + data.substring(4, 6))
+                                 .add(data.substring(2, 4) + data.substring(0, 2))
+                                 .add(data.substring(14, 16) + data.substring(12, 14))
+                                 .add(data.substring(10, 12) + data.substring(8, 10))
+                                 .add(data.substring(22, 24) + data.substring(20, 22))
+                                 .add(data.substring(18, 20) + data.substring(16, 18))
+                                 .add(data.substring(26, 28) + data.substring(24, 26));
 
-        writer.print(joiner.toString());
+        return joiner.toString();
     }
     
     /**
@@ -243,74 +217,42 @@ public class ArchiveData {
      * @param isIPv4  true if this arguments represent IPv4.
      */
     private void writeSockDataInternal(String proto, String[] data, PrintWriter writer, boolean isIPv4){
-        writer.print(sockOwner.contains(data[INDEX_INODE]) ? "jvm\t " : "\t"); // owner
-        writer.print(proto + "\t");
+        writer.print(String.format("%-7s", sockOwner.contains(data[INDEX_INODE]) ? "jvm" : "")); // owner
+        writer.print(String.format("%-7s", proto));
         
         String[] queueData = data[INDEX_QUEUE].split(":");
-        writer.print(Integer.parseInt(queueData[1], 16)); // Recv-Q
-        writer.print("\t");
-        writer.print(Integer.parseInt(queueData[0], 16)); // Send-Q
-        writer.print("\t");
+        writer.print(String.format("%-8d", Integer.parseInt(queueData[1], 16))); // Recv-Q
+        writer.print(String.format("%-8d", Integer.parseInt(queueData[0], 16))); // Send-Q
         
         String[] localAddr = data[INDEX_LOCAL_ADDR].split(":"); // local address
+        String localAddrStr;
         if(isIPv4){
-            writeIPv4(localAddr[0], writer);
+            localAddrStr = getIPv4(localAddr[0]);
         }
         else{
-            writeIPv6(localAddr[0], writer);
+            localAddrStr = getIPv6(localAddr[0]);
         }
-        writer.print(':');
-        writer.print(Integer.parseInt(localAddr[1], 16));
-        writer.print("\t");
+        localAddrStr += String.format(":%d", Integer.parseInt(localAddr[1], 16));
+        writer.print(String.format("%-42s", localAddrStr));
         
         String[] foreignAddr = data[INDEX_FOREIGN_ADDR].split(":"); // foreign address
+        String foreignAddrStr;
         if(isIPv4){
-            writeIPv4(foreignAddr[0], writer);
+            foreignAddrStr = getIPv4(foreignAddr[0]);
         }
         else{
-            writeIPv6(foreignAddr[0], writer);
+            foreignAddrStr = getIPv6(foreignAddr[0]);
         }
-        writer.print(':');
-        writer.print(Integer.parseInt(foreignAddr[1], 16));
-        writer.print("\t");
+        foreignAddrStr += String.format(":%d", Integer.parseInt(foreignAddr[1], 16));
+        writer.print(String.format("%-42s", foreignAddrStr));
         
-        switch(Integer.parseInt(data[INDEX_STATE], 16)){ // connection state
-            case 1:
-                writer.println("ESTABLISHED");
-                break;
-            case 2:
-                writer.println("SYN_SENT");
-                break;
-            case 3:
-                writer.println("SYN_RECV");
-                break;
-            case 4:
-                writer.println("FIN_WAIT1");
-                break;
-            case 5:
-                writer.println("FIN_WAIT2");
-                break;
-            case 6:
-                writer.println("TIME_WAIT");
-                break;
-            case 7:
-                writer.println("CLOSE");
-                break;
-            case 8:
-                writer.println("CLOSE_WAIT");
-                break;
-            case 9:
-                writer.println("LAST_ACK");
-                break;
-            case 10:
-                writer.println("LISTEN");
-                break;
-            case 11:
-                writer.println("CLOSING");
-                break;
-            default:
-                writer.println("-");
-                break;
+        try{
+            String[] states = {"ESTABLISHED", "SYN_SENT", "SYN_RECV", "FIN_WAIT1", "FIN_WAIT2",
+                                  "TIME_WAIT", "CLOSE", "CLOSE_WAIT", "LAST_ACK", "LISTEN", "CLOSING"};
+            writer.println(states[Integer.parseInt(data[INDEX_STATE], 16) - 1]); // connection state
+        }
+        catch(ArrayIndexOutOfBoundsException e){
+            writer.println("-");
         }
         
     }
@@ -321,10 +263,16 @@ public class ArchiveData {
      * @throws IOException 
      */
     private void buildSockData() throws IOException{
-        Path sockfile = FileSystems.getDefault().getPath(tmpPath.getAbsolutePath(), "socket");
+        Path sockfile = Paths.get(tmpPath.getAbsolutePath(), "socket");
         
         try(PrintWriter writer = new PrintWriter(Files.newOutputStream(sockfile, StandardOpenOption.CREATE))){
-            writer.println("Owner\tProto\tRecv-Q\tSend-Q\tLocal Address\tForeign Address\tState");
+            writer.print(String.format("%-7s", "Owner"));
+            writer.print(String.format("%-7s", "Proto"));
+            writer.print(String.format("%-8s", "Recv-Q"));
+            writer.print(String.format("%-8s", "Send-Q"));
+            writer.print(String.format("%-42s", "Local Address"));
+            writer.print(String.format("%-42s", "Foreign Address"));
+            writer.println("State");
         
             tcp.stream().map(s -> s.split("\\s+"))
                         .forEach(d -> writeSockDataInternal("tcp", d, writer, true));
@@ -390,7 +338,7 @@ public class ArchiveData {
             buildSockData();
         }
         catch (IOException ex) {
-            Logger.getLogger(LogController.class.getName()).log(Level.SEVERE, null, ex);
+            HeapStatsUtils.showExceptionDialog(ex);
         }
         
         parsed = true;
@@ -441,10 +389,12 @@ public class ArchiveData {
      * @throws IOException 
      */
     public String getFileContents(String file) throws IOException{
-        Path filePath = FileSystems.getDefault().getPath(tmpPath.getAbsolutePath(), file);
-        return Files.readAllLines(filePath).stream()
-                                           .collect(StringBuilder::new, (r, s) -> r.append(s).append("\n"), StringBuilder::append)
-                                           .toString();
+        Path filePath = Paths.get(tmpPath.getAbsolutePath(), file);
+        
+        try(Stream<String> paths = Files.lines(filePath)){
+            return paths.collect(Collectors.joining("\n"));
+        }
+        
     }
     
 }
