@@ -1,3 +1,7 @@
 /nbproject/private/
 /build/
 /dist/
+/heapstats-core/nbproject/private/
+/heapstats-cli/nbproject/private/
+/heapstats-core/build/
+/heapstats-core/dist/

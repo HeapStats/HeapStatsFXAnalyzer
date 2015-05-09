@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (C) 2014 Yasumasa Suenaga
+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ as published by the Free Software Foundation; either version 2
+ of the License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+-->
+
+<?import java.lang.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="SnapShot" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.SnapShotController">
+<children><Button layoutX="14.427734375" layoutY="14.0" mnemonicParsing="false" onAction="#onSnapshotFileClick" text="%button.snapshot" AnchorPane.leftAnchor="14.427734375" AnchorPane.topAnchor="14.0" /><TextField fx:id="snapshotList" layoutX="83.0" layoutY="14.0" prefHeight="23.0" prefWidth="697.0" AnchorPane.leftAnchor="91.0" AnchorPane.rightAnchor="12.0" AnchorPane.topAnchor="14.0" /><Label layoutX="26.0" layoutY="49.0" text="%label.range" AnchorPane.leftAnchor="26.0" AnchorPane.topAnchor="49.0" /><ComboBox fx:id="startCombo" layoutX="91.0" layoutY="45.0" prefHeight="23.0" prefWidth="176.0" AnchorPane.leftAnchor="83.0" AnchorPane.topAnchor="45.0" /><Label layoutX="269.6337890625" layoutY="49.0" text="-" AnchorPane.leftAnchor="269.6337890625" AnchorPane.topAnchor="49.0" /><ComboBox fx:id="endCombo" layoutX="292.0" layoutY="45.0" prefHeight="23.0" prefWidth="176.0" AnchorPane.leftAnchor="292.0" AnchorPane.topAnchor="45.0" /><Button fx:id="okBtn" layoutX="752.0" layoutY="45.0" mnemonicParsing="false" onAction="#onOkClick" text="OK" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="45.0" /><TabPane layoutX="14.0" layoutY="80.0" prefHeight="508.0" prefWidth="773.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="12.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="80.0">
+  <tabs>
+    <Tab text="%tab.summary">
+<content><SplitPane dividerPositions="0.2551813471502591" focusTraversable="true" prefHeight="160.0" prefWidth="200.0">
+  <items>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+<children><TableView fx:id="summaryTable" layoutX="-27.0" layoutY="39.5" minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <columns>
+    <TableColumn fx:id="keyColumn" editable="false" prefWidth="94.0" sortable="false" />
+    <TableColumn fx:id="valueColumn" editable="false" prefWidth="99.0" sortable="false" />
+  </columns>
+</TableView>
+</children></AnchorPane>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+<children><SplitPane dividerPositions="0.4, 0.7" layoutX="66.0" layoutY="58.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="200.0" stylesheets="@/jp/co/ntt/oss/heapstats/plugin/builtin/snapshot/snapshot.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<items><AnchorPane prefHeight="200.0" prefWidth="200.0">
+<children><StackedAreaChart id="heapChart" fx:id="heapChart" animated="false" createSymbols="false" layoutX="-129.0" layoutY="-91.0" minHeight="0.0" title="Java Heap" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <xAxis>
+    <CategoryAxis side="BOTTOM" tickLabelsVisible="false" />
+  </xAxis>
+  <yAxis>
+    <NumberAxis label="MB" side="LEFT" />
+  </yAxis>
+</StackedAreaChart>
+</children></AnchorPane><AnchorPane prefHeight="200.0" prefWidth="200.0">
+<children><LineChart id="gcTimeChart" fx:id="gcTimeChart" animated="false" createSymbols="false" layoutX="-169.0" layoutY="-120.0" legendVisible="false" minHeight="0.0" title="GC Time" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <xAxis>
+    <CategoryAxis side="BOTTOM" tickLabelsVisible="false" />
+  </xAxis>
+  <yAxis>
+    <NumberAxis label="ms" side="LEFT" />
+  </yAxis>
+</LineChart>
+</children></AnchorPane><AnchorPane prefHeight="200.0" prefWidth="200.0">
+<children><AreaChart id="metaspaceChart" fx:id="metaspaceChart" animated="false" createSymbols="false" layoutX="-174.0" layoutY="-166.0" minHeight="0.0" title="Metaspace" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <xAxis>
+    <CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" />
+  </xAxis>
+  <yAxis>
+    <NumberAxis label="MB" side="LEFT" />
+  </yAxis>
+</AreaChart>
+</children></AnchorPane>
+</items></SplitPane>
+</children></AnchorPane>
+  </items>
+</SplitPane>
+</content>
+    </Tab>
+    <Tab fx:id="histogramTab" text="%tab.histogram">
+<content><SplitPane dividerPositions="0.3" focusTraversable="true">
+  <items>
+    <AnchorPane>
+<children><SplitPane dividerPositions="0.5" focusTraversable="true" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <items>
+    <AnchorPane>
+<children><Label text="%label.exclude" AnchorPane.leftAnchor="7.0" AnchorPane.topAnchor="7.0" /><Button mnemonicParsing="false" onAction="#onAddClick" prefWidth="60.0" text="%button.add" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="3.0" /><Button mnemonicParsing="false" onAction="#onHiddenFilterApply" prefWidth="60.0" text="%button.apply" AnchorPane.leftAnchor="163.0" AnchorPane.topAnchor="3.0" /><TableView fx:id="excludeTable" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="33.0">
+  <columns>
+    <TableColumn fx:id="hideColumn" prefWidth="45.0" sortable="false" text="%table.column.hide" />
+    <TableColumn fx:id="excludeNameColumn" editable="false" prefWidth="150.0" text="%table.column.filtername" />
+  </columns>
+</TableView>
+</children></AnchorPane>
+    <AnchorPane>
+<children><Label text="%label.classsearch" AnchorPane.leftAnchor="3.0" AnchorPane.topAnchor="3.0" /><TextField fx:id="searchText" onKeyTyped="#onSearchTextChanged" AnchorPane.leftAnchor="3.0" AnchorPane.rightAnchor="3.0" AnchorPane.topAnchor="20.0" />
+<ListView fx:id="searchList" AnchorPane.bottomAnchor="32.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="48.0" />
+<Button fx:id="selectFilterApplyBtn" mnemonicParsing="false" onAction="#onSelectFilterApply" text="%button.apply" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="55.0" /><Button mnemonicParsing="false" onAction="#onSelectFilterClear" text="%button.clear" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+</children></AnchorPane>
+  </items>
+</SplitPane>
+</children></AnchorPane>
+    <AnchorPane>
+<children><SplitPane dividerPositions="0.5" focusTraversable="true" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <items>
+    <AnchorPane>
+<children><StackedAreaChart fx:id="topNChart" animated="false" legendVisible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <xAxis>
+    <CategoryAxis side="BOTTOM" tickLabelsVisible="false" />
+  </xAxis>
+  <yAxis>
+    <NumberAxis label="MB" side="LEFT" />
+  </yAxis>
+</StackedAreaChart>
+</children>
+    </AnchorPane>
+    <AnchorPane>
+<children><TableView fx:id="lastDiffTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <columns>
+    <TableColumn fx:id="colorColumn" editable="false" prefWidth="75.0" sortable="false" />
+    <TableColumn fx:id="classNameColumn" editable="false" prefWidth="75.0" text="%table.column.classname" /><TableColumn fx:id="classLoaderColumn" editable="false" prefWidth="75.0" text="%table.column.classloader" /><TableColumn fx:id="instanceColumn" editable="false" prefWidth="75.0" text="%table.column.instances" /><TableColumn fx:id="totalSizeColumn" editable="false" prefWidth="75.0" text="%table.column.totalsize" />
+  </columns>
+</TableView>
+</children></AnchorPane>
+  </items>
+</SplitPane>
+</children></AnchorPane>
+  </items>
+</SplitPane>
+</content>
+    </Tab><Tab text="%tab.snapshot">
+<content><AnchorPane>
+<children><Label text="%label.snapshot" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" /><ComboBox fx:id="snapShotTimeCombo" layoutX="91.0" layoutY="45.0" onAction="#onSnapShotTimeSelected" prefHeight="23.0" prefWidth="176.0" AnchorPane.leftAnchor="70.0" AnchorPane.topAnchor="7.0" /><SplitPane dividerPositions="0.2, 0.7" orientation="VERTICAL" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+<items><AnchorPane prefHeight="200.0" prefWidth="200.0">
+<children><TableView fx:id="snapShotSummaryTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <columns>
+    <TableColumn fx:id="snapShotSummaryKey" editable="false" minWidth="300.0" prefWidth="300.0" sortable="false" />
+    <TableColumn fx:id="snapShotSummaryValue" editable="false" minWidth="400.0" prefWidth="400.0" sortable="false" />
+  </columns>
+</TableView>
+</children></AnchorPane><AnchorPane prefHeight="200.0" prefWidth="200.0">
+<children><PieChart fx:id="usagePieChart" legendVisible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+</children></AnchorPane><AnchorPane prefHeight="186.0" prefWidth="772.0">
+<children><TableView fx:id="objDataTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <columns>
+    <TableColumn fx:id="objColorColumn" editable="false" prefWidth="40.0" sortable="false" />
+    <TableColumn fx:id="objClassNameColumn" editable="false" prefWidth="200.0" text="%table.column.classname" /><TableColumn fx:id="objClassLoaderColumn" editable="false" prefWidth="200.0" text="%table.column.classloader" /><TableColumn fx:id="objInstancesColumn" editable="false" prefWidth="75.0" text="%table.column.instances" /><TableColumn fx:id="objSizeColumn" editable="false" prefWidth="75.0" text="%table.column.totalsize" />
+  </columns>
+</TableView>
+</children></AnchorPane>
+</items></SplitPane>
+</children></AnchorPane>
+</content>
+</Tab>
+  </tabs>
+</TabPane>
+</children></AnchorPane>
