@@ -164,7 +164,7 @@ public class ThreadRecordParser {
      * @param path Path to recorder file.
      * @throws IOException 
      */
-    private void parse(Path path) throws IOException{
+    public void parse(Path path) throws IOException{
         ByteBuffer buffer = ByteBuffer.allocateDirect(32);
 
         try(SeekableByteChannel ch = Files.newByteChannel(path, StandardOpenOption.READ)){

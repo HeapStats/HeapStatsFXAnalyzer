@@ -8,8 +8,8 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="HeapStatsFXAnalyzer.jar" size="110653" download="eager" />
-    <jar href="lib/heapstats-core.jar" size="134391" download="eager" />
+    <jar href="HeapStatsFXAnalyzer.jar" size="117249" download="eager" />
+    <jar href="lib/heapstats-core.jar" size="148740" download="eager" />
   </resources>
 <security>
   <all-permissions/>

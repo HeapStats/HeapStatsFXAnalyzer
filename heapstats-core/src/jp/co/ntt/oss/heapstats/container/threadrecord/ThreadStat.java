@@ -26,8 +26,8 @@ import java.time.ZoneId;
  * 
  * @author Yasumasa Suenaga
  */
-public class ThreadStat {
-    
+public class ThreadStat implements Comparable<ThreadStat>{
+
     public static enum ThreadEvent{
         Unused,
         ThreadStart,
@@ -105,4 +105,9 @@ public class ThreadStat {
         return additionalData;
     }
 
+    @Override
+    public int compareTo(ThreadStat o) {
+        return time.compareTo(o.time);
+    }
+    
 }
