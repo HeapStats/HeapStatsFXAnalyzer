@@ -67,7 +67,7 @@ public class ArchiveData {
     
     private final String archivePath;
     
-    private final File tmpPath;
+    private File extractPath;
     
     private Map<String, String> envInfo;
     
@@ -85,16 +85,26 @@ public class ArchiveData {
     
     /**
      * Constructor of ArchiveData.
-     * Each fields is initialized from argument.
      * 
      * @param log LogData. This value must be included archive data.
      * @throws java.io.IOException
      */
     public ArchiveData(LogData log) throws IOException{
+        this(log, null);
+        extractPath = Files.createTempDirectory("heapstats_archive").toFile();
+        extractPath.deleteOnExit();
+    }
+    
+    /**
+     * Constructor of ArchiveData.
+     * 
+     * @param log LogData. This value must be included archive data.
+     * @param location Location to extract archive data.
+     */
+    public ArchiveData(LogData log, File location){
         date = log.getDateTime();
         archivePath = log.getArchivePath();
-        tmpPath = Files.createTempDirectory("heapstats_archive").toFile();
-        tmpPath.deleteOnExit();
+        extractPath = location;
         parsed = false;
     }
     
@@ -150,7 +160,7 @@ public class ArchiveData {
      * @throws java.io.IOException
      */
     private void deflateFileData(ZipFile archive, ZipEntry entry) throws IOException{
-        Path destPath = Paths.get(tmpPath.getAbsolutePath(), entry.getName());
+        Path destPath = Paths.get(extractPath.getAbsolutePath(), entry.getName());
         
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(archive.getInputStream(entry)));
             PrintWriter writer = new PrintWriter(Files.newBufferedWriter(destPath, StandardOpenOption.CREATE));){
@@ -240,7 +250,7 @@ public class ArchiveData {
      * @throws IOException 
      */
     private void buildSockData() throws IOException{
-        Path sockfile = Paths.get(tmpPath.getAbsolutePath(), "socket");
+        Path sockfile = Paths.get(extractPath.getAbsolutePath(), "socket");
         
         try(PrintWriter writer = new PrintWriter(Files.newOutputStream(sockfile, StandardOpenOption.CREATE))){
             writer.print(String.format("%-7s", "Owner"));
@@ -329,7 +339,7 @@ public class ArchiveData {
     @Override
     protected void finalize() throws Throwable {
         try {
-            tmpPath.delete();
+            extractPath.delete();
         } finally {
             super.finalize();
         }
@@ -359,7 +369,16 @@ public class ArchiveData {
      * @return file list in this archive.
      */
     public List<String> getFileList(){
-        return Arrays.asList(tmpPath.list());
+        return Arrays.asList(extractPath.list());
+    }
+
+    /**
+     * Getter of location to archive data.
+     * 
+     * @return Path of archive data.
+     */
+    public File getExtractPath() {
+        return extractPath;
     }
     
     /**
@@ -371,7 +390,7 @@ public class ArchiveData {
      * @throws IOException 
      */
     public String getFileContents(String file) throws IOException{
-        Path filePath = Paths.get(tmpPath.getAbsolutePath(), file);
+        Path filePath = Paths.get(extractPath.getAbsolutePath(), file);
         
         try(Stream<String> paths = Files.lines(filePath)){
             return paths.collect(Collectors.joining("\n"));
