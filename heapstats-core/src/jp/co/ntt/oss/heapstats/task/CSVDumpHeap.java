@@ -71,7 +71,7 @@ public class CSVDumpHeap extends ProgressRunnable{
             Map<Long, String> targetClasses = snapShots.stream()
                                                        .flatMap(s -> s.getSnapShot(needJavaStyle).entrySet().stream())
                                                        .filter(e -> filter.orElse(f -> true).test(e.getValue()))
-                                                       .collect(toConcurrentMap(e -> e.getKey(), e -> e.getValue().getName()));
+                                                       .collect(toConcurrentMap(e -> e.getKey(), e -> e.getValue().getName(), (v1, v2) -> v1));
             
             /* Sorted SnapShot DateTime List */
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss.SSS");
