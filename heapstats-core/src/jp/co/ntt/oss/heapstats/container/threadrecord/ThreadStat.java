@@ -20,6 +20,7 @@ package jp.co.ntt.oss.heapstats.container.threadrecord;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Thread status holder.
@@ -108,6 +109,11 @@ public class ThreadStat implements Comparable<ThreadStat>{
     @Override
     public int compareTo(ThreadStat o) {
         return time.compareTo(o.time);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%d: %s: %s (%d)", id, time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), event.toString(), additionalData);
     }
     
 }
