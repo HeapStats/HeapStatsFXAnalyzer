@@ -23,6 +23,7 @@ HeapStatsFXAnalyzer is composed two modules.
 
 * heapstats-core: パーサー等のコア機能ライブラリ Core library of HeapStats
 * heapstats-analyzer: HeapStatsFXAnalyzer本体 Main program of HeapStatsFXAnalyzer
+* heapstats-cli: HeapStatsコマンドラインインターフェース Commandline interface of HeapStats
 
 
 ## License ##
