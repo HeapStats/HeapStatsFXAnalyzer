@@ -9,3 +9,6 @@
 /heapstats-analyzer/build/
 /heapstats-analyzer/dist/
 /heapstats-analyzer/build
+/heapstats-cli/nbproject/private/
+/heapstats-cli/build/
+/heapstats-cli/dist/
