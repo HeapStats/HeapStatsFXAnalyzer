@@ -18,10 +18,9 @@
 
 package jp.co.ntt.oss.heapstats.xml.binding;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Filter class in XML filter.
@@ -33,34 +32,41 @@ public class Filter {
     @XmlAttribute(name="name")
     private String name;
     
-    private BooleanProperty hide;
+    @XmlElement(name="visible")
+    private boolean hide;
     
     @XmlElement(name="classes")
     private Classes classes;
 
     public Filter() {
-        hide = new SimpleBooleanProperty(false);
+        hide = false;
     }
-
+    
+    @XmlTransient
     public String getName() {
         return name;
     }
 
-    public boolean isHide() {
-        return hide.get();
+    public void setName(String name) {
+        this.name = name;
     }
 
+    @XmlTransient
     public Classes getClasses() {
         return classes;
     }
-
-    @XmlElement(name="hide")
-    public void setHide(boolean visible) {
-        this.hide.set(visible);
+    
+    public void setClasses(Classes classes) {
+        this.classes = classes;
     }
 
-    public BooleanProperty hideProperty() {
+    @XmlTransient
+    public boolean isHide() {
         return hide;
+    }
+    
+    public void setHide(boolean visible) {
+        this.hide = visible;
     }
 
 }

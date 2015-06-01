@@ -630,7 +630,9 @@ public class SnapShotController extends PluginController implements Initializabl
             excludeFilterList.stream()
                              .map(f -> (Filters)JAXB.unmarshal(f, Filters.class))
                              .filter(f -> f != null)
-                             .forEach(f -> excludeTable.getItems().addAll(f.getFilter()));
+                             .flatMap(f -> f.getFilter().stream()
+                                                        .map(e -> new BindingFilter(e)))
+                             .forEach(f -> excludeTable.getItems().addAll(f));
         }
         
     }
