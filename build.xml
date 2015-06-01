@@ -29,11 +29,16 @@
     <ant dir="heapstats-analyzer" target="jfx-build" useNativeBasedir="true"/>
   </target>
 
+  <target name="cli">
+    <ant dir="heapstats-cli" target="jar" useNativeBasedir="true"/>
+  </target>
+
   <target name="clean">
+    <ant dir="heapstats-cli" target="clean" useNativeBasedir="true"/>
     <ant dir="heapstats-analyzer" target="clean" useNativeBasedir="true"/>
     <ant dir="heapstats-core" target="clean" useNativeBasedir="true"/>
   </target>
 
-  <target name="all" depends="core,analyzer"/>
+  <target name="all" depends="core,analyzer,cli"/>
 
 </project>
