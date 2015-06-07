@@ -9,3 +9,11 @@
 /heapstats-analyzer/build/
 /heapstats-analyzer/dist/
 /heapstats-analyzer/build
+.idea/
+*.ipr
+*.iws
+*.iml
+out/
+.idea_modules/
+atlassian-ide-plugin.xml
+com_crashlytics_export_strings.xml
