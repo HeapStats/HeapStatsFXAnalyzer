@@ -6,7 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jp.co.ntt.oss.heapstats.plugin.builtin.threadrecorder.ThreadRecorderController">
+<AnchorPane id="AnchorPane" prefHeight="600.0" prefWidth="800.0" stylesheets="@threadrecorder.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jp.co.ntt.oss.heapstats.plugin.builtin.threadrecorder.ThreadRecorderController">
    <children>
       <Button fx:id="openBtn" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#onOpenBtnClick" text="Recorder File" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0" />
       <TextField fx:id="fileNameBox" layoutX="118.0" layoutY="14.0" prefHeight="25.0" prefWidth="666.0" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0" />
@@ -21,10 +21,10 @@
           <TableColumn fx:id="threadNameColumn" editable="false" prefWidth="166.0" text="Thread" />
         </columns>
       </TableView>
-      <ScrollPane layoutX="261.0" layoutY="91.0" prefHeight="498.0" prefWidth="525.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="261.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="91.0">
-        <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
-        </content>
-      </ScrollPane>
+      <TableView fx:id="timelineView" layoutX="261.0" layoutY="91.0" prefHeight="495.0" prefWidth="527.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="261.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="91.0">
+        <columns>
+          <TableColumn fx:id="timelineColumn" maxWidth="1.7976931348623157E308" minWidth="200.0" prefWidth="525.0" />
+        </columns>
+      </TableView>
    </children>
 </AnchorPane>
