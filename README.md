@@ -31,7 +31,7 @@ HeapStatsFXAnalyzer is composed two modules.
 ## JDP ##
 
 * An automatic discovery function of JDP (Java Discovery Protocol) is enabled
-by JVM which is runned with the following options.
+by JVM which is run with the following options.
 
 ```
 -Dcom.sun.management.jmxremote.port=<JMX port>
