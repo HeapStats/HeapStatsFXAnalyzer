@@ -274,7 +274,7 @@ public class WindowController implements Initializable {
                                                       throw new RuntimeException(e);
                                                   }
                                                 })
-                                      .filter(u -> u.getFile().equals("heapstats-core.jar"))
+                                      .filter(u -> !u.getFile().endsWith("heapstats-core"))
                                       .collect(Collectors.toList())
                                       .toArray(new URL[0]);
         }
