@@ -26,7 +26,7 @@ import jp.co.ntt.oss.heapstats.utils.TaskAdapter;
 import java.io.File;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -98,10 +98,10 @@ public class ThreadRecorderController extends PluginController implements Initia
         else{
             LocalDateTime start = threadStatList.get(0).getTime();
             LocalDateTime end = threadStatList.get(threadStatList.size() - 1).getTime();
-            long diff = end.toEpochSecond(ZoneOffset.UTC) - start.toEpochSecond(ZoneOffset.UTC);
+            long diff = start.until(end, ChronoUnit.MILLIS);
             
             LocalDateTimeConverter converter = new LocalDateTimeConverter();
-            target.setText(converter.toString(start.plusSeconds((long)(diff * newValue))));
+            target.setText(converter.toString(start.plus((long)((double)diff * newValue), ChronoUnit.MILLIS)));
         }
     }
 

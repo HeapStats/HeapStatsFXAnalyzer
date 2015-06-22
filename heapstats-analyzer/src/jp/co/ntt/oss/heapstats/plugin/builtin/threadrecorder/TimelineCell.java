@@ -88,7 +88,8 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
 
     private Rectangle createThreadRect(LocalDateTime startTime, LocalDateTime endTime,
                                        ThreadStat.ThreadEvent prevEvent) {
-        long range = controller.getRangeStart().until(controller.getRangeEnd(), ChronoUnit.MILLIS);
+        // Add 1 sec to end time because we want to draw timeline until end time.
+        long range = controller.getRangeStart().until(controller.getRangeEnd().plusSeconds(1), ChronoUnit.MILLIS);
         long timeDiff = startTime.until(endTime, ChronoUnit.MILLIS);
         double width = (this.getTableView().getWidth() / (double)range) * timeDiff;
         Rectangle rectangle = new Rectangle(width, RECT_HEIGHT);
