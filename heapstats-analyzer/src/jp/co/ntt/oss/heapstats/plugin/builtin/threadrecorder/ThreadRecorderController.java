@@ -27,7 +27,6 @@ import java.io.File;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -46,8 +45,6 @@ import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 public class ThreadRecorderController extends PluginController implements Initializable {
 
     private static final int TIMELINE_PADDING = 8;
-
-    private static final double DEFAULT_COLUMN_WIDTH = 525.0;
 
     @FXML
     private Button openBtn;
@@ -122,7 +119,7 @@ public class ThreadRecorderController extends PluginController implements Initia
         showColumn.setCellFactory(CheckBoxTableCell.forTableColumn(showColumn));
         threadNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         timelineColumn.setCellValueFactory(new PropertyValueFactory<>("threadStats"));
-        timelineColumn.setCellFactory(param -> new TimelineCell());
+        timelineColumn.setCellFactory(param -> new TimelineCell(this));
     }
     
     /**
@@ -182,7 +179,6 @@ public class ThreadRecorderController extends PluginController implements Initia
                                 .sorted()
                                 .map(k -> new ThreadStatViewModel(k, idMap.get(k), startTime, endTime, statById.get(k)))
                                 .collect(Collectors.toList()));
-        adjustColumnWidth(startTime, endTime);
         threadListView.setItems(threadStats);
         timelineView.setItems(threadStats);
     }
@@ -210,6 +206,24 @@ public class ThreadRecorderController extends PluginController implements Initia
     @Override
     public Runnable getOnCloseRequest() {
         return null;
+    }
+
+    /**
+     * Get start time of selected range.
+     * @return Start tine to draw.
+     */
+    public LocalDateTime getRangeStart(){
+        LocalDateTimeConverter converter = new LocalDateTimeConverter();
+        return converter.fromString(startTimeLabel.getText());
+    }
+
+    /**
+     * Get end time of selected range.
+     * @return End tine to draw.
+     */
+    public LocalDateTime getRangeEnd(){
+        LocalDateTimeConverter converter = new LocalDateTimeConverter();
+        return converter.fromString(endTimeLabel.getText());
     }
 
     private void bindScroll() {
@@ -247,17 +261,7 @@ public class ThreadRecorderController extends PluginController implements Initia
             threadListView.setItems(newViewModels);
             timelineView.getItems().clear();
             timelineView.setItems(newViewModels);
-            LocalDateTime startTime = newViewModels.get(0).getStartTime();
-            LocalDateTime endTime = newViewModels.get(0).getEndTime();
-            adjustColumnWidth(startTime, endTime);
         }
-    }
-
-    private void adjustColumnWidth(LocalDateTime startTime, LocalDateTime endTime) {
-        long timeDiff = startTime.until(endTime, ChronoUnit.MILLIS);
-        double newWidth = timeDiff * TimelineCell.LENGTH_PER_MILLS + TIMELINE_PADDING;
-        newWidth = (newWidth < DEFAULT_COLUMN_WIDTH) ? DEFAULT_COLUMN_WIDTH : newWidth;
-        timelineColumn.setPrefWidth(newWidth);
     }
 
 }

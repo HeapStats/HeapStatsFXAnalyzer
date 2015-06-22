@@ -17,15 +17,16 @@ import java.util.List;
  */
 public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat>> {
 
-    public static final double LENGTH_PER_MILLS = 1;
-
     private static final double RECT_HEIGHT = 16;
 
     private static final String CSS_CLASS_PREFIX = "rect-";
 
     private final HBox container;
+    
+    private final ThreadRecorderController controller;
 
-    public TimelineCell() {
+    public TimelineCell(ThreadRecorderController controller) {
+        this.controller = controller;
         container = new HBox(0);
         container.setAlignment(Pos.CENTER_LEFT);
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
@@ -87,8 +88,9 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
 
     private Rectangle createThreadRect(LocalDateTime startTime, LocalDateTime endTime,
                                        ThreadStat.ThreadEvent prevEvent) {
+        long range = controller.getRangeStart().until(controller.getRangeEnd(), ChronoUnit.MILLIS);
         long timeDiff = startTime.until(endTime, ChronoUnit.MILLIS);
-        double width = LENGTH_PER_MILLS * timeDiff;
+        double width = (this.getTableView().getWidth() / (double)range) * timeDiff;
         Rectangle rectangle = new Rectangle(width, RECT_HEIGHT);
         String styleClass = CSS_CLASS_PREFIX + prevEvent.name().toLowerCase();
         rectangle.getStyleClass().add(styleClass);
