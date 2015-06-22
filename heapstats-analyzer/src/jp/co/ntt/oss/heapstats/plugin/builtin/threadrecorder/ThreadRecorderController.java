@@ -22,11 +22,11 @@ import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.task.ThreadRecordParseTask;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 import jp.co.ntt.oss.heapstats.utils.TaskAdapter;
-import jp.co.ntt.oss.heapstats.utils.ThreadStatConverter;
 
 import java.io.File;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
+import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 
 /**
  * FXML Controller class
@@ -55,10 +56,10 @@ public class ThreadRecorderController extends PluginController implements Initia
     private TextField fileNameBox;
 
     @FXML
-    private ComboBox<ThreadStat> startCombo;
+    private Label startTimeLabel;
 
     @FXML
-    private ComboBox<ThreadStat> endCombo;
+    private Label endTimeLabel;
 
     @FXML
     private TableView<ThreadStatViewModel> threadListView;
@@ -74,23 +75,49 @@ public class ThreadRecorderController extends PluginController implements Initia
 
     @FXML
     private TableColumn<ThreadStatViewModel, List<ThreadStat>> timelineColumn;
-
+    
+    @FXML
+    private SplitPane rangePane;
+    
+    @FXML
+    private Button okBtn;
+    
     private boolean boundScrollBar = false;
+    
+    private List<ThreadStat> threadStatList;
+    
+    private Map<Long, String> idMap;
+
+    /**
+     * Update caption of label which represents time of selection.
+     * 
+     * @param target Label compornent to draw.
+     * @param newValue Percentage of timeline. This value is between 0.0 and 1.0 .
+     */
+    private void updateRangeLabel(Label target, double newValue){
+        if(threadStatList == null){
+            target.setText("");
+        }
+        else{
+            LocalDateTime start = threadStatList.get(0).getTime();
+            LocalDateTime end = threadStatList.get(threadStatList.size() - 1).getTime();
+            long diff = end.toEpochSecond(ZoneOffset.UTC) - start.toEpochSecond(ZoneOffset.UTC);
+            
+            LocalDateTimeConverter converter = new LocalDateTimeConverter();
+            target.setText(converter.toString(start.plusSeconds((long)(diff * newValue))));
+        }
+    }
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        startCombo.setConverter(new ThreadStatConverter());
-        startCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            updateTime(newValue.getTime(), true);
-        });
-        endCombo.setConverter(new ThreadStatConverter());
-        endCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            updateTime(newValue.getTime(), false);
-        });
+        threadStatList = null;
         
+        rangePane.getDividers().get(0).positionProperty().addListener((b, o, n) -> updateRangeLabel(startTimeLabel, n.doubleValue()));
+        rangePane.getDividers().get(1).positionProperty().addListener((b, o, n) -> updateRangeLabel(endTimeLabel, n.doubleValue()));
+
         showColumn.setCellValueFactory(new PropertyValueFactory<>("show"));
         showColumn.setCellFactory(CheckBoxTableCell.forTableColumn(showColumn));
         threadNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -98,12 +125,12 @@ public class ThreadRecorderController extends PluginController implements Initia
         timelineColumn.setCellFactory(param -> new TimelineCell());
     }
     
+    /**
+     * Event handler for open button.
+     * @param event 
+     */
     @FXML
     private void onOpenBtnClick(ActionEvent event){
-        if (boundScrollBar != true) {
-            bindScroll();
-            boundScrollBar = true;
-        }
         FileChooser dialog = new FileChooser();
         dialog.setTitle("Choose HeapStats Thread Recorder file");
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
@@ -119,26 +146,13 @@ public class ThreadRecorderController extends PluginController implements Initia
             super.bindTask(task);
             task.setOnSucceeded(evt -> {
                 ThreadRecordParseTask parser = task.getTask();
-
-                ObservableList<ThreadStat> list = FXCollections.observableArrayList(parser.getThreadStatList());
-                startCombo.setItems(list);
-                endCombo.setItems(list);
-                startCombo.getSelectionModel().selectFirst();
-                endCombo.getSelectionModel().selectLast();
-
-                Map<Long, List<ThreadStat>> statById = list.stream()
-                        .collect(Collectors.groupingBy(ThreadStat::getId));
-
-                Map<Long, String> idMap = parser.getIdMap();
-                final LocalDateTime startTime = list.get(0).getTime();
-                final LocalDateTime endTime = list.get(list.size() - 1).getTime();
-                ObservableList<ThreadStatViewModel> threadStats = FXCollections.observableArrayList(idMap.keySet().stream()
-                                .sorted()
-                                .map(k -> new ThreadStatViewModel(k, idMap.get(k), startTime, endTime, statById.get(k)))
-                                .collect(Collectors.toList()));
-                adjustColumnWidth(startTime, endTime);
-                threadListView.setItems(threadStats);
-                timelineView.setItems(threadStats);
+                idMap = parser.getIdMap();
+                threadStatList = parser.getThreadStatList();
+                updateRangeLabel(startTimeLabel, 0.0d);
+                updateRangeLabel(endTimeLabel, 1.0d);
+                
+                rangePane.setDisable(false);
+                okBtn.setDisable(false);
             });
             
             Thread parseThread = new Thread(task);
@@ -147,6 +161,32 @@ public class ThreadRecorderController extends PluginController implements Initia
         
     }
 
+    /**
+     * Event handler for OK button.
+     * @param event 
+     */
+    @FXML
+    private void onOkBtnClick(ActionEvent event){
+        
+        if (boundScrollBar != true) {
+            bindScroll();
+            boundScrollBar = true;
+        }
+        
+        Map<Long, List<ThreadStat>> statById = threadStatList.stream()
+                                                             .collect(Collectors.groupingBy(ThreadStat::getId));
+        LocalDateTimeConverter converter = new LocalDateTimeConverter();
+        final LocalDateTime startTime = converter.fromString(startTimeLabel.getText());
+        final LocalDateTime endTime = converter.fromString(endTimeLabel.getText());
+        ObservableList<ThreadStatViewModel> threadStats = FXCollections.observableArrayList(idMap.keySet().stream()
+                                .sorted()
+                                .map(k -> new ThreadStatViewModel(k, idMap.get(k), startTime, endTime, statById.get(k)))
+                                .collect(Collectors.toList()));
+        adjustColumnWidth(startTime, endTime);
+        threadListView.setItems(threadStats);
+        timelineView.setItems(threadStats);
+    }
+    
     @Override
     public String getPluginName() {
         return "Thread Recorder";

@@ -73,3 +73,11 @@
 .rect-socketreadend {
     -fx-fill: #ff8c00;
 }
+
+.rect-range-selected {
+    -fx-background-color: lime;
+}
+
+.rect-range-unselected {
+    -fx-background-color: grey;
+}
