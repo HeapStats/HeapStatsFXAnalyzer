@@ -8,9 +8,11 @@ import javafx.scene.shape.Rectangle;
 import jp.co.ntt.oss.heapstats.container.threadrecord.ThreadStat;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.scene.control.Tooltip;
 
 /**
  * Table cell for thread timeline.
@@ -95,6 +97,10 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
         Rectangle rectangle = new Rectangle(width, RECT_HEIGHT);
         String styleClass = CSS_CLASS_PREFIX + prevEvent.name().toLowerCase();
         rectangle.getStyleClass().add(styleClass);
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS");
+        String caption = startTime.format(formatter) + " - " + endTime.format(formatter) + ": " + prevEvent.toString();
+        Tooltip.install(rectangle, new Tooltip(caption));
         return rectangle;
     }
 
