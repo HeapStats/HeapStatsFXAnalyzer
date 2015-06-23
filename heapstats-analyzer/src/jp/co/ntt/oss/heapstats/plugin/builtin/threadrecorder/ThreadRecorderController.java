@@ -120,6 +120,7 @@ public class ThreadRecorderController extends PluginController implements Initia
         threadNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         timelineColumn.setCellValueFactory(new PropertyValueFactory<>("threadStats"));
         timelineColumn.setCellFactory(param -> new TimelineCell(this));
+        timelineColumn.prefWidthProperty().bind(timelineView.widthProperty());
     }
     
     /**
@@ -150,6 +151,9 @@ public class ThreadRecorderController extends PluginController implements Initia
                 
                 rangePane.setDisable(false);
                 okBtn.setDisable(false);
+                
+                // FIX ME! Can we redraw more lightly?
+                timelineColumn.prefWidthProperty().addListener((b, o, n) -> onOkBtnClick(null));
             });
             
             Thread parseThread = new Thread(task);
