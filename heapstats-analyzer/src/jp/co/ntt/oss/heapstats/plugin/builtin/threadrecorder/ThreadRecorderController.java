@@ -233,6 +233,10 @@ public class ThreadRecorderController extends PluginController implements Initia
         return converter.fromString(endTimeLabel.getText());
     }
 
+    public TableView<ThreadStatViewModel> getTimelineView() {
+        return timelineView;
+    }
+
     private void bindScroll() {
         ScrollBar leftScrollBar = getVerticalScrollBar(threadListView);
         ScrollBar rightScrollBar = getVerticalScrollBar(timelineView);
