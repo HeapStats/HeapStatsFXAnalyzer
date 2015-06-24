@@ -18,6 +18,19 @@ import javafx.scene.control.Tooltip;
  * Table cell for thread timeline.
  */
 public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat>> {
+    
+    public static enum ThreadEvent{
+        Unused,
+        Run,
+        MonitorWait,
+        MonitorContendedEnter,
+        ThreadSleep,
+        Park,
+        FileWrite,
+        FileRead,
+        SocketWrite,
+        SocketRead
+    }
 
     private static final double RECT_HEIGHT = 16;
 
@@ -44,11 +57,7 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
             ThreadStatViewModel viewModel = getTableView().getItems().get(getIndex());
             LocalDateTime startTime = viewModel.getStartTime();
             LocalDateTime endTime = viewModel.getEndTime();
-            if (startTime.isAfter(endTime)) {
-                updateToEmptyCell();
-            } else {
-                drawTimeline(startTime, item, endTime);
-            }
+            drawTimeline(startTime, item, endTime);
         }
     }
 
@@ -56,28 +65,107 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
         container.getChildren().clear();
 
         LocalDateTime prevTime = startTime;
-        ThreadStat.ThreadEvent prevEvent = item.get(0).getEvent();
+        ThreadEvent prevEvent = ThreadEvent.Unused;
+        long prevAdditionalData = 0;
         List<Rectangle> rects = new ArrayList<>();
-        for (int i = 0; i < item.size(); i++) {
-            ThreadStat threadStat = item.get(i);
-            LocalDateTime currentTime = threadStat.getTime();
-            boolean end = currentTime.isAfter(endTime);
-            currentTime = end ? endTime : currentTime;
-            if (i == 0 && threadStat.getEvent() == ThreadStat.ThreadEvent.ThreadStart) {
-                rects.add(createThreadRect(prevTime, currentTime, ThreadStat.ThreadEvent.Unused));
-            } else {
-                rects.add(createThreadRect(prevTime, currentTime, prevEvent));
-            }
-            if (end) {
-                break;
+        for (ThreadStat threadStat : item) {
+            
+            switch(threadStat.getEvent()){
+                
+                case ThreadStart:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), ThreadEvent.Unused, 0));
+                    prevEvent = ThreadEvent.Run;
+                    break;
+                    
+                case ThreadEnd:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), prevEvent, prevAdditionalData));
+                    break;
+                    
+                case MonitorWait:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), prevEvent, prevAdditionalData));
+                    prevEvent = ThreadEvent.MonitorWait;
+                    prevAdditionalData = threadStat.getAdditionalData();
+                    break;
+                    
+                case MonitorWaited:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), ThreadEvent.MonitorWait, prevAdditionalData));
+                    prevEvent = ThreadEvent.Run;
+                    break;
+                    
+                case MonitorContendedEnter:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), prevEvent, prevAdditionalData));
+                    prevEvent = ThreadEvent.MonitorContendedEnter;
+                    break;
+                    
+                case MonitorContendedEntered:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), ThreadEvent.MonitorContendedEnter, prevAdditionalData));
+                    prevEvent = ThreadEvent.Run;
+                    break;
+                    
+                case ThreadSleepStart:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), prevEvent, prevAdditionalData));
+                    prevEvent = ThreadEvent.ThreadSleep;
+                    break;
+                    
+                case ThreadSleepEnd:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), ThreadEvent.ThreadSleep, threadStat.getAdditionalData()));
+                    prevEvent = ThreadEvent.Run;
+                    break;
+                    
+                case Park:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), prevEvent, prevAdditionalData));
+                    prevEvent = ThreadEvent.Park;
+                    prevAdditionalData = threadStat.getAdditionalData();
+                    break;
+                    
+                case Unpark:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), ThreadEvent.Park, prevAdditionalData));
+                    prevEvent = ThreadEvent.Run;
+                    break;
+                    
+                case FileWriteStart:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), prevEvent, prevAdditionalData));
+                    prevEvent = ThreadEvent.FileWrite;
+                    break;
+                    
+                case FileWriteEnd:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), ThreadEvent.FileWrite, threadStat.getAdditionalData()));
+                    prevEvent = ThreadEvent.Run;
+                    break;
+                    
+                case FileReadStart:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), prevEvent, prevAdditionalData));
+                    prevEvent = ThreadEvent.FileRead;
+                    break;
+                    
+                case FileReadEnd:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), ThreadEvent.FileRead, threadStat.getAdditionalData()));
+                    prevEvent = ThreadEvent.Run;
+                    break;
+                    
+                case SocketWriteStart:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), prevEvent, prevAdditionalData));
+                    prevEvent = ThreadEvent.SocketWrite;
+                    break;
+                    
+                case SocketWriteEnd:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), ThreadEvent.SocketWrite, threadStat.getAdditionalData()));
+                    prevEvent = ThreadEvent.Run;
+                    break;
+                    
+                case SocketReadStart:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), prevEvent, prevAdditionalData));
+                    prevEvent = ThreadEvent.SocketRead;
+                    break;
+                    
+                case SocketReadEnd:
+                    rects.add(createThreadRect(prevTime, threadStat.getTime(), ThreadEvent.SocketRead, threadStat.getAdditionalData()));
+                    prevEvent = ThreadEvent.Run;
+                    break;
+                    
             }
             
-            prevTime = currentTime;
-            prevEvent = threadStat.getEvent();
-            
-            if (i == item.size() - 1 && threadStat.getEvent() != ThreadStat.ThreadEvent.ThreadEnd) {
-                rects.add(createThreadRect(prevTime, endTime, prevEvent));
-            }
+            prevTime = threadStat.getTime();
         }
         container.getChildren().addAll(rects);
         setGraphic(container);
@@ -88,19 +176,45 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
         setGraphic(null);
     }
 
-    private Rectangle createThreadRect(LocalDateTime startTime, LocalDateTime endTime,
-                                       ThreadStat.ThreadEvent prevEvent) {
+    private Rectangle createThreadRect(LocalDateTime startTime, LocalDateTime endTime, ThreadEvent event, long additionalData) {
         // Add 1 sec to end time because we want to draw timeline until end time.
         long range = controller.getRangeStart().until(controller.getRangeEnd().plusSeconds(1), ChronoUnit.MILLIS);
+        double scale = this.getTableView().getWidth() / (double)range;
         long timeDiff = startTime.until(endTime, ChronoUnit.MILLIS);
-        double width = (this.getTableView().getWidth() / (double)range) * timeDiff;
+        if(scale > 0.0d){
+            range = controller.getRangeStart().until(controller.getRangeEnd().plusSeconds(1), ChronoUnit.MICROS);
+            scale = this.getTableView().getWidth() / (double)range;
+            timeDiff = startTime.until(endTime, ChronoUnit.MICROS);
+        }
+        
+        double width = scale * timeDiff;
         Rectangle rectangle = new Rectangle(width, RECT_HEIGHT);
-        String styleClass = CSS_CLASS_PREFIX + prevEvent.name().toLowerCase();
+        String styleClass = CSS_CLASS_PREFIX + event.name().toLowerCase();
         rectangle.getStyleClass().add(styleClass);
         
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS");
-        String caption = startTime.format(formatter) + " - " + endTime.format(formatter) + ": " + prevEvent.toString();
-        Tooltip.install(rectangle, new Tooltip(caption));
+        String caption = startTime.format(formatter) + " - " + endTime.format(formatter) + ": " + event.toString();
+        switch(event){
+            case MonitorWait:
+            case ThreadSleep:
+            case Park:
+                if(additionalData > 0){
+                    caption += " (" + Long.toString(additionalData) + " ms)";
+                }
+                break;
+                
+            case FileWrite:
+            case FileRead:
+            case SocketWrite:
+            case SocketRead:
+                caption += " (" + Long.toString(additionalData) + " bytes)";
+                break;
+        }
+        
+        if((event != ThreadEvent.Unused) && (timeDiff > 0)){
+            Tooltip.install(rectangle, new Tooltip(caption));
+        }
+        
         return rectangle;
     }
 

@@ -175,11 +175,13 @@ public class ThreadRecorderController extends PluginController implements Initia
             boundScrollBar = true;
         }
         
-        Map<Long, List<ThreadStat>> statById = threadStatList.stream()
-                                                             .collect(Collectors.groupingBy(ThreadStat::getId));
         LocalDateTimeConverter converter = new LocalDateTimeConverter();
         final LocalDateTime startTime = converter.fromString(startTimeLabel.getText());
         final LocalDateTime endTime = converter.fromString(endTimeLabel.getText());
+
+        Map<Long, List<ThreadStat>> statById = threadStatList.stream()
+                                                             .filter(s -> s.getTime().isAfter(startTime) && s.getTime().isBefore(endTime))
+                                                             .collect(Collectors.groupingBy(ThreadStat::getId));
         ObservableList<ThreadStatViewModel> threadStats = FXCollections.observableArrayList(idMap.keySet().stream()
                                 .sorted()
                                 .map(k -> new ThreadStatViewModel(k, idMap.get(k), startTime, endTime, statById.get(k)))
