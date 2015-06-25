@@ -187,7 +187,7 @@ public class ThreadRecorderController extends PluginController implements Initia
                                 .map(k -> new ThreadStatViewModel(k, idMap.get(k), startTime, endTime, statById.get(k)))
                                 .collect(Collectors.toList()));
         threadListView.setItems(threadStats);
-        timelineView.setItems(threadStats);
+        timelineView.itemsProperty().bind(threadListView.itemsProperty());
     }
     
     @Override

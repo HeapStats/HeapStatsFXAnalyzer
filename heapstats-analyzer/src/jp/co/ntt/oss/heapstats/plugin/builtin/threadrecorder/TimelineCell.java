@@ -85,21 +85,18 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
         if (empty || item == null || item.isEmpty()) {
             updateToEmptyCell();
         } else {
-            ThreadStatViewModel viewModel = getTableView().getItems().get(getIndex());
-            LocalDateTime startTime = viewModel.getStartTime();
-            LocalDateTime endTime = viewModel.getEndTime();
-            drawTimeline(startTime, item, endTime);
+            drawTimeline((ThreadStatViewModel)getTableRow().getItem());
         }
     }
 
-    private void drawTimeline(LocalDateTime startTime, List<ThreadStat> item, LocalDateTime endTime) {
+    private void drawTimeline(ThreadStatViewModel viewModel) {
         container.getChildren().clear();
 
-        LocalDateTime prevTime = startTime;
+        LocalDateTime prevTime = viewModel.getStartTime();
         ThreadEvent prevEvent = ThreadEvent.Unused;
         long prevAdditionalData = 0;
         List<Rectangle> rects = new ArrayList<>();
-        for (ThreadStat threadStat : item) {
+        for (ThreadStat threadStat : viewModel.threadStatsProperty().get()) {
             
             switch(threadStat.getEvent()){
                 
@@ -198,6 +195,8 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
             
             prevTime = threadStat.getTime();
         }
+        
+        container.visibleProperty().bind(viewModel.showProperty());
         container.getChildren().addAll(rects);
         setGraphic(container);
     }
