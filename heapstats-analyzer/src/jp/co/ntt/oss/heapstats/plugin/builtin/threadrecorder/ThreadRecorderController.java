@@ -119,7 +119,7 @@ public class ThreadRecorderController extends PluginController implements Initia
         showColumn.setCellFactory(CheckBoxTableCell.forTableColumn(showColumn));
         threadNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         timelineColumn.setCellValueFactory(new PropertyValueFactory<>("threadStats"));
-        timelineColumn.setCellFactory(param -> new TimelineCell(this));
+        timelineColumn.setCellFactory(param -> new TimelineCell((new LocalDateTimeConverter()).fromString(startTimeLabel.getText()), (new LocalDateTimeConverter()).fromString(endTimeLabel.getText())));
         timelineColumn.prefWidthProperty().bind(timelineView.widthProperty());
         rangePane.getItems().forEach(n -> SplitPane.setResizableWithParent(n, false));
     }
@@ -213,24 +213,6 @@ public class ThreadRecorderController extends PluginController implements Initia
     @Override
     public Runnable getOnCloseRequest() {
         return null;
-    }
-
-    /**
-     * Get start time of selected range.
-     * @return Start tine to draw.
-     */
-    public LocalDateTime getRangeStart(){
-        LocalDateTimeConverter converter = new LocalDateTimeConverter();
-        return converter.fromString(startTimeLabel.getText());
-    }
-
-    /**
-     * Get end time of selected range.
-     * @return End tine to draw.
-     */
-    public LocalDateTime getRangeEnd(){
-        LocalDateTimeConverter converter = new LocalDateTimeConverter();
-        return converter.fromString(endTimeLabel.getText());
     }
 
     public TableView<ThreadStatViewModel> getTimelineView() {
