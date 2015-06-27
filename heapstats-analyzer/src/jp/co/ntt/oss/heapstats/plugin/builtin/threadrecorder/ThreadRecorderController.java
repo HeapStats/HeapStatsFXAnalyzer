@@ -84,6 +84,10 @@ public class ThreadRecorderController extends PluginController implements Initia
     private List<ThreadStat> threadStatList;
     
     private Map<Long, String> idMap;
+    
+    private LocalDateTime rangeStart;
+    
+    private LocalDateTime rangeEnd;
 
     /**
      * Update caption of label which represents time of selection.
@@ -92,16 +96,21 @@ public class ThreadRecorderController extends PluginController implements Initia
      * @param newValue Percentage of timeline. This value is between 0.0 and 1.0 .
      */
     private void updateRangeLabel(Label target, double newValue){
-        if(threadStatList == null){
-            target.setText("");
-        }
-        else{
+        if((threadStatList != null) && !threadStatList.isEmpty()){
             LocalDateTime start = threadStatList.get(0).getTime();
             LocalDateTime end = threadStatList.get(threadStatList.size() - 1).getTime();
             long diff = start.until(end, ChronoUnit.MILLIS);
+            LocalDateTime newTime = start.plus((long)((double)diff * newValue), ChronoUnit.MILLIS);
+            
+            if(target == startTimeLabel){
+                rangeStart = newTime;
+            }
+            else{
+                rangeEnd = newTime;
+            }
             
             LocalDateTimeConverter converter = new LocalDateTimeConverter();
-            target.setText(converter.toString(start.plus((long)((double)diff * newValue), ChronoUnit.MILLIS)));
+            target.setText(converter.toString(newTime));
         }
     }
 
@@ -111,6 +120,8 @@ public class ThreadRecorderController extends PluginController implements Initia
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         threadStatList = null;
+        rangeStart = null;
+        rangeEnd = null;
         
         rangePane.getDividers().get(0).positionProperty().addListener((b, o, n) -> updateRangeLabel(startTimeLabel, n.doubleValue()));
         rangePane.getDividers().get(1).positionProperty().addListener((b, o, n) -> updateRangeLabel(endTimeLabel, n.doubleValue()));
@@ -119,7 +130,7 @@ public class ThreadRecorderController extends PluginController implements Initia
         showColumn.setCellFactory(CheckBoxTableCell.forTableColumn(showColumn));
         threadNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         timelineColumn.setCellValueFactory(new PropertyValueFactory<>("threadStats"));
-        timelineColumn.setCellFactory(param -> new TimelineCell((new LocalDateTimeConverter()).fromString(startTimeLabel.getText()), (new LocalDateTimeConverter()).fromString(endTimeLabel.getText())));
+        timelineColumn.setCellFactory(param -> new TimelineCell(rangeStart, rangeEnd));
         timelineColumn.prefWidthProperty().bind(timelineView.widthProperty());
         rangePane.getItems().forEach(n -> SplitPane.setResizableWithParent(n, false));
     }
@@ -147,8 +158,8 @@ public class ThreadRecorderController extends PluginController implements Initia
                 ThreadRecordParseTask parser = task.getTask();
                 idMap = parser.getIdMap();
                 threadStatList = parser.getThreadStatList();
-                updateRangeLabel(startTimeLabel, 0.0d);
-                updateRangeLabel(endTimeLabel, 1.0d);
+                rangePane.getDividers().get(0).setPosition(0.0d);
+                rangePane.getDividers().get(1).setPosition(1.0d);
                 
                 rangePane.setDisable(false);
                 okBtn.setDisable(false);
@@ -175,16 +186,12 @@ public class ThreadRecorderController extends PluginController implements Initia
             boundScrollBar = true;
         }
         
-        LocalDateTimeConverter converter = new LocalDateTimeConverter();
-        final LocalDateTime startTime = converter.fromString(startTimeLabel.getText());
-        final LocalDateTime endTime = converter.fromString(endTimeLabel.getText());
-
         Map<Long, List<ThreadStat>> statById = threadStatList.stream()
-                                                             .filter(s -> s.getTime().isAfter(startTime) && s.getTime().isBefore(endTime))
+                                                             .filter(s -> s.getTime().isAfter(rangeStart) && s.getTime().isBefore(rangeEnd))
                                                              .collect(Collectors.groupingBy(ThreadStat::getId));
         ObservableList<ThreadStatViewModel> threadStats = FXCollections.observableArrayList(idMap.keySet().stream()
                                 .sorted()
-                                .map(k -> new ThreadStatViewModel(k, idMap.get(k), startTime, endTime, statById.get(k)))
+                                .map(k -> new ThreadStatViewModel(k, idMap.get(k), rangeStart, rangeEnd, statById.get(k)))
                                 .collect(Collectors.toList()));
         threadListView.setItems(threadStats);
         timelineView.itemsProperty().bind(threadListView.itemsProperty());
