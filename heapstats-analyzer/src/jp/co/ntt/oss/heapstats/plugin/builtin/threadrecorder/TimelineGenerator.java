@@ -182,8 +182,17 @@ public class TimelineGenerator {
         
         for(int Cnt = startIndex; Cnt < threadStatList.size(); Cnt++){
             ThreadStat threadStat = threadStatList.get(Cnt);
+            long additionalData;
             
-            rects.add(createThreadRect(prevTime, threadStat.getTime(), prevEvent, prevAdditionalData));
+            if((prevEvent == ThreadEvent.FileRead) || (prevEvent == ThreadEvent.FileWrite) ||
+               (prevEvent == ThreadEvent.SocketRead) || (prevEvent == ThreadEvent.SocketWrite)){
+                additionalData = threadStat.getAdditionalData();
+            }
+            else{
+                additionalData = prevAdditionalData;
+            }
+            
+            rects.add(createThreadRect(prevTime, threadStat.getTime(), prevEvent, additionalData));
             
             prevTime = threadStat.getTime();
             prevAdditionalData = threadStat.getAdditionalData();
