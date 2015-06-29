@@ -22,3 +22,7 @@ out/
 .idea_modules/
 atlassian-ide-plugin.xml
 com_crashlytics_export_strings.xml
+/heapstats-mbean/java/heapstats-mbean/nbproject/private/
+/heapstats-mbean/java/build/
+/heapstats-mbean/java/dist/
+/heapstats-mbean/java/nbproject/private/
