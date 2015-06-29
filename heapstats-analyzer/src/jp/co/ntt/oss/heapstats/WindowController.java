@@ -21,12 +21,12 @@ package jp.co.ntt.oss.heapstats;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -36,6 +36,8 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -53,7 +55,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
-import jp.co.ntt.oss.heapstats.plugin.PluginClassLoader;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.LogController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.SnapShotController;
@@ -72,7 +73,7 @@ public class WindowController implements Initializable {
     
     private ProgressIndicator progress;
     
-    private PluginClassLoader pluginClassLoader;
+    private URLClassLoader pluginClassLoader;
     
     private Window owner;
     
@@ -261,24 +262,30 @@ public class WindowController implements Initializable {
         }
         
         Path libPath = appJarPath.getParent().resolve("lib");
-        List<URL> jarURLList = new ArrayList<>();
+        URL[] jarURLList = null;
         
         try(DirectoryStream<Path> jarPaths = Files.newDirectoryStream(libPath, "*.jar")){
-            jarPaths.forEach(p -> {
-                                     try{
-                                       jarURLList.add(p.toUri().toURL());
-                                     }
-                                     catch (MalformedURLException ex) {
-                                       Logger.getLogger(WindowController.class.getName()).log(Level.SEVERE, null, ex);
-                                     }
-                                  });
+            jarURLList = StreamSupport.stream(jarPaths.spliterator(), false)
+                                      .map(p -> {
+                                                  try{
+                                                      return p.toUri().toURL();
+                                                  }
+                                                  catch(MalformedURLException e){
+                                                      throw new RuntimeException(e);
+                                                  }
+                                                })
+                                      .filter(u -> !u.getFile().endsWith("heapstats-core"))
+                                      .collect(Collectors.toList())
+                                      .toArray(new URL[0]);
         }
         catch(IOException ex) {
             Logger.getLogger(WindowController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        pluginClassLoader = new PluginClassLoader(jarURLList.toArray(new URL[0]));
-        FXMLLoader.setDefaultClassLoader(pluginClassLoader);
+        if(jarURLList != null){
+            pluginClassLoader = new URLClassLoader(jarURLList);
+            FXMLLoader.setDefaultClassLoader(pluginClassLoader);
+        }
             
         List<String> plugins = HeapStatsUtils.getPlugins();
         plugins.stream().forEach(s -> addPlugin(s));

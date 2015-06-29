@@ -18,14 +18,20 @@
 package jp.co.ntt.oss.heapstats.plugin.builtin.threadrecorder;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
+import jp.co.ntt.oss.heapstats.container.threadrecord.ThreadStat;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
- * This class uses for switch to show Thread Status Data.
+ * Thread Status Data Model for presentation.
  * 
  * @author Yasumasa Suenaga
  */
-public class ThreadShowSwitch {
+public class ThreadStatViewModel {
     
     private final BooleanProperty show;
     
@@ -33,9 +39,19 @@ public class ThreadShowSwitch {
     
     private String name;
 
-    public ThreadShowSwitch(long id, String name) {
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime;
+
+    private final ReadOnlyObjectWrapper<List<ThreadStat>> threadStats;
+
+    public ThreadStatViewModel(long id, String name, LocalDateTime startTime, LocalDateTime endTime,
+            List<ThreadStat> threadStats) {
         this.id = id;
         this.name = name;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.threadStats = new ReadOnlyObjectWrapper<>(threadStats);
         this.show = new SimpleBooleanProperty(true);
     }
     
@@ -58,5 +74,29 @@ public class ThreadShowSwitch {
     public void setName(String name) {
         this.name = name;
     }
-    
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public List<ThreadStat> getThreadStats() {
+        return threadStats.get();
+    }
+
+    public ReadOnlyObjectProperty<List<ThreadStat>> threadStatsProperty() {
+        return threadStats.getReadOnlyProperty();
+    }
+
 }
