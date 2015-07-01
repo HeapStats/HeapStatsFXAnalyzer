@@ -18,6 +18,7 @@
 package jp.co.ntt.oss.heapstats.cli;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import javax.management.remote.JMXServiceURL;
 import javax.xml.bind.JAXB;
 import jp.co.ntt.oss.heapstats.container.snapshot.ObjectData;
 import jp.co.ntt.oss.heapstats.container.threadrecord.ThreadStat;
@@ -48,7 +50,8 @@ public class Options {
     public enum FileType{
         LOG,
         SNAPSHOT,
-        THREADRECORD
+        THREADRECORD,
+        JMX
     }
     
     /**
@@ -77,7 +80,17 @@ public class Options {
         DUMP_THREAD_RECORD,    /* -a */
         DUMP_SUSPEND_EVENTS,   /* -s */
         DUMP_LOCK_EVENTS,      /* -l */
-        DUMP_IO_EVENTS         /* -i */
+        DUMP_IO_EVENTS,        /* -i */
+        
+        /* JMX access (-jmx) */
+        JMX_GET_VERSION,     /* -v */
+        JMX_GET_SNAPSHOT,    /* -s */
+        JMX_GET_LOG,         /* -r */
+        JMX_GET_CONFIG,      /* -c */
+        JMX_CHANGE_CONFIG,   /* -n */
+        JMX_INVOKE_SNAPSHOT, /* -is */
+        JMX_INVOKE_LOG,      /* -ir */
+        JMX_INVOKE_ALL_LOG   /* -ia */
     }
     
     /**
@@ -135,6 +148,24 @@ public class Options {
     private OptionalLong tid = OptionalLong.empty();
     
     /**
+     * JMX URL to connect.
+     * This value affects -jmx only.
+     */
+    private JMXServiceURL jmxURL;
+    
+    /**
+     * Configuration key of HeapStats agent.
+     * This value affects -jmx only.
+     */
+    private String configKey;
+    
+    /**
+     * New configuration key of HeapStats agent.
+     * This value affects -jmx only.
+     */
+    private String newConfigValue;
+    
+    /**
      * Print help message of HeapStats CLI.
      */
     public void printHelp(){
@@ -179,6 +210,15 @@ public class Options {
         System.out.println("    -s      : List suspend events.");
         System.out.println("    -l      : List lock events.");
         System.out.println("    -i      : List I/O events.");
+        System.out.println("  -jmx <URL> : Access remote HeapStats agent through JMX.");
+        System.out.println("    -v               : Get version of HeapStats agent.");
+        System.out.println("    -s               : Save remote HeapStats snapshot to file.");
+        System.out.println("    -r               : Save remote HeapStats resource log to file.");
+        System.out.println("    -c <name>        : Get configuration value of <name> in remote HeapStats agent.");
+        System.out.println("    -n <name> <value>: Change configuration value of <name> to <value> in remote HeapStats agent.");
+        System.out.println("    -is              : Invoke SnapShot collection.");
+        System.out.println("    -ir              : Invoke resource log collection.");
+        System.out.println("    -ia              : Invoke all log collection.");
     }
     
     /**
@@ -349,6 +389,54 @@ public class Options {
     }
     
     /**
+     * Parse commandline options for -jmx option.
+     * @param itr List iterator of commandline options.
+     */
+    private void parseJMXOptions(ListIterator<String> itr){
+        type = FileType.JMX;
+        
+        try {
+            jmxURL = new JMXServiceURL(getNextValue(itr, "-jmx option need a URL to connect."));
+        } catch (MalformedURLException ex) {
+            throw new IllegalArgumentException("Invalid JMX URL", ex);
+        }
+        
+        String option = getNextValue(itr, "-jmx option need more argument.");
+        switch(option){
+            case "-v":
+                mode = Mode.JMX_GET_VERSION;
+                break;
+            case "-s":
+                mode = Mode.JMX_GET_SNAPSHOT;
+                break;
+            case "-r":
+                mode = Mode.JMX_GET_LOG;
+                break;
+            case "-c":
+                mode = Mode.JMX_GET_CONFIG;
+                configKey = getNextValue(itr, "-jmx option need more argument.");
+                break;
+            case "-n":
+                mode = Mode.JMX_CHANGE_CONFIG;
+                configKey = getNextValue(itr, "-jmx option need more argument.");
+                newConfigValue = getNextValue(itr, "-jmx option need more argument.");
+                break;
+            case "-is":
+                mode = Mode.JMX_INVOKE_SNAPSHOT;
+                break;
+            case "-ir":
+                mode = Mode.JMX_INVOKE_LOG;
+                break;
+            case "-ia":
+                mode = Mode.JMX_INVOKE_ALL_LOG;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown option: " + option);
+        }
+        
+    }
+
+    /**
      * Parse commandline options.
      * @param options Array of commandline options.
      */
@@ -374,6 +462,9 @@ public class Options {
                     break;
                 case "-event":
                     parseThreadRecorderOptions(itr);
+                    break;
+                case "-jmx":
+                    parseJMXOptions(itr);
                     break;
                 default:
                     file.add(Paths.get(option));
@@ -504,6 +595,22 @@ public class Options {
      */
     public Predicate<? super ThreadStat> getIdPredicate(){
         return tid.isPresent() ? (s -> tid.getAsLong() == s.getId()) : (s -> true);
+    }
+
+    /**
+     * Get JMX URL to connect.
+     * @return JMX URL.
+     */
+    public JMXServiceURL getJmxURL() {
+        return jmxURL;
+    }
+
+    public String getConfigKey() {
+        return configKey;
+    }
+
+    public String getNewConfigValue() {
+        return newConfigValue;
     }
     
 }

@@ -18,6 +18,7 @@
 package jp.co.ntt.oss.heapstats.cli;
 
 import jp.co.ntt.oss.heapstats.cli.processor.CliProcessor;
+import jp.co.ntt.oss.heapstats.cli.processor.JMXProcessor;
 import jp.co.ntt.oss.heapstats.cli.processor.LogProcessor;
 import jp.co.ntt.oss.heapstats.cli.processor.SnapShotProcessor;
 import jp.co.ntt.oss.heapstats.cli.processor.ThreadRecordProcessor;
@@ -55,6 +56,9 @@ public class CliMain {
                 break;
             case THREADRECORD:
                 processor = new ThreadRecordProcessor(options);
+                break;
+            case JMX:
+                processor = new JMXProcessor(options);
                 break;
             default:
                 throw new IllegalStateException("Unexpected file mode: " + fileType.toString());
