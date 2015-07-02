@@ -36,6 +36,8 @@ public class JMXHelper implements AutoCloseable{
     
     public static final String DEFAULT_OBJECT_NAME = "heapstats:type=HeapStats";
     
+    private JMXServiceURL url;
+    
     private JMXConnector connector;
     
     private final HeapStatsMBean mbean;
@@ -45,6 +47,7 @@ public class JMXHelper implements AutoCloseable{
     }
     
     public JMXHelper(JMXServiceURL url) throws IOException, MalformedObjectNameException{
+        this.url = url;
         connector = JMXConnectorFactory.connect(url);
         MBeanServerConnection connection = connector.getMBeanServerConnection();
         mbean = MBeanServerInvocationHandler.newProxyInstance(connection, new ObjectName(DEFAULT_OBJECT_NAME), HeapStatsMBean.class, false);
@@ -130,6 +133,10 @@ public class JMXHelper implements AutoCloseable{
         }
         
         mbean.changeConfiguration(key, newObj);
+    }
+
+    public JMXServiceURL getUrl() {
+        return url;
     }
     
 }
