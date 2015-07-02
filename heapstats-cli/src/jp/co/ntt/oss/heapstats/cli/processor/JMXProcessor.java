@@ -43,10 +43,9 @@ public class JMXProcessor implements CliProcessor{
                     System.out.println(jmx.getMbean().getConfiguration(options.getConfigKey()));
                     break;
                 case JMX_CHANGE_CONFIG:
+                    System.out.print(options.getConfigKey() + ": " + jmx.getMbean().getConfiguration(options.getConfigKey()) + " -> ");
                     jmx.changeConfigurationThroughString(options.getConfigKey(), options.getNewConfigValue());
-                    System.out.print(options.getConfigKey() + ": " + jmx.getMbean().getConfiguration(jmx.getMbean().getConfiguration(options.getConfigKey()).toString() + " -> "));
-                    jmx.changeConfigurationThroughString(options.getConfigKey(), options.getNewConfigValue());
-                    System.out.println(jmx.getMbean().getConfiguration(options.getConfigKey()).toString());
+                    System.out.println(jmx.getMbean().getConfiguration(options.getConfigKey()));
                     break;
                 case JMX_INVOKE_SNAPSHOT:
                     jmx.getMbean().invokeSnapShotCollection();
