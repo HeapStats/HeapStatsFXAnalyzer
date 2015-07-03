@@ -24,6 +24,7 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.scene.control.Control;
 
 /**
  * Container class of HeapStats agent configuration.
@@ -37,6 +38,8 @@ public class HeapStatsConfig {
     private final Property value;
     
     private final Object currentValue;
+    
+    private Control cellContent;
     
     private final BooleanProperty changed;
     
@@ -66,6 +69,7 @@ public class HeapStatsConfig {
         }
         
         this.value.addListener((v, o, n) -> changed.set(!n.equals(currentValue)));
+        this.cellContent = null;
     }
     
     public StringProperty keyProperty(){
@@ -78,6 +82,14 @@ public class HeapStatsConfig {
 
     public BooleanProperty changedProperty(){
         return changed;
+    }
+
+    public Control getCellContent() {
+        return cellContent;
+    }
+
+    public void setCellContent(Control cellContent) {
+        this.cellContent = cellContent;
     }
 
 }

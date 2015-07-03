@@ -35,6 +35,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -73,6 +74,82 @@ public class HeapStatsMBeanController implements Initializable {
     
     private Stage stage;
     
+    
+    private static class ConfigKeyTableCell extends TableCell<HeapStatsConfig, String>{
+        
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            
+            if(!empty){
+                HeapStatsConfig config = (HeapStatsConfig)getTableRow().getItem();
+                styleProperty().bind(Bindings.createStringBinding(() -> config.changedProperty().get() ? "-fx-text-fill: orange;" : "-fx-text-fill: black;", config.changedProperty()));
+                setText(item);
+            }
+            
+       }
+        
+    }
+    
+    private static class VariousTableCell extends TableCell<HeapStatsConfig, Object>{
+        
+        @Override
+        protected void updateItem(Object item, boolean empty) {
+            super.updateItem(item, empty);
+            
+            if(empty){
+               return;
+            }
+
+            HeapStatsConfig config = (HeapStatsConfig)getTableRow().getItem();
+            if(config == null){
+                return;
+            }
+            
+            Control cellContent = config.getCellContent();
+            if(item instanceof Boolean){
+                if(!(cellContent instanceof CheckBox)){
+                    cellContent = new CheckBox();
+                    ((CheckBox)cellContent).selectedProperty().bindBidirectional(config.valueProperty());
+                }
+            }
+            else if(item instanceof HeapStatsMBean.LogLevel){
+                if(!(cellContent instanceof ChoiceBox)){
+                    cellContent = new ChoiceBox(FXCollections.observableArrayList(HeapStatsMBean.LogLevel.values()));
+                    ((ChoiceBox<HeapStatsMBean.LogLevel>)cellContent).valueProperty().bindBidirectional(config.valueProperty());
+                }
+            }
+            else if(item instanceof HeapStatsMBean.RankOrder){
+                if(!(cellContent instanceof ChoiceBox)){
+                    cellContent = new ChoiceBox(FXCollections.observableArrayList(HeapStatsMBean.RankOrder.values()));
+                    ((ChoiceBox<HeapStatsMBean.RankOrder>)cellContent).valueProperty().bindBidirectional(config.valueProperty());
+                }
+            }
+            else if(item instanceof Integer){
+                if(!(cellContent instanceof TextField)){
+                    cellContent = new TextField();
+                    ((TextField)cellContent).textProperty().bindBidirectional((Property<Integer>)config.valueProperty(), new IntegerStringConverter());
+                }
+            }
+            else if(item instanceof Long){
+                if(!(cellContent instanceof TextField)){
+                    cellContent = new TextField();
+                    ((TextField)cellContent).textProperty().bindBidirectional((Property<Long>)config.valueProperty(), new LongStringConverter());
+                }
+            }
+            else{
+                if(!(cellContent instanceof TextField)){
+                    cellContent = new TextField();
+                    ((TextField)cellContent).textProperty().bindBidirectional(config.valueProperty());
+                }
+            }
+            
+            config.setCellContent(cellContent);
+            setGraphic(cellContent);
+        }
+        
+    }
+    
 
     /**
      * Initializes the controller class.
@@ -80,61 +157,9 @@ public class HeapStatsMBeanController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         keyColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
-        keyColumn.setCellFactory(p -> new TableCell<HeapStatsConfig, String>(){
-                                                                                 @Override
-                                                                                 protected void updateItem(String item, boolean empty){
-                                                                                     if(!empty){
-                                                                                         HeapStatsConfig config = configTable.getItems().get(getIndex());
-                                                                                         styleProperty().bind(Bindings.createStringBinding(() -> config.changedProperty().get() ? "-fx-text-fill: orange;" : "-fx-text-fill: black;", config.changedProperty()));
-                                                                                         setText(item);
-                                                                                     }
-                                                                                 }
-                                                                              });
+        keyColumn.setCellFactory(p -> new ConfigKeyTableCell());
         valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
-        valueColumn.setCellFactory(p -> new TableCell<HeapStatsConfig, Object>() {
-                                                                                    @Override
-                                                                                    protected void updateItem(Object item, boolean empty) {
-                                                                                      super.updateItem(item, empty);
-                                                                                      
-                                                                                      if(empty){
-                                                                                          return;
-                                                                                      }
-                                                                                      
-                                                                                      Property valProp = (Property)getTableColumn().getCellObservableValue(getIndex());
-                                                                                      Node node;
-                                                                                      
-                                                                                      if(item == null){
-                                                                                        node = new TextField();
-                                                                                        ((TextField)node).textProperty().bindBidirectional(valProp);
-                                                                                      }
-                                                                                      else if(item instanceof Boolean){
-                                                                                        node = new CheckBox();
-                                                                                        ((CheckBox)node).selectedProperty().bindBidirectional(valProp);
-                                                                                      }
-                                                                                      else if(item instanceof HeapStatsMBean.LogLevel){
-                                                                                        node = new ChoiceBox(FXCollections.observableArrayList(HeapStatsMBean.LogLevel.values()));
-                                                                                        ((ChoiceBox<HeapStatsMBean.LogLevel>)node).valueProperty().bindBidirectional(valProp);
-                                                                                      }
-                                                                                      else if(item instanceof HeapStatsMBean.RankOrder){
-                                                                                        node = new ChoiceBox(FXCollections.observableArrayList(HeapStatsMBean.RankOrder.values()));
-                                                                                        ((ChoiceBox<HeapStatsMBean.RankOrder>)node).valueProperty().bindBidirectional(valProp);
-                                                                                      }
-                                                                                      else if(item instanceof Integer){
-                                                                                        node = new TextField();
-                                                                                        ((TextField)node).textProperty().bindBidirectional((Property<Integer>)valProp, new IntegerStringConverter());
-                                                                                      }
-                                                                                      else if(item instanceof Long){
-                                                                                        node = new TextField();
-                                                                                        ((TextField)node).textProperty().bindBidirectional((Property<Long>)valProp, new LongStringConverter());
-                                                                                      }
-                                                                                      else{
-                                                                                        node = new TextField();
-                                                                                        ((TextField)node).textProperty().bindBidirectional(valProp);
-                                                                                      }
-                                                                                      
-                                                                                      setGraphic(node);
-                                                                                    }
-                                                                                 });
+        valueColumn.setCellFactory(p -> new VariousTableCell());
     }    
 
     public JMXHelper getJmxHelper() {
