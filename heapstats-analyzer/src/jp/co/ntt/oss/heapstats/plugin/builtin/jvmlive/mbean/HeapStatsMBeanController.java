@@ -43,6 +43,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.converter.IntegerStringConverter;
 import javafx.util.converter.LongStringConverter;
 import jp.co.ntt.oss.heapstats.WindowController;
 import jp.co.ntt.oss.heapstats.jmx.JMXHelper;
@@ -117,6 +118,10 @@ public class HeapStatsMBeanController implements Initializable {
                                                                                       else if(item instanceof HeapStatsMBean.RankOrder){
                                                                                         node = new ChoiceBox(FXCollections.observableArrayList(HeapStatsMBean.RankOrder.values()));
                                                                                         ((ChoiceBox<HeapStatsMBean.RankOrder>)node).valueProperty().bindBidirectional(valProp);
+                                                                                      }
+                                                                                      else if(item instanceof Integer){
+                                                                                        node = new TextField();
+                                                                                        ((TextField)node).textProperty().bindBidirectional((Property<Integer>)valProp, new IntegerStringConverter());
                                                                                       }
                                                                                       else if(item instanceof Long){
                                                                                         node = new TextField();

@@ -214,7 +214,7 @@ public class JVMLiveController extends PluginController implements Initializable
     }
     
     private void onHeapStatsLinkClicked(JMXHelper jmxHelper){
-        FXMLLoader loader = new FXMLLoader(JVMLiveController.class.getResource("/jp/co/ntt/oss/heapstats/plugin/buildin/jvmlive/mbean/heapstatsMBean.fxml"), HeapStatsUtils.getResourceBundle());
+        FXMLLoader loader = new FXMLLoader(JVMLiveController.class.getResource("/jp/co/ntt/oss/heapstats/plugin/builtin/jvmlive/mbean/heapstatsMBean.fxml"), HeapStatsUtils.getResourceBundle());
         HeapStatsMBeanController mbeanController;
         Scene mbeanDialogScene;
 
