@@ -31,7 +31,7 @@
 </image></ImageView><Label layoutX="196.0" layoutY="14.0" text="HeapStats FX Analyzer">
 <font>
 <Font size="36.0" />
-</font></Label><Label layoutX="304.0" layoutY="60.0" text="Version 0.2">
+</font></Label><Label layoutX="304.0" layoutY="60.0" text="Version 2.0 beta">
 <font>
 <Font size="24.0" />
 </font></Label><Label layoutX="182.0" layoutY="95.0" text="HeapStats is licensed under the GNU General Public License version 2." /><Label layoutX="175.0" layoutY="116.0" text="Copyright © 2011-2015 Nippon Telegraph and Telephone Corporation" /><Button layoutX="354.0" layoutY="141.0" mnemonicParsing="false" onAction="#onOKClick" text="OK" /><Accordion fx:id="accordion" layoutX="14.0" layoutY="171.5" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="171.5">
