@@ -275,6 +275,7 @@ public class WindowController implements Initializable {
                                                   }
                                                 })
                                       .filter(u -> !u.getFile().endsWith("heapstats-core"))
+                                      .filter(u -> !u.getFile().endsWith("heapstats-mbean"))
                                       .collect(Collectors.toList())
                                       .toArray(new URL[0]);
         }

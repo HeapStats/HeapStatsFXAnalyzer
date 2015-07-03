@@ -28,6 +28,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -40,6 +41,9 @@ import java.util.stream.Stream;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.paint.Color;
+import jp.co.ntt.oss.heapstats.plugin.builtin.jvmlive.JVMLiveController;
+import jp.co.ntt.oss.heapstats.plugin.builtin.log.LogController;
+import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.SnapShotController;
 
 /**
  * Utility class for HeapStats FX Analyzer.
@@ -153,12 +157,6 @@ public class HeapStatsUtils {
             }
         }
         
-        /* HeapStats plugins. */
-        String pluginList = prop.getProperty("plugins");
-        if(pluginList == null){
-            prop.setProperty("plugins", "jp.co.ntt.oss.heapstats.plugin.builtin.log;jp.co.ntt.oss.heapstats.plugin.builtin.snapshot");
-        }
-        
         /* Load resource bundle */
         resource = ResourceBundle.getBundle("HeapStatsResources", new Locale(prop.getProperty("language")));
         
@@ -175,18 +173,17 @@ public class HeapStatsUtils {
     }
     
     public static List<String> getPlugins(){
-        String pluginList = prop.getProperty("plugins");
+        List<String> pluginList = new ArrayList<>();
+        pluginList.add(LogController.class.getPackage().getName());
+        pluginList.add(SnapShotController.class.getPackage().getName());
+        pluginList.add(JVMLiveController.class.getPackage().getName());
+        pluginList.addAll(Arrays.asList(prop.getProperty("plugins", "").split(";")));
         
-        if(pluginList == null){
-            return null;
-        }
-        else{
-            return Arrays.asList(prop.getProperty("plugins").split(";"))
-                         .stream()
+        return pluginList.stream()
                          .map(s -> s.trim())
+                         .filter(s -> s.length() > 0)
+                         .distinct()
                          .collect(Collectors.toList());                                     
-        }
-        
     }
     
     public static boolean getReplaceClassName(){
