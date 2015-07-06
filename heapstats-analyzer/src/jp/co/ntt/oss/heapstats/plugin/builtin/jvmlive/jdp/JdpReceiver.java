@@ -18,13 +18,11 @@
 
 package jp.co.ntt.oss.heapstats.plugin.builtin.jvmlive.jdp;
 
-import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.net.StandardProtocolFamily;
 import java.net.StandardSocketOptions;
 import java.net.UnknownHostException;
@@ -34,10 +32,10 @@ import java.nio.channels.DatagramChannel;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.concurrent.Task;
 import javafx.scene.control.ListView;
+import jp.co.ntt.oss.heapstats.lambda.ConsumerWrapper;
+import jp.co.ntt.oss.heapstats.lambda.PredicateWrapper;
 
 /**
  * JDP Packet receiver thread.
@@ -99,22 +97,11 @@ public class JdpReceiver extends Task<Void>{
             Collections.list(NetworkInterface.getNetworkInterfaces()).stream()
                                                                      .filter(i -> i.getInterfaceAddresses().stream()
                                                                                                            .anyMatch(n -> n.getAddress() instanceof Inet4Address))
-                                                                     .filter(i -> {
-                                                                                     try {
-                                                                                       return i.supportsMulticast();
-                                                                                     } catch (SocketException ex) {
-                                                                                       Logger.getLogger(JdpReceiver.class.getName()).log(Level.SEVERE, null, ex);
-                                                                                       return false;
-                                                                                     }
-                                                                                  })
-                                                                     .forEach(i -> {
-                                                                                      try {
-                                                                                        jdpChannel.setOption(StandardSocketOptions.IP_MULTICAST_IF, i);
-                                                                                        jdpChannel.join(jdpAddr, i);
-                                                                                      } catch (IOException ex) {
-                                                                                        Logger.getLogger(JdpReceiver.class.getName()).log(Level.SEVERE, null, ex);
-                                                                                      }
-                                                                                   });
+                                                                     .filter(new PredicateWrapper<>(i -> i.supportsMulticast()))
+                                                                     .forEach(new ConsumerWrapper<>(i -> {
+                                                                                                           jdpChannel.setOption(StandardSocketOptions.IP_MULTICAST_IF, i);
+                                                                                                           jdpChannel.join(jdpAddr, i);
+                                                                                                         }));
 
             while(!isCancelled()){
                 ByteBuffer buf = ByteBuffer.allocateDirect(UDP_PACKET_LENGTH);

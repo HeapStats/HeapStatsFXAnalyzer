@@ -26,6 +26,7 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import jp.co.ntt.oss.heapstats.lambda.SupplierWrapper;
 import jp.co.ntt.oss.heapstats.mbean.HeapStatsMBean;
 
 /**
@@ -82,14 +83,7 @@ public class JMXHelper implements AutoCloseable{
     private void getFileInternal(Path path, boolean isSnapShot) throws IOException, InterruptedException, ExecutionException{
         try(AsynchronousServerSocketChannel server = AsynchronousServerSocketChannel.open()){
             server.bind(new InetSocketAddress(InetAddress.getLocalHost(), 0));
-            CompletableFuture<Void> receiveFuture = CompletableFuture.supplyAsync(() -> {
-                                                                                            try{
-                                                                                                return server.accept().get();
-                                                                                            }
-                                                                                            catch(InterruptedException | ExecutionException e){
-                                                                                                throw new RuntimeException(e);
-                                                                                            }
-                                                                                        })
+            CompletableFuture<Void> receiveFuture = CompletableFuture.supplyAsync(new SupplierWrapper<>(() -> server.accept().get()))
                                                                      .thenAccept(s -> receiveFile(path, s));
             InetSocketAddress addr = (InetSocketAddress)server.getLocalAddress();
 

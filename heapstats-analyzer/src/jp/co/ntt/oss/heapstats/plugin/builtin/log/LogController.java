@@ -20,7 +20,6 @@ package jp.co.ntt.oss.heapstats.plugin.builtin.log;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.AbstractMap;
@@ -69,6 +68,7 @@ import jp.co.ntt.oss.heapstats.container.log.ArchiveData;
 import jp.co.ntt.oss.heapstats.container.log.DiffData;
 import jp.co.ntt.oss.heapstats.container.log.LogData;
 import jp.co.ntt.oss.heapstats.container.log.SummaryData;
+import jp.co.ntt.oss.heapstats.lambda.FunctionWrapper;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.task.ParseLogFile;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
@@ -309,17 +309,11 @@ public class LogController extends PluginController implements Initializable{
 
         logEntries.stream()
                   .filter(d -> d.getArchivePath() != null)
-                  .map(d -> {
-                              try{
-                                ArchiveData archive = new ArchiveData(d);
-                                archive.parseArchive();
-                                
-                                return archive;
-                              }
-                              catch(IOException e){
-                                throw new UncheckedIOException(e);
-                              }
-                            })
+                  .map(new FunctionWrapper<>(d -> {
+                                                    ArchiveData archive = new ArchiveData(d);
+                                                    archive.parseArchive();
+                                                    return archive;
+                                                  }))
                   .forEach(a -> archiveCombo.getItems().add(a));                                          
     }
     

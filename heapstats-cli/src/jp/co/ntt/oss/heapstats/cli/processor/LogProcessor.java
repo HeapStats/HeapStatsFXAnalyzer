@@ -18,8 +18,6 @@
 package jp.co.ntt.oss.heapstats.cli.processor;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +26,7 @@ import jp.co.ntt.oss.heapstats.cli.Options;
 import jp.co.ntt.oss.heapstats.container.log.ArchiveData;
 import jp.co.ntt.oss.heapstats.container.log.DiffData;
 import jp.co.ntt.oss.heapstats.container.log.LogData;
+import jp.co.ntt.oss.heapstats.lambda.ConsumerWrapper;
 import jp.co.ntt.oss.heapstats.task.ParseLogFile;
 
 /**
@@ -114,15 +113,10 @@ public class LogProcessor implements CliProcessor{
                              .mapToObj(i -> logEntries.get(i))
                              .filter(d -> d.getArchivePath() != null)
                              .map(d -> new ArchiveData(d, new File(d.getArchivePath().replaceAll("\\..*$", ""))))
-                             .peek(a -> {
-                                          try{
-                                            a.getExtractPath().mkdir();
-                                            a.parseArchive();
-                                          }
-                                          catch(IOException e){
-                                              throw new UncheckedIOException(e);
-                                          }
-                                        })
+                             .peek(new ConsumerWrapper<>(a -> {
+                                                                a.getExtractPath().mkdir();
+                                                                a.parseArchive();
+                                                              }))
                              .forEach(a -> System.out.println(String.format("%s: %s", a.getDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), a.getExtractPath().getAbsolutePath())));
                     break;
             }

@@ -18,8 +18,6 @@
 
 package jp.co.ntt.oss.heapstats.plugin.builtin.jvmlive.jdp;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -41,8 +39,9 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.ListView;
-import javax.management.MalformedObjectNameException;
+import jp.co.ntt.oss.heapstats.fx.lambda.EventHandlerWrapper;
 import jp.co.ntt.oss.heapstats.jmx.JMXHelper;
+import jp.co.ntt.oss.heapstats.lambda.RunnableWrapper;
 import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 
 
@@ -170,14 +169,7 @@ public class JdpDecoder extends Task<Void>{
         if(jconsolePath.isPresent()){
             String[] execParam = {jconsolePath.get(), jmxServiceURL};
             jmxURL = new Hyperlink(jmxServiceURL);
-            ((Hyperlink)jmxURL).setOnAction(e -> {
-                                                    try{
-                                                        Runtime.getRuntime().exec(execParam);
-                                                    }
-                                                    catch(IOException ex){
-                                                        throw new UncheckedIOException(ex);
-                                                    }
-                                                 });
+            ((Hyperlink)jmxURL).setOnAction(new EventHandlerWrapper<>(e -> Runtime.getRuntime().exec(execParam)));
         }
         else{
             jmxURL = new Label(jmxServiceURL);
@@ -187,13 +179,7 @@ public class JdpDecoder extends Task<Void>{
         
         if(idx == -1){
             heapstatsValue = new JdpTableKeyValue("HeapStats", "Checking...");
-            jmxProcPool.submit(() -> {
-                                        try {
-                                            heapstatsValue.valueProperty().set(new JMXHelper(jmxServiceURL));
-                                        } catch (IOException | MalformedObjectNameException ex) {
-                                            heapstatsValue.valueProperty().set("None");
-                                        }
-                                     });
+            jmxProcPool.submit(new RunnableWrapper(() -> heapstatsValue.valueProperty().set(new JMXHelper(jmxServiceURL))));
             
             jdpTableKeyValue.set(FXCollections.observableArrayList(
                     new JdpTableKeyValue("Received Time", (new LocalDateTimeConverter()).toString(receivedTime)),

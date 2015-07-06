@@ -21,7 +21,6 @@ package jp.co.ntt.oss.heapstats.plugin.builtin.jvmlive;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
@@ -67,6 +66,7 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import jp.co.ntt.oss.heapstats.WindowController;
 import jp.co.ntt.oss.heapstats.jmx.JMXHelper;
+import jp.co.ntt.oss.heapstats.lambda.ConsumerWrapper;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.jvmlive.errorreporter.ErrorReportDecoder;
 import jp.co.ntt.oss.heapstats.plugin.builtin.jvmlive.errorreporter.ErrorReportServer;
@@ -289,15 +289,7 @@ public class JVMLiveController extends PluginController implements Initializable
         
         Path hs_err_path = crashList.getSelectionModel().getSelectedItem().getHsErrFile().toPath();
         Optional.ofNullable(dialog.showSaveDialog(WindowController.getInstance().getOwner()))
-                .ifPresent(t -> {
-                                   try{
-                                     Files.copy(hs_err_path, t.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                                   }
-                                   catch(IOException e){
-                                       throw new UncheckedIOException(e);
-                                   } 
-                                });
-        
+                .ifPresent(new ConsumerWrapper<>(t -> Files.copy(hs_err_path, t.toPath(), StandardCopyOption.REPLACE_EXISTING)));
     }
     
     private void showJdpDecoderDetail(JdpDecoder data){
@@ -331,16 +323,7 @@ public class JVMLiveController extends PluginController implements Initializable
         return () -> {
                         Optional.ofNullable(jdpValidator).ifPresent(p -> p.cancel());
                         Optional.ofNullable(jdpReceiver).ifPresent(r -> r.cancel(true));
-                        Optional.ofNullable(receiverThread).ifPresent(t -> {
-                                                                              
-                                                                              try{
-                                                                                t.join();
-                                                                              }
-                                                                              catch (InterruptedException ex){
-                                                                                Logger.getLogger(JVMLiveController.class.getName()).log(Level.SEVERE, null, ex);
-                                                                              }
-                                                                              
-                                                                           });
+                        Optional.ofNullable(receiverThread).ifPresent(new ConsumerWrapper<>(t -> t.join()));
                         errorReportServer.cancel(true);
                         try{
                             errorReportThread.join();
@@ -363,15 +346,7 @@ public class JVMLiveController extends PluginController implements Initializable
                             Logger.getLogger(JVMLiveController.class.getName()).log(Level.SEVERE, null, ex);
                         }
                         
-                        jvmList.getItems().forEach(p -> {
-                                                           try{
-                                                             ((JMXHelper)p.getHeapStatsTableKeyValue().valueProperty().get()).close();
-                                                           }
-                                                           catch(Exception e){
-                                                             // Do nothing
-                                                           }
-                                                        });
-                        
+                        jvmList.getItems().forEach(new ConsumerWrapper<>(p -> ((JMXHelper)p.getHeapStatsTableKeyValue().valueProperty().get()).close()));
                      };
     }
     

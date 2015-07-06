@@ -19,7 +19,6 @@
 package jp.co.ntt.oss.heapstats;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.DirectoryStream;
@@ -55,6 +54,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
+import jp.co.ntt.oss.heapstats.lambda.FunctionWrapper;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.LogController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.SnapShotController;
@@ -266,14 +266,7 @@ public class WindowController implements Initializable {
         
         try(DirectoryStream<Path> jarPaths = Files.newDirectoryStream(libPath, "*.jar")){
             jarURLList = StreamSupport.stream(jarPaths.spliterator(), false)
-                                      .map(p -> {
-                                                  try{
-                                                      return p.toUri().toURL();
-                                                  }
-                                                  catch(MalformedURLException e){
-                                                      throw new RuntimeException(e);
-                                                  }
-                                                })
+                                      .map(new FunctionWrapper<>(p -> p.toUri().toURL()))
                                       .filter(u -> !u.getFile().endsWith("heapstats-core"))
                                       .filter(u -> !u.getFile().endsWith("heapstats-mbean"))
                                       .collect(Collectors.toList())
