@@ -133,7 +133,7 @@ public class ThreadRecorderController extends PluginController implements Initia
         threadNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         timelineColumn.setCellValueFactory(new PropertyValueFactory<>("threadStats"));
         timelineColumn.setCellFactory(param -> new TimelineCell(rangeStart, rangeEnd));
-        timelineColumn.prefWidthProperty().bind(timelineView.widthProperty());
+        timelineColumn.prefWidthProperty().bind(timelineView.widthProperty().subtract(TIMELINE_PADDING));
         rangePane.getItems().forEach(n -> SplitPane.setResizableWithParent(n, false));
     }
     
