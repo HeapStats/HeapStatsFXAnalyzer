@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
@@ -85,9 +87,9 @@ public class ThreadRecorderController extends PluginController implements Initia
     
     private Map<Long, String> idMap;
     
-    private LocalDateTime rangeStart;
+    private ObjectProperty<LocalDateTime> rangeStart;
     
-    private LocalDateTime rangeEnd;
+    private ObjectProperty<LocalDateTime> rangeEnd;
 
     /**
      * Update caption of label which represents time of selection.
@@ -103,10 +105,10 @@ public class ThreadRecorderController extends PluginController implements Initia
             LocalDateTime newTime = start.plus((long)((double)diff * newValue), ChronoUnit.MILLIS);
             
             if(target == startTimeLabel){
-                rangeStart = newTime;
+                rangeStart.set(newTime);
             }
             else{
-                rangeEnd = newTime;
+                rangeEnd.set(newTime);
             }
             
             LocalDateTimeConverter converter = new LocalDateTimeConverter();
@@ -120,8 +122,8 @@ public class ThreadRecorderController extends PluginController implements Initia
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         threadStatList = null;
-        rangeStart = null;
-        rangeEnd = null;
+        rangeStart = new SimpleObjectProperty<>();
+        rangeEnd = new SimpleObjectProperty<>();
         
         rangePane.getDividers().get(0).positionProperty().addListener((b, o, n) -> updateRangeLabel(startTimeLabel, n.doubleValue()));
         rangePane.getDividers().get(1).positionProperty().addListener((b, o, n) -> updateRangeLabel(endTimeLabel, n.doubleValue()));
@@ -187,11 +189,11 @@ public class ThreadRecorderController extends PluginController implements Initia
         }
         
         Map<Long, List<ThreadStat>> statById = threadStatList.stream()
-                                                             .filter(s -> s.getTime().isAfter(rangeStart) && s.getTime().isBefore(rangeEnd))
+                                                             .filter(s -> s.getTime().isAfter(rangeStart.get()) && s.getTime().isBefore(rangeEnd.get()))
                                                              .collect(Collectors.groupingBy(ThreadStat::getId));
         ObservableList<ThreadStatViewModel> threadStats = FXCollections.observableArrayList(idMap.keySet().stream()
                                 .sorted()
-                                .map(k -> new ThreadStatViewModel(k, idMap.get(k), rangeStart, rangeEnd, statById.get(k)))
+                                .map(k -> new ThreadStatViewModel(k, idMap.get(k), rangeStart.get(), rangeEnd.get(), statById.get(k)))
                                 .collect(Collectors.toList()));
         threadListView.setItems(threadStats);
         timelineView.itemsProperty().bind(threadListView.itemsProperty());

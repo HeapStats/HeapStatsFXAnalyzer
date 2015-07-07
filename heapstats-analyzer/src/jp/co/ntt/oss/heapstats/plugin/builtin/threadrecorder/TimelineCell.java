@@ -8,17 +8,18 @@ import jp.co.ntt.oss.heapstats.container.threadrecord.ThreadStat;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import javafx.beans.property.ObjectProperty;
 
 /**
  * Table cell for thread timeline.
  */
 public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat>> {
     
-    private final LocalDateTime rangeStart;
+    private final ObjectProperty<LocalDateTime> rangeStart;
     
-    private final LocalDateTime rangeEnd;
+    private final ObjectProperty<LocalDateTime> rangeEnd;
 
-    public TimelineCell(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
+    public TimelineCell(ObjectProperty<LocalDateTime> rangeStart, ObjectProperty<LocalDateTime> rangeEnd) {
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         setAlignment(Pos.CENTER_LEFT);
 
@@ -38,7 +39,7 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
 
     private void drawTimeline(ThreadStatViewModel viewModel) {
         TimelineGenerator generator = new TimelineGenerator(viewModel, getTableColumn().prefWidthProperty());
-        HBox container = generator.createTimeline(rangeStart, rangeEnd);
+        HBox container = generator.createTimeline(rangeStart.get(), rangeEnd.get());
         
         container.visibleProperty().bind(viewModel.showProperty());
         setGraphic(container);

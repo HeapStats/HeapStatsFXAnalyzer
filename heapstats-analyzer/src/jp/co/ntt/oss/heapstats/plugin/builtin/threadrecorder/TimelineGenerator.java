@@ -45,7 +45,7 @@ public class TimelineGenerator {
     
     private final DoubleProperty prefWidth;
     
-    private double range;
+    private long range;
     
     private double scale;
     
@@ -65,13 +65,13 @@ public class TimelineGenerator {
         scale = width / (double)range;
         
         // Try to micro sec
-        if(scale > 0.0d){
+        if(scale > 1.0d){
             unit = ChronoUnit.MICROS;
             range = start.until(end, unit);
             scale = width / (double)range;
             
             // Try to nano sec
-            if(scale > 0.0d){
+            if(scale > 1.0d){
                 unit = ChronoUnit.NANOS;
                 range = start.until(end, unit);
                 scale = width / (double)range;
