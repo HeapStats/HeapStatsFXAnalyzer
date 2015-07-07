@@ -44,6 +44,7 @@ import javafx.scene.paint.Color;
 import jp.co.ntt.oss.heapstats.plugin.builtin.jvmlive.JVMLiveController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.log.LogController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.SnapShotController;
+import jp.co.ntt.oss.heapstats.plugin.builtin.threadrecorder.ThreadRecorderController;
 
 /**
  * Utility class for HeapStats FX Analyzer.
@@ -176,6 +177,7 @@ public class HeapStatsUtils {
         List<String> pluginList = new ArrayList<>();
         pluginList.add(LogController.class.getPackage().getName());
         pluginList.add(SnapShotController.class.getPackage().getName());
+        pluginList.add(ThreadRecorderController.class.getPackage().getName());
         pluginList.add(JVMLiveController.class.getPackage().getName());
         pluginList.addAll(Arrays.asList(prop.getProperty("plugins", "").split(";")));
         
