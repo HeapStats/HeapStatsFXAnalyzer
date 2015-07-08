@@ -28,6 +28,8 @@ public class TimelineGenerator {
 
     private static final String CSS_CLASS_PREFIX = "rect-";
 
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS");
+    
     public static enum ThreadEvent{
         Unused,
         Run,
@@ -209,27 +211,29 @@ public class TimelineGenerator {
         String styleClass = CSS_CLASS_PREFIX + event.name().toLowerCase();
         rectangle.getStyleClass().add(styleClass);
         
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS");
-        String caption = startTime.format(formatter) + " - " + endTime.format(formatter) + ": " + event.toString();
-        switch(event){
-            case MonitorWait:
-            case ThreadSleep:
-            case Park:
-                if(additionalData > 0){
-                    caption += " (" + Long.toString(additionalData) + " ms)";
-                }
-                break;
-                
-            case FileWrite:
-            case FileRead:
-            case SocketWrite:
-            case SocketRead:
-                caption += " (" + Long.toString(additionalData) + " bytes)";
-                break;
-        }
-        
-        if((event != ThreadEvent.Unused) && (width > 0.0d)){
-            Tooltip.install(rectangle, new Tooltip(caption));
+        if(width > 1.0d){
+            String caption = startTime.format(formatter) + " - " + endTime.format(formatter) + ": " + event.toString();
+            switch(event){
+                case MonitorWait:
+                case ThreadSleep:
+                case Park:
+                    if(additionalData > 0){
+                        caption += " (" + Long.toString(additionalData) + " ms)";
+                    }
+                    break;
+
+                case FileWrite:
+                case FileRead:
+                case SocketWrite:
+                case SocketRead:
+                    caption += " (" + Long.toString(additionalData) + " bytes)";
+                    break;
+            }
+
+            if((event != ThreadEvent.Unused)){
+                Tooltip.install(rectangle, new Tooltip(caption));
+            }
+
         }
         
         return rectangle;
