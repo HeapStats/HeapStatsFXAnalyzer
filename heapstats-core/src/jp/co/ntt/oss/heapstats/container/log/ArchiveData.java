@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,6 +43,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import jp.co.ntt.oss.heapstats.lambda.ConsumerWrapper;
 
 /**
  * This class stores archive data.
@@ -281,6 +281,38 @@ public class ArchiveData {
         
     }
     
+    private void processZipEntry(ZipFile archive, ZipEntry entry) throws IOException{
+        switch(entry.getName()){
+            case "envInfo.txt":
+                buildEnvInfo(archive, entry);
+                break;
+
+            case "tcp":
+                tcp = buildStringData(archive, entry);
+                break;
+
+            case "tcp6":
+                tcp6 = buildStringData(archive, entry);
+                break;
+
+            case "udp":
+                udp = buildStringData(archive, entry);
+                break;
+
+            case "udp6":
+                udp6 = buildStringData(archive, entry);
+                break;
+
+            case "sockowner":
+                sockOwner = buildStringData(archive, entry);
+                break;
+
+            default:
+                deflateFileData(archive, entry);
+                break;
+        }
+    }
+    
     /**
      * Parsing Archive data.
      * @throws java.io.IOException
@@ -292,44 +324,7 @@ public class ArchiveData {
         }
         
         try(ZipFile archive = new ZipFile(archivePath)){
-            archive.stream().forEach(d -> {
-                                             try{
-                                               switch(d.getName()){
-
-                                                 case "envInfo.txt":
-                                                     buildEnvInfo(archive, d);
-                                                     break;
-                                                     
-                                                 case "tcp":
-                                                     tcp = buildStringData(archive, d);
-                                                     break;
-                                                     
-                                                 case "tcp6":
-                                                     tcp6 = buildStringData(archive, d);
-                                                     break;
-                                                     
-                                                 case "udp":
-                                                     udp = buildStringData(archive, d);
-                                                     break;
-                                                     
-                                                 case "udp6":
-                                                     udp6 = buildStringData(archive, d);
-                                                     break;
-                                                     
-                                                 case "sockowner":
-                                                     sockOwner = buildStringData(archive, d);
-                                                     break;
-                                                     
-                                                 default:
-                                                     deflateFileData(archive, d);
-                                                     break;
-                                               }
-                                             }
-                                             catch(IOException e){
-                                                 throw new UncheckedIOException(e);
-                                             }
-                                          });
-            
+            archive.stream().forEach(new ConsumerWrapper<ZipEntry>(d -> processZipEntry(archive, d)));
             buildSockData();
         }
         

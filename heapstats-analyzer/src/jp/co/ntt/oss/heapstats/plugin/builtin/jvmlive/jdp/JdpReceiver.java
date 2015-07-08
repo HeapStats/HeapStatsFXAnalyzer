@@ -98,10 +98,8 @@ public class JdpReceiver extends Task<Void>{
                                                                      .filter(i -> i.getInterfaceAddresses().stream()
                                                                                                            .anyMatch(n -> n.getAddress() instanceof Inet4Address))
                                                                      .filter(new PredicateWrapper<>(i -> i.supportsMulticast()))
-                                                                     .forEach(new ConsumerWrapper<>(i -> {
-                                                                                                           jdpChannel.setOption(StandardSocketOptions.IP_MULTICAST_IF, i);
-                                                                                                           jdpChannel.join(jdpAddr, i);
-                                                                                                         }));
+                                                                     .peek(new ConsumerWrapper<>(i ->jdpChannel.setOption(StandardSocketOptions.IP_MULTICAST_IF, i)))
+                                                                     .forEach(new ConsumerWrapper<>(i -> jdpChannel.join(jdpAddr, i)));
 
             while(!isCancelled()){
                 ByteBuffer buf = ByteBuffer.allocateDirect(UDP_PACKET_LENGTH);

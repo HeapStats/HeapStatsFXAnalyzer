@@ -118,11 +118,10 @@ public class DiffCalculator extends ProgressRunnable{
         start.forEach((k, v) -> end.putIfAbsent(k, new ObjectData(k, v.getName(), v.getClassLoader(), v.getClassLoaderTag(), 0, 0, v.getLoaderName(), null)));
         
         if(filter.isPresent()){
-            end.forEach((k, v) -> {
-                                     if(filter.get().test(v)){
-                                         lastDiffList.add(new DiffData(endHeader.getSnapShotDate(), start.get(k), v, rankedTagList.contains(v.getTag())));
-                                     }
-                                  });
+            end.entrySet().stream()
+                          .filter(e -> filter.get().test(e.getValue()))
+                          .map(e -> new DiffData(endHeader.getSnapShotDate(), start.get(e.getKey()), e.getValue(), rankedTagList.contains(e.getValue().getTag())))
+                          .forEach(d -> lastDiffList.add(d));
         }
         else{
             end.forEach((k, v) -> lastDiffList.add(new DiffData(endHeader.getSnapShotDate(), start.get(k), v, rankedTagList.contains(v.getTag()))));

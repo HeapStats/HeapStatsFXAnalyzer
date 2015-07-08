@@ -113,10 +113,8 @@ public class LogProcessor implements CliProcessor{
                              .mapToObj(i -> logEntries.get(i))
                              .filter(d -> d.getArchivePath() != null)
                              .map(d -> new ArchiveData(d, new File(d.getArchivePath().replaceAll("\\..*$", ""))))
-                             .peek(new ConsumerWrapper<>(a -> {
-                                                                a.getExtractPath().mkdir();
-                                                                a.parseArchive();
-                                                              }))
+                             .peek(a -> a.getExtractPath().mkdir())
+                             .peek(new ConsumerWrapper<>(a -> a.parseArchive()))
                              .forEach(a -> System.out.println(String.format("%s: %s", a.getDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), a.getExtractPath().getAbsolutePath())));
                     break;
             }

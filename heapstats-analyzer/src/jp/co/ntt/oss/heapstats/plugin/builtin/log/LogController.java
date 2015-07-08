@@ -68,6 +68,7 @@ import jp.co.ntt.oss.heapstats.container.log.ArchiveData;
 import jp.co.ntt.oss.heapstats.container.log.DiffData;
 import jp.co.ntt.oss.heapstats.container.log.LogData;
 import jp.co.ntt.oss.heapstats.container.log.SummaryData;
+import jp.co.ntt.oss.heapstats.lambda.ConsumerWrapper;
 import jp.co.ntt.oss.heapstats.lambda.FunctionWrapper;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.task.ParseLogFile;
@@ -309,12 +310,9 @@ public class LogController extends PluginController implements Initializable{
 
         logEntries.stream()
                   .filter(d -> d.getArchivePath() != null)
-                  .map(new FunctionWrapper<>(d -> {
-                                                    ArchiveData archive = new ArchiveData(d);
-                                                    archive.parseArchive();
-                                                    return archive;
-                                                  }))
-                  .forEach(a -> archiveCombo.getItems().add(a));                                          
+                  .map(new FunctionWrapper<>(ArchiveData::new))
+                  .peek(new ConsumerWrapper<>(a -> a.parseArchive()))
+                  .forEach(archiveCombo.getItems()::add);                                          
     }
     
     /**

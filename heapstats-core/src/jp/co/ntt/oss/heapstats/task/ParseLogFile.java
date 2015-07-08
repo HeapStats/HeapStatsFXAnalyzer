@@ -20,7 +20,6 @@ package jp.co.ntt.oss.heapstats.task;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,6 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import jp.co.ntt.oss.heapstats.container.log.DiffData;
 import jp.co.ntt.oss.heapstats.container.log.LogData;
+import jp.co.ntt.oss.heapstats.lambda.ConsumerWrapper;
 
 /**
  * HeapStats log file (CSV) parser.
@@ -73,18 +73,15 @@ public class ParseLogFile extends ProgressRunnable{
      * 
      * @param logfile Log to be parsedd.
      * @param progress
+     * @throws java.io.IOException
      */
-    protected void parse(String logfile, AtomicLong progress){
+    protected void parse(String logfile, AtomicLong progress) throws IOException{
         Path logPath = Paths.get(logfile);
         String logdir =logPath.getParent().toString();
         
         try(Stream<String> paths = Files.lines(logPath)){
-            paths.forEach(s -> {
-                                  addEntry(s, logdir);
-                                  updateProgress.ifPresent(p -> p.accept(progress.addAndGet(s.length())));
-                               });
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
+            paths.peek(s -> addEntry(s, logdir))
+                 .forEach(s -> updateProgress.ifPresent(p -> p.accept(progress.addAndGet(s.length()))));
         }
         
     }
@@ -116,7 +113,7 @@ public class ParseLogFile extends ProgressRunnable{
         /* Parse log files */
         fileList.stream()
                 .map(File::getAbsolutePath)
-                .forEach(f -> parse(f, progress));
+                .forEach(new ConsumerWrapper<>(f -> parse(f, progress)));
         
         /* Sort log files order by date&time */
         logEntries.sort(Comparator.naturalOrder());

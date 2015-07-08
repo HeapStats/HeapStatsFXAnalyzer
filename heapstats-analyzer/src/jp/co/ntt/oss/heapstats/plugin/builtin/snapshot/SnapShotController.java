@@ -350,18 +350,15 @@ public class SnapShotController extends PluginController implements Initializabl
         
     }
     
-    private void setTopNChartColor(){
-        topNChart.getData().stream()
-                           .forEach(s -> {
-                                            String colorHexCode = String.format("#%06x", s.getName().hashCode() & 0xFFFFFF);
-                                            
-                                            s.getNode().lookup(".chart-series-area-line").setStyle(String.format("-fx-stroke: %s;", colorHexCode));
-                                            s.getNode().lookup(".chart-series-area-fill").setStyle(String.format("-fx-fill: %s;", colorHexCode));
+    private void setTopNChartColor(XYChart.Series<String, Long> series){
+        String colorHexCode = String.format("#%06x", series.getName().hashCode() & 0xFFFFFF);
 
-                                            s.getData().stream()
-                                                       .map(d -> d.getNode().lookup(".chart-area-symbol"))
-                                                       .forEach(n -> n.setStyle(String.format("-fx-background-color: %s, white;", colorHexCode)));
-                                         });
+        series.getNode().lookup(".chart-series-area-line").setStyle(String.format("-fx-stroke: %s;", colorHexCode));
+        series.getNode().lookup(".chart-series-area-fill").setStyle(String.format("-fx-fill: %s;", colorHexCode));
+
+        series.getData().stream()
+                        .map(d -> d.getNode().lookup(".chart-area-symbol"))
+                        .forEach(n -> n.setStyle(String.format("-fx-background-color: %s, white;", colorHexCode)));
     }
     
     /**
@@ -406,7 +403,7 @@ public class SnapShotController extends PluginController implements Initializabl
         
         lastDiffTable.getItems().addAll(diff.getLastDiffList());
         snapShotTimeCombo.getSelectionModel().selectLast();
-        setTopNChartColor();
+        topNChart.getData().forEach(this::setTopNChartColor);
     }
     
     /**

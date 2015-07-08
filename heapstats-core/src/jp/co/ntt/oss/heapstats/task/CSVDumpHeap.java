@@ -62,6 +62,19 @@ public class CSVDumpHeap extends ProgressRunnable{
         this.filter = Optional.ofNullable(filter);
         this.needJavaStyle = needJavaStyle;
     }
+    
+    private String buildCSVEntry(long tag, String className){
+        StringJoiner joiner = new StringJoiner(",");
+        joiner.add(String.format("0x%X", tag))
+              .add(className);
+        
+        snapShots.stream()
+                 .map(h -> Optional.ofNullable(h.getSnapShot(needJavaStyle).get(tag)))
+                 .peek(p -> joiner.add(p.map(o -> o.getCount()).orElse(0L).toString()))
+                 .forEach(p -> joiner.add(p.map(o -> o.getTotalSize()).orElse(0L).toString()));
+        
+        return joiner.toString();
+    }
 
     @Override
     public void run() {
@@ -87,22 +100,9 @@ public class CSVDumpHeap extends ProgressRunnable{
             writer.println(headerJoiner.toString());
             
             /* Dump data */
-            targetClasses.forEach((k, v) -> {
-                                               StringJoiner joiner = new StringJoiner(",");
-                                               joiner.add(String.format("0x%X", k))
-                                                     .add(v);
-                                               snapShots.forEach(h -> {
-                                                                        Optional<ObjectData> objData = Optional.ofNullable(h.getSnapShot(needJavaStyle).get(k));
-                                                                        joiner.add(objData.map(o -> o.getCount())
-                                                                                          .orElse(0L)
-                                                                                          .toString())
-                                                                              .add(objData.map(o -> o.getTotalSize())
-                                                                                          .orElse(0L)
-                                                                                          .toString());
-                                                                      });
-                                               writer.println(joiner.toString());
-                                            });
-            
+            targetClasses.entrySet().stream()
+                                    .map(e -> buildCSVEntry(e.getKey(), e.getValue()))
+                                    .forEach(writer::println);
         } catch (FileNotFoundException ex) {
             throw new UncheckedIOException(ex);
         }

@@ -160,6 +160,37 @@ public class JdpDecoder extends Task<Void>{
         return jdpContents;
     }
     
+    private void setJdpTableKeyValue(JdpTableKeyValue val, Labeled jmxURL){
+        switch(val.keyProperty().get()){
+            case "Received Time":
+                val.valueProperty().set((new LocalDateTimeConverter()).toString(receivedTime));
+                break;
+
+            case "Address":
+                val.valueProperty().set(sourceAddr.getAddress().getHostAddress());
+                break;
+
+            case "JDP Instance Name":
+                val.valueProperty().set(instanceName);
+                break;
+
+            case "Main Class":
+                val.valueProperty().set(mainClass);
+                break;
+
+            case "UUID":
+                val.valueProperty().set(uuid.toString());
+                break;
+
+            case "PID":
+                val.valueProperty().set(Integer.toString(pid));
+                break;
+
+            case "JMX URL":
+                val.valueProperty().set(jmxURL);
+        }
+    }
+    
     /**
      * Update JDP packet if same UUID is registered in JDP list.
      */
@@ -196,37 +227,7 @@ public class JdpDecoder extends Task<Void>{
         else{
             JdpDecoder existData = jdpList.getItems().get(idx);
             existData.receivedTime = receivedTime;
-            existData.jdpTableKeyValue.get().stream()
-                                            .forEach(p -> {
-                                                             switch(p.keyProperty().get()){
-                                                                 case "Received Time":
-                                                                     p.valueProperty().set((new LocalDateTimeConverter()).toString(receivedTime));
-                                                                     break;
-                                                                     
-                                                                 case "Address":
-                                                                     p.valueProperty().set(sourceAddr.getAddress().getHostAddress());
-                                                                     break;
-                                                                     
-                                                                 case "JDP Instance Name":
-                                                                     p.valueProperty().set(instanceName);
-                                                                     break;
-                                                                     
-                                                                 case "Main Class":
-                                                                     p.valueProperty().set(mainClass);
-                                                                     break;
-                                                                     
-                                                                 case "UUID":
-                                                                     p.valueProperty().set(uuid.toString());
-                                                                     break;
-                                                                     
-                                                                 case "PID":
-                                                                     p.valueProperty().set(Integer.toString(pid));
-                                                                     break;
-                                                                     
-                                                                 case "JMX URL":
-                                                                     p.valueProperty().set(jmxURL);
-                                                             }
-                                                          });
+            existData.jdpTableKeyValue.get().forEach(p -> setJdpTableKeyValue(p, jmxURL));
         }
         
     }

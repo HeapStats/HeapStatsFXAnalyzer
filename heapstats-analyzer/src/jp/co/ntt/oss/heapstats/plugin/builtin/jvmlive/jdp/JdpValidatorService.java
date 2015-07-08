@@ -49,6 +49,14 @@ public class JdpValidatorService extends ScheduledService<Void>{
     }
     
     class JdpValidationTask extends Task<Void>{
+        
+        private void swapJdpDecoder(int index){
+            JdpDecoder target = jdpList.getItems().get(index);
+            target.setInvalidate();
+            
+            jdpList.getItems().remove(index);
+            jdpList.getItems().add(index, target);
+        }
 
         @Override
         protected Void call() throws Exception {
@@ -58,12 +66,7 @@ public class JdpValidatorService extends ScheduledService<Void>{
                                                          .filter(d -> !d.invalidateProperty().get())
                                                          .filter(d -> d.getReceivedTime().plusSeconds(d.getBroadcastInterval() / 1000 + JVMLiveConfig.getJdpWaitDuration()).isBefore(now))
                                                          .mapToInt(d -> jdpList.getItems().indexOf(d))
-                                                         .forEach(i -> {
-                                                                          JdpDecoder target = jdpList.getItems().get(i);
-                                                                          target.setInvalidate();
-                                                                          jdpList.getItems().remove(i);
-                                                                          jdpList.getItems().add(i, target);
-                                                                       });
+                                                         .forEach(i -> swapJdpDecoder(i));
                                     });
 
             return null;

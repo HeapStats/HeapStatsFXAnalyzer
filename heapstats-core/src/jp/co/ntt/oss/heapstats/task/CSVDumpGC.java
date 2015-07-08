@@ -72,23 +72,19 @@ public class CSVDumpGC extends ProgressRunnable{
             AtomicLong progress = new AtomicLong();
             setTotal(headers.size());
             headers.stream()
-                   .forEachOrdered(h -> {
-                                           StringJoiner joiner = new StringJoiner(",");
-                                           joiner.add(formatter.format(h.getSnapShotDate()))
-                                                 .add(Long.toString(h.getFullCount()))
-                                                 .add(Long.toString(h.getYngCount()))
-                                                 .add(Long.toString(h.getNewHeap()))
-                                                 .add(Long.toString(h.getOldHeap()))
-                                                 .add(Long.toString(h.getTotalCapacity()))
-                                                 .add(h.getGcCause())
-                                                 .add(h.getGcTime() == 0 ? "-" : Long.toString(h.getGcTime()))
-                                                 .add(h.getMetaspaceUsage() == 0 ? "-" : Long.toString(h.getMetaspaceUsage()))
-                                                 .add(h.getMetaspaceCapacity() == 0 ? "-" : Long.toString(h.getMetaspaceCapacity()));
-                                           writer.println(joiner.toString());
-                                           
-                                           updateProgress.ifPresent(c -> c.accept(progress.incrementAndGet()));
-                                        });
-            
+                   .map(h -> (new StringJoiner(",")).add(formatter.format(h.getSnapShotDate()))
+                                                    .add(Long.toString(h.getFullCount()))
+                                                    .add(Long.toString(h.getYngCount()))
+                                                    .add(Long.toString(h.getNewHeap()))
+                                                    .add(Long.toString(h.getOldHeap()))
+                                                    .add(Long.toString(h.getTotalCapacity()))
+                                                    .add(h.getGcCause())
+                                                    .add(h.getGcTime() == 0 ? "-" : Long.toString(h.getGcTime()))
+                                                    .add(h.getMetaspaceUsage() == 0 ? "-" : Long.toString(h.getMetaspaceUsage()))
+                                                    .add(h.getMetaspaceCapacity() == 0 ? "-" : Long.toString(h.getMetaspaceCapacity()))
+                                                    .toString())
+                    .peek(s -> updateProgress.ifPresent(c -> c.accept(progress.incrementAndGet())))
+                    .forEachOrdered(writer::println);
         } catch (FileNotFoundException ex) {
             throw new UncheckedIOException(ex);
         }
