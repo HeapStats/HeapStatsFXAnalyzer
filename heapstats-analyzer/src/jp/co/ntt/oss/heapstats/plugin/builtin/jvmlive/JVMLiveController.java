@@ -346,7 +346,11 @@ public class JVMLiveController extends PluginController implements Initializable
                             Logger.getLogger(JVMLiveController.class.getName()).log(Level.SEVERE, null, ex);
                         }
                         
-                        jvmList.getItems().forEach(new ConsumerWrapper<>(p -> ((JMXHelper)p.getHeapStatsTableKeyValue().valueProperty().get()).close()));
+                        jvmList.getItems().forEach(new ConsumerWrapper<>(p -> {
+                                                                                if(p.getHeapStatsTableKeyValue().valueProperty().get() instanceof JMXHelper){
+                                                                                    ((JMXHelper)p.getHeapStatsTableKeyValue().valueProperty().get()).close();
+                                                                                }
+                                                                              }));
                      };
     }
     
