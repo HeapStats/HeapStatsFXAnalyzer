@@ -266,7 +266,7 @@ public class SnapShotController extends PluginController implements Initializabl
                                                 super.updateItem(item, empty);
                                                 String style = Optional.ofNullable((DiffData)getTableRow().getItem())
                                                                        .filter(d -> d.isRanked())
-                                                                       .map(d -> String.format("-fx-background-color: #%06x;", d.getClassName().hashCode() & 0xFFFFFF))
+                                                                       .map(d -> "-fx-background-color: " + ChartColorManager.getNextColor(d.getClassName()))
                                                                        .orElse("-fx-background-color: transparent;");
                                                 setStyle(style);
                                               }
@@ -286,7 +286,7 @@ public class SnapShotController extends PluginController implements Initializabl
                                                    super.updateItem(item, empty);
                                                    String style = Optional.ofNullable((ObjectData)getTableRow().getItem())
                                                                           .filter(o -> topNChart.getData().stream().anyMatch(d -> d.getName().equals(o.getName())))
-                                                                          .map(o -> String.format("-fx-background-color: #%06x;", o.getName().hashCode() & 0xFFFFFF))
+                                                                          .map(o -> "-fx-background-color: " + ChartColorManager.getNextColor(o.getName()))
                                                                           .orElse("-fx-background-color: transparent;");
                                                    setStyle(style);
                                                  }
@@ -351,14 +351,14 @@ public class SnapShotController extends PluginController implements Initializabl
     }
     
     private void setTopNChartColor(XYChart.Series<String, Long> series){
-        String colorHexCode = String.format("#%06x", series.getName().hashCode() & 0xFFFFFF);
+        String color = ChartColorManager.getNextColor(series.getName());
 
-        series.getNode().lookup(".chart-series-area-line").setStyle(String.format("-fx-stroke: %s;", colorHexCode));
-        series.getNode().lookup(".chart-series-area-fill").setStyle(String.format("-fx-fill: %s;", colorHexCode));
+        series.getNode().lookup(".chart-series-area-line").setStyle(String.format("-fx-stroke: %s;", color));
+        series.getNode().lookup(".chart-series-area-fill").setStyle(String.format("-fx-fill: %s;", color));
 
         series.getData().stream()
                         .map(d -> d.getNode().lookup(".chart-area-symbol"))
-                        .forEach(n -> n.setStyle(String.format("-fx-background-color: %s, white;", colorHexCode)));
+                        .forEach(n -> n.setStyle(String.format("-fx-background-color: %s, white;", color)));
     }
     
     /**
@@ -542,7 +542,7 @@ public class SnapShotController extends PluginController implements Initializabl
                                                                              .map(o -> new PieChart.Data(o.getName(), o.getTotalSize()))
                                                                              .collect(Collectors.toList()));
         usagePieChart.getData().stream()
-                               .forEach(d -> d.getNode().setStyle(String.format("-fx-pie-color: #%06X;", d.getName().hashCode() & 0xFFFFFF)));
+                               .forEach(d -> d.getNode().setStyle("-fx-pie-color: " + ChartColorManager.getNextColor(d.getName())));
         
         objDataTable.setItems(FXCollections.observableArrayList(
                 header.getSnapShot(HeapStatsUtils.getReplaceClassName()).values().stream().collect(Collectors.toList())));
