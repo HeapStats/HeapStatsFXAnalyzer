@@ -125,17 +125,29 @@
 </content>
     </Tab><Tab text="%tab.snapshot">
 <content><AnchorPane>
-<children><Label text="%label.snapshot" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" /><ComboBox fx:id="snapShotTimeCombo" layoutX="91.0" layoutY="45.0" onAction="#onSnapShotTimeSelected" prefHeight="23.0" prefWidth="176.0" AnchorPane.leftAnchor="70.0" AnchorPane.topAnchor="7.0" /><SplitPane dividerPositions="0.2, 0.7" orientation="VERTICAL" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+<children><Label text="%label.snapshot" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" /><ComboBox fx:id="snapShotTimeCombo" layoutX="91.0" layoutY="45.0" onAction="#onSnapShotTimeSelected" prefHeight="23.0" prefWidth="176.0" AnchorPane.leftAnchor="70.0" AnchorPane.topAnchor="7.0" /><SplitPane dividerPositions="0.6" orientation="VERTICAL" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
 <items><AnchorPane prefHeight="200.0" prefWidth="200.0">
-<children><TableView fx:id="snapShotSummaryTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-  <columns>
-    <TableColumn fx:id="snapShotSummaryKey" editable="false" minWidth="300.0" prefWidth="300.0" sortable="false" />
-    <TableColumn fx:id="snapShotSummaryValue" editable="false" minWidth="400.0" prefWidth="400.0" sortable="false" />
-  </columns>
-</TableView>
-</children></AnchorPane><AnchorPane prefHeight="200.0" prefWidth="200.0">
-<children><PieChart fx:id="usagePieChart" legendVisible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-</children></AnchorPane><AnchorPane prefHeight="186.0" prefWidth="772.0">
+                                 <children>
+                                    <SplitPane dividerPositions="0.5" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                      <items>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                             <children>
+                                                <PieChart fx:id="usagePieChart" legendVisible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                             </children>
+                                          </AnchorPane>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                             <children>
+                                                <TableView fx:id="snapShotSummaryTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <columns>
+                <TableColumn fx:id="snapShotSummaryKey" editable="false" minWidth="95.0" prefWidth="170.0" sortable="false" />
+                <TableColumn fx:id="snapShotSummaryValue" editable="false" minWidth="190.0" prefWidth="190.0" sortable="false" />
+              </columns>
+            </TableView>
+                                             </children>
+                                          </AnchorPane>
+                                      </items>
+                                    </SplitPane>
+                                 </children></AnchorPane><AnchorPane prefHeight="186.0" prefWidth="772.0">
 <children><TableView fx:id="objDataTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
   <columns>
     <TableColumn fx:id="objColorColumn" editable="false" prefWidth="40.0" sortable="false" />
