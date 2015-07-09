@@ -25,6 +25,7 @@ package jp.co.ntt.oss.heapstats.container.snapshot;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -227,7 +228,10 @@ public class ObjectData implements Serializable, Cloneable, Comparable<ObjectDat
             loaderName = "<SystemClassLoader>";
         }
         else{
-            loaderName = String.format("%s (0x%x)", snapShotData.get(classLoaderTag).name, classLoader);
+            String loaderClass =  Optional.ofNullable(snapShotData.get(classLoaderTag))
+                                          .map(o -> o.name)
+                                          .orElse("<Unknown>");
+            loaderName = String.format("%s (0x%x)", loaderClass, classLoader);
         }
         
     }
