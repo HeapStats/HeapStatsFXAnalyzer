@@ -30,11 +30,14 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
     @Override
     protected void updateItem(List<ThreadStat> item, boolean empty) {
         super.updateItem(item, empty);
-        if (empty || item == null || item.isEmpty()) {
+        ThreadStatViewModel model = (ThreadStatViewModel)getTableRow().getItem();
+        
+        if (empty || (item == null) || item.isEmpty() || (model == null)) {
             updateToEmptyCell();
         } else {
-            drawTimeline((ThreadStatViewModel)getTableRow().getItem());
+            drawTimeline(model);
         }
+        
     }
 
     private void drawTimeline(ThreadStatViewModel viewModel) {

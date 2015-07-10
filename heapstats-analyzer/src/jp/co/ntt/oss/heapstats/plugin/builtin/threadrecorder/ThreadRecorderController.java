@@ -135,6 +135,7 @@ public class ThreadRecorderController extends PluginController implements Initia
         timelineColumn.setCellFactory(param -> new TimelineCell(rangeStart, rangeEnd));
         timelineColumn.prefWidthProperty().bind(timelineView.widthProperty().subtract(TIMELINE_PADDING));
         rangePane.getItems().forEach(n -> SplitPane.setResizableWithParent(n, false));
+        timelineView.itemsProperty().bind(threadListView.itemsProperty());
     }
     
     /**
@@ -196,7 +197,6 @@ public class ThreadRecorderController extends PluginController implements Initia
                                 .map(k -> new ThreadStatViewModel(k, idMap.get(k), rangeStart.get(), rangeEnd.get(), statById.get(k)))
                                 .collect(Collectors.toList()));
         threadListView.setItems(threadStats);
-        timelineView.itemsProperty().bind(threadListView.itemsProperty());
     }
     
     @Override
