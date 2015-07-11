@@ -104,7 +104,7 @@
     <CategoryAxis side="BOTTOM" tickLabelsVisible="false" />
   </xAxis>
   <yAxis>
-    <NumberAxis label="MB" side="LEFT" />
+    <NumberAxis autoRanging="false" label="MB" side="LEFT" />
   </yAxis>
 </StackedAreaChart>
 </children>

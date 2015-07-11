@@ -45,6 +45,7 @@ import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.StackedAreaChart;
+import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -404,6 +405,16 @@ public class SnapShotController extends PluginController implements Initializabl
         lastDiffTable.getItems().addAll(diff.getLastDiffList());
         snapShotTimeCombo.getSelectionModel().selectLast();
         topNChart.getData().forEach(this::setTopNChartColor);
+        
+        long maxVal = topNChart.getData().stream()
+                               .flatMap(s -> s.dataProperty().get().stream())
+                               .collect(Collectors.groupingBy(d -> d.getXValue(), Collectors.summingLong(d -> d.getYValue())))
+                               .values()
+                               .stream()
+                               .mapToLong(Long::longValue)
+                               .max()
+                               .getAsLong();
+        ((ValueAxis)topNChart.getYAxis()).setUpperBound(maxVal * 1.05d);
     }
     
     /**
