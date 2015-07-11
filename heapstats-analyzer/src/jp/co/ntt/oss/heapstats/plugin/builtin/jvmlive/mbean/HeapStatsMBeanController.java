@@ -29,7 +29,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -189,8 +188,13 @@ public class HeapStatsMBeanController implements Initializable {
         }
         catch(IllegalArgumentException e){
             HeapStatsUtils.showExceptionDialog(e);
+            return;
         }
         
+        Alert dialog = new Alert(AlertType.INFORMATION, "New configuration values are applied.", ButtonType.OK);
+        dialog.show();
+        
+        loadAllConfigs();
     }
 
     @FXML
