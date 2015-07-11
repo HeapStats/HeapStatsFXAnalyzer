@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.rmi.ConnectException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -317,6 +318,21 @@ public class JVMLiveController extends PluginController implements Initializable
         // do nothing
         return null;
     }
+    
+    private void closeJMXConnection(Object obj){
+        if(obj instanceof JMXHelper){
+            try{
+                ((JMXHelper)obj).close();
+            } catch(ConnectException ex){
+                // Do nothing
+                // Runtime will connect remote host when JMX connection will be closed.
+                // So we can skip this operation.
+                Logger.getLogger(JVMLiveController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                HeapStatsUtils.showExceptionDialog(ex);
+            }
+        }
+    }
 
     @Override
     public Runnable getOnCloseRequest() {
@@ -346,11 +362,7 @@ public class JVMLiveController extends PluginController implements Initializable
                             Logger.getLogger(JVMLiveController.class.getName()).log(Level.SEVERE, null, ex);
                         }
                         
-                        jvmList.getItems().forEach(new ConsumerWrapper<>(p -> {
-                                                                                if(p.getHeapStatsTableKeyValue().valueProperty().get() instanceof JMXHelper){
-                                                                                    ((JMXHelper)p.getHeapStatsTableKeyValue().valueProperty().get()).close();
-                                                                                }
-                                                                              }));
+                        jvmList.getItems().forEach(p -> closeJMXConnection(p.getHeapStatsTableKeyValue().valueProperty().get()));
                      };
     }
     
