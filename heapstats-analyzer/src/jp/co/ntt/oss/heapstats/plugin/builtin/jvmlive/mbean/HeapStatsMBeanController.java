@@ -20,6 +20,7 @@ package jp.co.ntt.oss.heapstats.plugin.builtin.jvmlive.mbean;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 import javafx.beans.binding.Bindings;
@@ -191,7 +192,8 @@ public class HeapStatsMBeanController implements Initializable {
             return;
         }
         
-        Alert dialog = new Alert(AlertType.INFORMATION, "New configuration values are applied.", ButtonType.OK);
+        ResourceBundle resource = ResourceBundle.getBundle("jvmliveResources", new Locale(HeapStatsUtils.getLanguage()));
+        Alert dialog = new Alert(AlertType.INFORMATION, resource.getString("dialog.config.message.applyConfig"), ButtonType.OK);
         dialog.show();
         
         loadAllConfigs();
@@ -199,24 +201,28 @@ public class HeapStatsMBeanController implements Initializable {
 
     @FXML
     private void onInvokeResourceBtnClick(ActionEvent event){
+        ResourceBundle resource = ResourceBundle.getBundle("jvmliveResources", new Locale(HeapStatsUtils.getLanguage()));
+        
         if(jmxHelper.getMbean().invokeLogCollection()){
-            Alert dialog = new Alert(AlertType.INFORMATION, "Invoke Resource Log collection is succeeded.", ButtonType.OK);
+            Alert dialog = new Alert(AlertType.INFORMATION, resource.getString("dialog.config.message.invoke.resource.success"), ButtonType.OK);
             dialog.show();
         }
         else{
-            Alert dialog = new Alert(AlertType.ERROR, "Invoke Resource Log collection failed.", ButtonType.OK);
+            Alert dialog = new Alert(AlertType.ERROR, resource.getString("dialog.config.message.invoke.resource.fail"), ButtonType.OK);
             dialog.show();
         }
     }
 
     @FXML
     private void onInvokeAllBtnClick(ActionEvent event){
+        ResourceBundle resource = ResourceBundle.getBundle("jvmliveResources", new Locale(HeapStatsUtils.getLanguage()));
+        
         if(jmxHelper.getMbean().invokeAllLogCollection()){
-            Alert dialog = new Alert(AlertType.INFORMATION, "Invoke Resource Log collection is succeeded.", ButtonType.OK);
+            Alert dialog = new Alert(AlertType.INFORMATION, resource.getString("dialog.config.message.invoke.archive.success"), ButtonType.OK);
             dialog.show();
         }
         else{
-            Alert dialog = new Alert(AlertType.ERROR, "Invoke Resource Log collection failed.", ButtonType.OK);
+            Alert dialog = new Alert(AlertType.ERROR, resource.getString("dialog.config.message.invoke.archive.fail"), ButtonType.OK);
             dialog.show();
         }
     }
@@ -224,14 +230,16 @@ public class HeapStatsMBeanController implements Initializable {
     @FXML
     private void onInvokeSnapShotBtnClick(ActionEvent event){
         jmxHelper.getMbean().invokeSnapShotCollection();
-        Alert dialog = new Alert(AlertType.INFORMATION, "Invoke SnapShot is requested.", ButtonType.OK);
+        ResourceBundle resource = ResourceBundle.getBundle("jvmliveResources", new Locale(HeapStatsUtils.getLanguage()));
+        Alert dialog = new Alert(AlertType.INFORMATION, resource.getString("dialog.config.message.invoke.snapshot"), ButtonType.OK);
         dialog.show();
     }
     
     @FXML
     private void onGetResourceBtnClick(ActionEvent event){
         FileChooser dialog = new FileChooser();
-        dialog.setTitle("Save resource log");
+        ResourceBundle resource = ResourceBundle.getBundle("jvmliveResources", new Locale(HeapStatsUtils.getLanguage()));
+        dialog.setTitle(resource.getString("dialog.config.resource.save"));
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv"),
                                             new FileChooser.ExtensionFilter("All files", "*.*"));
@@ -250,7 +258,8 @@ public class HeapStatsMBeanController implements Initializable {
     @FXML
     private void onGetSnapShotBtnClick(ActionEvent event){
         FileChooser dialog = new FileChooser();
-        dialog.setTitle("Save SnapShot");
+        ResourceBundle resource = ResourceBundle.getBundle("jvmliveResources", new Locale(HeapStatsUtils.getLanguage()));
+        dialog.setTitle(resource.getString("dialog.config.snapshot.save"));
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("SnapShot file (*.dat)", "*.dat"),
                                             new FileChooser.ExtensionFilter("All files", "*.*"));

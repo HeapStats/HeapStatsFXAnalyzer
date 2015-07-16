@@ -28,6 +28,7 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -145,7 +146,9 @@ public class ThreadRecorderController extends PluginController implements Initia
     @FXML
     private void onOpenBtnClick(ActionEvent event){
         FileChooser dialog = new FileChooser();
-        dialog.setTitle("Choose HeapStats Thread Recorder file");
+        ResourceBundle resource = ResourceBundle.getBundle("snapshotResources", new Locale(HeapStatsUtils.getLanguage()));
+        
+        dialog.setTitle(resource.getString("dialog.filechooser.title"));
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Thread Recorder file (*.htr)", "*.htr"),
                                             new FileChooser.ExtensionFilter("All files", "*.*"));

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Yasumasa Suenaga
+ * Copyright (C) 2014-2015 Yasumasa Suenaga
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.rmi.ConnectException;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -143,7 +144,7 @@ public class JVMLiveController extends PluginController implements Initializable
                                          super.updateItem(item, empty);
                                          Optional.ofNullable(item).ifPresent(i -> {
                                                                                      if(empty){
-                                                                                         setText("<None>");
+                                                                                         setText("<N/A>");
                                                                                      }
                                                                                      else if(i instanceof Labeled){
                                                                                          setGraphic((Labeled)i);
@@ -215,7 +216,8 @@ public class JVMLiveController extends PluginController implements Initializable
     }
     
     private void onHeapStatsLinkClicked(JMXHelper jmxHelper){
-        FXMLLoader loader = new FXMLLoader(JVMLiveController.class.getResource("/jp/co/ntt/oss/heapstats/plugin/builtin/jvmlive/mbean/heapstatsMBean.fxml"), HeapStatsUtils.getResourceBundle());
+        ResourceBundle pluginResource = ResourceBundle.getBundle("jvmliveResources", new Locale(HeapStatsUtils.getLanguage()));
+        FXMLLoader loader = new FXMLLoader(JVMLiveController.class.getResource("/jp/co/ntt/oss/heapstats/plugin/builtin/jvmlive/mbean/heapstatsMBean.fxml"), pluginResource);
         HeapStatsMBeanController mbeanController;
         Scene mbeanDialogScene;
 
@@ -260,8 +262,10 @@ public class JVMLiveController extends PluginController implements Initializable
         }
 
         Alert dialog = new Alert(AlertType.WARNING);
-        dialog.setTitle("Crash report");
-        dialog.setHeaderText("A fatal error has been detected on " + host);
+        ResourceBundle resource = ResourceBundle.getBundle("jvmliveResources", new Locale(HeapStatsUtils.getLanguage()));
+        
+        dialog.setTitle(resource.getString("dialog.crashreport.title"));
+        dialog.setHeaderText(resource.getString("dialog.crashreport.header") + host);
         TextArea hsErrArea = new TextArea(hsErr);
         hsErrArea.setEditable(false);
         dialog.getDialogPane().setExpandableContent(hsErrArea);
@@ -283,7 +287,9 @@ public class JVMLiveController extends PluginController implements Initializable
     @FXML
     private void onSaveMenuClicked(ActionEvent event){
         FileChooser dialog = new FileChooser();
-        dialog.setTitle("Save hs_err log");
+        ResourceBundle resource = ResourceBundle.getBundle("jvmliveResources", new Locale(HeapStatsUtils.getLanguage()));
+        
+        dialog.setTitle(resource.getString("dialog.crashreport.save.title"));
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Log file (*.log)", "*.log"),
                                             new FileChooser.ExtensionFilter("All files", "*.*"));
