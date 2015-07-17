@@ -18,18 +18,18 @@ public class JdpTableKeyValue {
     
     private final StringProperty key;
     
-    private final ObjectProperty value;
+    private final ObjectProperty<Object> value;
     
     public JdpTableKeyValue(String key, Object value){
         this.key = new SimpleStringProperty(key);
-        this.value = new SimpleObjectProperty(value);
+        this.value = new SimpleObjectProperty<>(value);
     }
     
     public StringProperty keyProperty(){
         return key;
     }
     
-    public ObjectProperty valueProperty(){
+    public ObjectProperty<Object> valueProperty(){
         return value;
     }
     

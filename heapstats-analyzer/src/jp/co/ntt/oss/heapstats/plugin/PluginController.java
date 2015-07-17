@@ -116,7 +116,7 @@ public abstract class PluginController implements Initializable{
         progress.progressProperty().bind(task.progressProperty());
     }
  
-    public void setOnWindowResize(ChangeListener event){
+    public void setOnWindowResize(ChangeListener<? super Number> event){
         this.windowResizeEvent = event;
         WindowController.getInstance().getOwner().widthProperty().addListener(event);
         WindowController.getInstance().getOwner().heightProperty().addListener(event);

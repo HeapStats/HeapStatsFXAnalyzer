@@ -197,6 +197,7 @@ public class LogController extends PluginController implements Initializable{
      *   RT-37994: [FXML] ProxyBuilder does not support read-only collections
      *   https://javafx-jira.kenai.com/browse/RT-37994
      */
+    @SuppressWarnings("unchecked")
     private void initializeChartSeries(){
         threads = new XYChart.Series<>();
         threads.setName("Threads");
@@ -339,7 +340,7 @@ public class LogController extends PluginController implements Initializable{
 
             logFileList.setText(logListStr);
             
-            TaskAdapter<ParseLogFile> task = new TaskAdapter(new ParseLogFile(logList));
+            TaskAdapter<ParseLogFile> task = new TaskAdapter<>(new ParseLogFile(logList));
             task.setOnSucceeded(evt -> onLogFileParserSucceeded(task.getTask()));
             super.bindTask(task);
             
@@ -668,8 +669,9 @@ public class LogController extends PluginController implements Initializable{
     }
     
     @FXML
+    @SuppressWarnings("unchecked")
     private void onChartMouseMoved(MouseEvent event){
-        XYChart<String, Number> chart = (XYChart)event.getSource();
+        XYChart<String, Number> chart = (XYChart<String, Number>)event.getSource();
         CategoryAxis xAxis = (CategoryAxis)chart.getXAxis();
         double startXPoint = xAxis.getLayoutX() + xAxis.getStartMargin();
         
@@ -718,7 +720,7 @@ public class LogController extends PluginController implements Initializable{
         super.setData(data, select);
         logFileList.setText((String)data);
         
-        TaskAdapter<ParseLogFile> task = new TaskAdapter(new ParseLogFile(Arrays.asList(new File((String)data))));
+        TaskAdapter<ParseLogFile> task = new TaskAdapter<>(new ParseLogFile(Arrays.asList(new File((String)data))));
         task.setOnSucceeded(evt -> onLogFileParserSucceeded(task.getTask()));
         super.bindTask(task);
         

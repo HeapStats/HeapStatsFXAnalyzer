@@ -43,6 +43,7 @@ public class HeapStatsConfig {
     
     private final BooleanProperty changed;
     
+    @SuppressWarnings("unchecked")
     public HeapStatsConfig(String key, Object value){
         this.key = new SimpleStringProperty(key);
         changed = new SimpleBooleanProperty();
@@ -64,7 +65,7 @@ public class HeapStatsConfig {
             this.currentValue = (String)value;
         }
         else{
-            this.value = new SimpleObjectProperty(value);
+            this.value = new SimpleObjectProperty<>(value);
             this.currentValue = value;
         }
         

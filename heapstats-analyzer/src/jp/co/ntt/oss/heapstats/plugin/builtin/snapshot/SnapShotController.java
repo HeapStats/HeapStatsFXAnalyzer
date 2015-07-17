@@ -220,6 +220,7 @@ public class SnapShotController extends PluginController implements Initializabl
      *   RT-37994: [FXML] ProxyBuilder does not support read-only collections
      *   https://javafx-jira.kenai.com/browse/RT-37994
      */
+    @SuppressWarnings("unchecked")
     private void initializeChartSeries(){
         youngUsage = new XYChart.Series<>();
         youngUsage.setName("Young");
@@ -527,6 +528,7 @@ public class SnapShotController extends PluginController implements Initializabl
      * @param event ActionEvent of this event.
      */
     @FXML
+    @SuppressWarnings("unchecked")
     private void onSnapShotTimeSelected(ActionEvent event){
         SnapShotHeader header = snapShotTimeCombo.getSelectionModel().getSelectedItem();
         if(header == null){

@@ -94,6 +94,7 @@ public class HeapStatsMBeanController implements Initializable {
     private static class VariousTableCell extends TableCell<HeapStatsConfig, Object>{
         
         @Override
+        @SuppressWarnings("unchecked")
         protected void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
             
