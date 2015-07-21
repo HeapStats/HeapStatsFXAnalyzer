@@ -36,6 +36,7 @@
                             <classpathPrefix>lib/heapstats-core.jar:lib/heapstats-mbean.jar</classpathPrefix>
                         </manifest>
                     </archive>
+                    <finalName>heapstats-cli</finalName>
                 </configuration>
             </plugin>
         </plugins>
