@@ -5,6 +5,9 @@
     <artifactId>RefTreePlugin</artifactId>
     <version>2.0</version>
     <packaging>jar</packaging>
+    <organization>
+        <name>NTT OSS Center</name>
+    </organization>
     <repositories>
         <repository>
             <id>jitpack.io</id>
@@ -14,8 +17,17 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>core</artifactId>
+            <version>${project.version}</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/../../../core/target/heapstats-core.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>analyzer</artifactId>
             <version>${project.version}</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/../../target/heapstats-analyzer.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.github.jgraph</groupId>
