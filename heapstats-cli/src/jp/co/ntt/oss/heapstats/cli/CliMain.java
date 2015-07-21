@@ -46,6 +46,11 @@ public class CliMain {
         
         CliProcessor processor;
         Options.FileType fileType = options.getType();
+
+        if(fileType == null){
+            options.printHelp();
+            return;
+        }
         
         switch(fileType){
             case LOG:
