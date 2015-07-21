@@ -65,7 +65,7 @@ public class HeapStatsUtils {
         
         if(currentPath == null){
             String appJar = Stream.of(System.getProperty("java.class.path").split(System.getProperty("path.separator")))
-                                         .filter(s -> s.endsWith("analyzer-2.0.jar"))
+                                         .filter(s -> s.endsWith("heapstats-analyzer.jar"))
                                          .findFirst()
                                          .get();
             currentPath = Paths.get(appJar).toAbsolutePath().getParent();
