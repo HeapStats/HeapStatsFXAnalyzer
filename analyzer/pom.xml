@@ -81,5 +81,12 @@
             <artifactId>core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.mxgraph</groupId>
+            <artifactId>jgraphx</artifactId>
+            <version>3.3.1.1</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/jgraphx.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

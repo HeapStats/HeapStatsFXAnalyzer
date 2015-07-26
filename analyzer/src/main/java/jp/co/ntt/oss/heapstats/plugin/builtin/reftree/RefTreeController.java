@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package jp.co.ntt.oss.heapstats.plugin.reftree;
+package jp.co.ntt.oss.heapstats.plugin.builtin.reftree;
 
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.model.mxCell;
