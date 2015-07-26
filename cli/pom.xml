@@ -6,7 +6,7 @@
         <artifactId>heapstats</artifactId>
         <version>2.0</version>
     </parent>
-    <artifactId>cli</artifactId>
+    <artifactId>heapstats-cli</artifactId>
     <packaging>jar</packaging>
     <name>HeapStats CLI</name>
 
@@ -33,7 +33,7 @@
                             <packageName>jp.co.ntt.oss.heapstats.cli</packageName>
                             <addClasspath>true</addClasspath>
                             <classpathLayoutType>custom</classpathLayoutType>
-                            <customClasspathLayout>lib/heapstats-${artifact.artifactId}.${artifact.extension}</customClasspathLayout>
+                            <customClasspathLayout>lib/${artifact.artifactId}.${artifact.extension}</customClasspathLayout>
                         </manifest>
                     </archive>
                     <finalName>heapstats-cli</finalName>
@@ -47,7 +47,6 @@
                     <descriptors>
                         <descriptor>src/main/assembly/distribution.xml</descriptor>
                     </descriptors>
-                    <finalName>heapstats-cli-${project.version}</finalName>
                     <attach>false</attach>
                 </configuration>
                 <executions>
@@ -66,12 +65,12 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>mbean</artifactId>
+            <artifactId>heapstats-mbean</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>heapstats-core</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

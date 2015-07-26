@@ -45,7 +45,7 @@
             <unpack>false</unpack>
             <scope>runtime</scope>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>heapstats-${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
             <outputDirectory>lib</outputDirectory>
         </dependencySet>
     </dependencySets>

@@ -267,8 +267,9 @@ public class WindowController implements Initializable {
         try(DirectoryStream<Path> jarPaths = Files.newDirectoryStream(libPath, "*.jar")){
             jarURLList = StreamSupport.stream(jarPaths.spliterator(), false)
                                       .map(new FunctionWrapper<>(p -> p.toUri().toURL()))
-                                      .filter(u -> !u.getFile().endsWith("heapstats-core"))
-                                      .filter(u -> !u.getFile().endsWith("heapstats-mbean"))
+                                      .filter(u -> !u.getFile().endsWith("heapstats-core.jar"))
+                                      .filter(u -> !u.getFile().endsWith("heapstats-mbean.jar"))
+                                      .filter(u -> !u.getFile().endsWith("jgraphx.jar"))
                                       .collect(Collectors.toList())
                                       .toArray(new URL[0]);
         }
