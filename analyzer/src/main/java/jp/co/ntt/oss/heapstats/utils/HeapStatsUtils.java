@@ -52,18 +52,18 @@ import jp.co.ntt.oss.heapstats.plugin.builtin.threadrecorder.ThreadRecorderContr
  * @author Yasu
  */
 public class HeapStatsUtils {
-    
+
     /* Path of HeapStats home directory. */
     private static Path currentPath = null;
-    
+
     /* Properties for HeapStats analyzer. */
     private static final Properties prop = new Properties();
-    
+
     /* Resource bundle for HeapStats Analyzer. */
     private static ResourceBundle resource;
-        
+
     public static Path getHeapStatsHomeDirectory(){
-        
+
         if(currentPath == null){
             String appJar = Stream.of(System.getProperty("java.class.path").split(System.getProperty("path.separator")))
                                          .filter(s -> s.endsWith("heapstats-analyzer.jar"))
@@ -71,10 +71,10 @@ public class HeapStatsUtils {
                                          .get();
             currentPath = Paths.get(appJar).toAbsolutePath().getParent();
         }
-        
+
         return currentPath;
     }
-    
+
     /**
      * Load HeapStats property file.
      * @author Yasumasa Suenaga
@@ -83,16 +83,16 @@ public class HeapStatsUtils {
      */
     public static void load() throws IOException, HeapStatsConfigException{
         Path properties = Paths.get(getHeapStatsHomeDirectory().toString(), "heapstats.properties");
-        
+
         try(InputStream in = Files.newInputStream(properties, StandardOpenOption.READ)){
             prop.load(in);
         }
         catch(NoSuchFileException e){
             // use default values.
         }
-        
+
         /* Validate values in properties. */
-        
+
         /* Language */
         String language = prop.getProperty("language");
         if(language == null){
@@ -115,7 +115,7 @@ public class HeapStatsUtils {
                 throw new HeapStatsConfigException("Invalid option: ranklevel=" + rankLevelStr, e);
             }
         }
-        
+
         /* ClassRename */
         /* java.lang.Boolean#parseStinrg() does not throws Throwable.
          * If user sets invalid value, Boolean will treat "true" .
@@ -124,17 +124,17 @@ public class HeapStatsUtils {
         if(prop.getProperty("replace") == null){
             prop.setProperty("replace", "false");
         }
-        
+
         /* Default directory for dialogs. */
         if(prop.getProperty("defaultdir") == null){
             prop.setProperty("defaultdir", getHeapStatsHomeDirectory().toString());
         }
-        
+
         /* Log file list to parse. */
         if(prop.getProperty("logfile") == null){
             prop.setProperty("logfile", "redhat-release,cmdline,status,smaps,limits");
         }
-        
+
         /* Socket endpoint file to parse. */
         if(prop.getProperty("socketend") == null){
             prop.setProperty("socketend", "tcp,udp,tcp6,udp6");
@@ -158,13 +158,13 @@ public class HeapStatsUtils {
                 throw new HeapStatsConfigException("Invalid option: bgcolor=" + bgColorStr, e);
             }
         }
-        
+
         /* Load resource bundle */
         resource = ResourceBundle.getBundle("HeapStatsResources", new Locale(prop.getProperty("language")));
-        
+
         /* Add shutdown hook for saving current settings. */
         Runnable savePropImpl = () -> {
-                                         try(OutputStream out = Files.newOutputStream(properties, StandardOpenOption.TRUNCATE_EXISTING)){
+                                         try(OutputStream out = Files.newOutputStream(properties, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)){
                                             prop.store(out, null);
                                          }
                                          catch(IOException ex){
@@ -173,7 +173,7 @@ public class HeapStatsUtils {
                                       };
         Runtime.getRuntime().addShutdownHook(new Thread(savePropImpl));
     }
-    
+
     public static List<String> getPlugins(){
         List<String> pluginList = new ArrayList<>();
         pluginList.add(LogController.class.getPackage().getName());
@@ -182,59 +182,59 @@ public class HeapStatsUtils {
         pluginList.add(ThreadRecorderController.class.getPackage().getName());
         pluginList.add(JVMLiveController.class.getPackage().getName());
         pluginList.addAll(Arrays.asList(prop.getProperty("plugins", "").split(";")));
-        
+
         return pluginList.stream()
                          .map(s -> s.trim())
                          .filter(s -> s.length() > 0)
                          .distinct()
-                         .collect(Collectors.toList());                                     
+                         .collect(Collectors.toList());
     }
-    
+
     public static boolean getReplaceClassName(){
         return Boolean.parseBoolean(prop.getProperty("replace"));
     }
-    
+
     public static String getDefaultDirectory(){
         return prop.getProperty("defaultdir");
     }
-    
+
     public static void setDefaultDirectory(String currentDir){
-        
+
         if(currentDir != null){
             prop.setProperty("defaultdir", currentDir);
         }
-        
+
     }
-    
+
     public static int getRankLevel(){
         return Integer.parseInt(prop.getProperty("ranklevel"));
     }
-    
+
     public static void setRankLevel(int rankLevel){
         prop.setProperty("ranklevel", Integer.toString(rankLevel));
     }
-    
+
     public static String getChartBgColor(){
         return prop.getProperty("bgcolor");
     }
-    
+
     public static String getLanguage(){
         return prop.getProperty("language");
     }
-    
+
     public static ResourceBundle getResourceBundle(){
         return ResourceBundle.getBundle("HeapStatsResources", new Locale(getLanguage()));
     }
-    
+
     /**
      * Convert stack trace to String.
      * @param e Throwable object to convert.
-     * 
+     *
      * @return String result of e.printStackTrace()
      */
     public static String stackTarceToString(Throwable e){
         String result = null;
-        
+
         try(StringWriter strWriter = new StringWriter();
             PrintWriter printWriter = new PrintWriter(strWriter)){
             e.printStackTrace(printWriter);
@@ -243,19 +243,19 @@ public class HeapStatsUtils {
         catch(IOException ex) {
             Logger.getLogger(HeapStatsUtils.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         return result;
     }
-    
+
     /**
      * Show alert dialog.
-     * 
+     *
      * @param e Throwable instance to show.
      */
     public static void showExceptionDialog(Throwable e){
         TextArea details = new TextArea(HeapStatsUtils.stackTarceToString(e));
         details.setEditable(false);
-        
+
         Alert dialog = new Alert(Alert.AlertType.ERROR);
         dialog.setTitle("Error");
         dialog.setHeaderText(e.getLocalizedMessage());

@@ -62,38 +62,38 @@ import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
 /**
  * Main window controller.
- * 
+ *
  * @author Yasumasa Suenaga
  */
 public class WindowController implements Initializable {
-    
+
     private Map<String, PluginController> pluginList;
-        
+
     private Region veil;
-    
+
     private ProgressIndicator progress;
-    
-    private URLClassLoader pluginClassLoader;
-    
+
+    private ClassLoader pluginClassLoader;
+
     private Window owner;
-    
+
     @FXML
     private StackPane stackPane;
-    
+
     @FXML
     private TabPane tabPane;
-    
+
     private AboutDialogController aboutDialogController;
-    
+
     private Scene aboutDialogScene;
-    
+
     private static WindowController thisController;
-    
+
     @FXML
     private void onExitClick(ActionEvent event) {
         Platform.exit();
     }
-    
+
     @FXML
     private void onRankLevelClick(ActionEvent event){
         TextInputDialog dialog = new TextInputDialog(Integer.toString(HeapStatsUtils.getRankLevel()));
@@ -109,7 +109,7 @@ public class WindowController implements Initializable {
     private void onAboutMenuClick(ActionEvent event){
         Stage dialog = new Stage(StageStyle.UTILITY);
         aboutDialogController.setStage(dialog);
-        
+
         dialog.setScene(aboutDialogScene);
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setResizable(false);
@@ -122,7 +122,7 @@ public class WindowController implements Initializable {
         packageName = packageName.replace('.', '/');
         String fxmlName = packageName + "/" + lastPackageName + ".fxml";
         FXMLLoader loader;
-        
+
         try{
             ResourceBundle pluginResource = ResourceBundle.getBundle(lastPackageName + "Resources", new Locale(HeapStatsUtils.getLanguage()), pluginClassLoader);
             loader = new FXMLLoader(pluginClassLoader.getResource(fxmlName), pluginResource);
@@ -130,9 +130,9 @@ public class WindowController implements Initializable {
         catch(MissingResourceException e){
             loader = new FXMLLoader(pluginClassLoader.getResource(fxmlName));
         }
-        
+
         Parent root;
-        
+
         try {
             root = loader.load();
         }
@@ -140,7 +140,7 @@ public class WindowController implements Initializable {
             HeapStatsUtils.showExceptionDialog(ex);
             return;
         }
-        
+
         PluginController controller = (PluginController)loader.getController();
         controller.setVeil(veil);
         controller.setProgress(progress);
@@ -149,16 +149,16 @@ public class WindowController implements Initializable {
         tab.setText(controller.getPluginName());
         tab.setContent(root);
         tab.setOnSelectionChanged(controller.getOnPluginTabSelected());
-        
+
         tabPane.getTabs().add(tab);
-        
+
         pluginList.put(controller.getPluginName(), controller);
     }
-    
+
     public static WindowController getInstance(){
         return thisController;
     }
-    
+
     @FXML
     private void onGCAllClick(ActionEvent event) {
         SnapShotController snapShotController = (SnapShotController)getPluginController("SnapShot Data");
@@ -191,7 +191,7 @@ public class WindowController implements Initializable {
                                  .orElseThrow(() -> new IllegalStateException("SnapShot plugin must be loaded."));
         tabPane.getSelectionModel().select(snapShotTab);
         SnapShotController snapShotController = (SnapShotController)getPluginController("SnapShot Data");
-        
+
         snapShotController.onSnapshotFileClick(event);
     }
 
@@ -203,22 +203,22 @@ public class WindowController implements Initializable {
                                  .orElseThrow(() -> new IllegalStateException("Log plugin must be loaded."));
         tabPane.getSelectionModel().select(snapShotTab);
         LogController logController = (LogController)getPluginController("Log Data");
-        
+
         logController.onLogFileClick(event);
     }
-    
+
     private void initializeAboutDialog(){
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/jp/co/ntt/oss/heapstats/aboutDialog.fxml"), HeapStatsUtils.getResourceBundle());
-        
+
         try {
             loader.load();
             aboutDialogController = (AboutDialogController)loader.getController();
-            aboutDialogScene = new Scene(loader.getRoot());        
+            aboutDialogScene = new Scene(loader.getRoot());
         }
         catch (IOException ex) {
             HeapStatsUtils.showExceptionDialog(ex);
         }
-        
+
     }
 
     @Override
@@ -228,14 +228,14 @@ public class WindowController implements Initializable {
         veil = new Region();
         veil.setStyle("-fx-background-color: rgba(0, 0, 0, 0.2)");
         veil.setVisible(false);
-        
+
         progress = new ProgressIndicator();
         progress.setMaxSize(200.0d, 200.0d);
         progress.setVisible(false);
-        
+
         stackPane.getChildren().add(veil);
         stackPane.getChildren().add(progress);
-        
+
         initializeAboutDialog();
     }
 
@@ -246,9 +246,9 @@ public class WindowController implements Initializable {
         String resourceName = "/" + this.getClass().getName().replace('.', '/') + ".class";
         String appJarString = this.getClass().getResource(resourceName).getPath();
         appJarString = appJarString.substring(0, appJarString.indexOf('!')).replaceFirst("file:", "");
-        
+
         Path appJarPath;
-        
+
         try{
             appJarPath = Paths.get(appJarString);
         }
@@ -260,10 +260,10 @@ public class WindowController implements Initializable {
                 throw e;
             }
         }
-        
+
         Path libPath = appJarPath.getParent().resolve("lib");
         URL[] jarURLList = null;
-        
+
         try(DirectoryStream<Path> jarPaths = Files.newDirectoryStream(libPath, "*.jar")){
             jarURLList = StreamSupport.stream(jarPaths.spliterator(), false)
                                       .map(new FunctionWrapper<>(p -> p.toUri().toURL()))
@@ -277,20 +277,18 @@ public class WindowController implements Initializable {
             Logger.getLogger(WindowController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        if(jarURLList != null){
-            pluginClassLoader = new URLClassLoader(jarURLList);
-            FXMLLoader.setDefaultClassLoader(pluginClassLoader);
-        }
-            
+        pluginClassLoader = (jarURLList == null) ? WindowController.class.getClassLoader() : new URLClassLoader(jarURLList);
+        FXMLLoader.setDefaultClassLoader(pluginClassLoader);
+
         List<String> plugins = HeapStatsUtils.getPlugins();
         plugins.stream().forEach(s -> addPlugin(s));
-        
+
         aboutDialogController.setPluginInfo();
     }
 
     /**
      * Get controller instance of plugin.
-     * 
+     *
      * @param pluginName Plugin name which you want.
      * @return Controller of Plugin. If it does not exist, return null.
      */
@@ -300,17 +298,17 @@ public class WindowController implements Initializable {
 
     /**
      * Get loaded plugin list.
-     * 
+     *
      * @return Loaded plugin list.
      */
     public Map<String, PluginController> getPluginList() {
         return pluginList;
     }
-    
+
     /**
      * Select plugin tab
-     * 
-     * @param pluginName Name of plugin to active. 
+     *
+     * @param pluginName Name of plugin to active.
      */
     public void selectTab(String pluginName) throws IllegalArgumentException{
         Tab target = tabPane.getTabs().stream()
@@ -328,5 +326,5 @@ public class WindowController implements Initializable {
         this.owner = owner;
         this.owner.setOnCloseRequest(e -> pluginList.values().forEach(c -> Optional.ofNullable(c.getOnCloseRequest()).ifPresent(r -> r.run())));
     }
-    
+
 }
