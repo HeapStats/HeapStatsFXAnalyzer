@@ -18,11 +18,13 @@
 
 package jp.co.ntt.oss.heapstats;
 
+import java.io.InputStream;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
@@ -36,6 +38,12 @@ public class HeapStatsFXAnalyzer extends Application {
         
     @Override
     public void start(Stage stage) throws Exception {
+        stage.setTitle("HeapStats Analyzer");
+        
+        try(InputStream icon = getClass().getResourceAsStream("heapstats-icon.png")){
+            stage.getIcons().add(new Image(icon));
+        }
+        
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> HeapStatsUtils.showExceptionDialog(e)));
         HeapStatsUtils.load();
         FXMLLoader mainWindowLoader = new FXMLLoader(getClass().getResource("window.fxml"), HeapStatsUtils.getResourceBundle());

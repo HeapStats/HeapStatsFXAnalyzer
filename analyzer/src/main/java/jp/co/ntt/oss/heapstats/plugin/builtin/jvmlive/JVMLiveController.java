@@ -21,6 +21,7 @@ package jp.co.ntt.oss.heapstats.plugin.builtin.jvmlive;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
@@ -59,6 +60,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
@@ -235,6 +237,13 @@ public class JVMLiveController extends PluginController implements Initializable
         mbeanController.loadAllConfigs();
         Stage dialog = new Stage(StageStyle.UTILITY);
 
+        try(InputStream icon = WindowController.class.getResourceAsStream("heapstats-icon.png")){
+            dialog.getIcons().add(new Image(icon));
+        }
+        catch(IOException e){
+            HeapStatsUtils.showExceptionDialog(e);
+        }
+        
         mbeanController.setStage(dialog);
         dialog.setScene(mbeanDialogScene);
         dialog.initModality(Modality.APPLICATION_MODAL);

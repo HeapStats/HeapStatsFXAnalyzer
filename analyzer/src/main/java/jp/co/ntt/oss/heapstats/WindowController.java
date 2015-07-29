@@ -97,6 +97,17 @@ public class WindowController implements Initializable {
     @FXML
     private void onRankLevelClick(ActionEvent event){
         TextInputDialog dialog = new TextInputDialog(Integer.toString(HeapStatsUtils.getRankLevel()));
+
+        /* TODO: Can we add icon to TextInputDialog? */
+        /*
+        try(InputStream icon = getClass().getResourceAsStream("heapstats-icon.png")){
+            dialog.getIcons().add(new Image(icon));
+        }
+        catch(IOException e){
+            HeapStatsUtils.showExceptionDialog(e);
+        }
+        */
+        
         dialog.setTitle("Rank Level setting");
         dialog.setHeaderText("Rank Level setting");
         ResourceBundle resource = ResourceBundle.getBundle("HeapStatsResources", new Locale(HeapStatsUtils.getLanguage()));
