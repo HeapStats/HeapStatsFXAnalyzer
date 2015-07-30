@@ -146,7 +146,7 @@ public class ThreadRecorderController extends PluginController implements Initia
     @FXML
     private void onOpenBtnClick(ActionEvent event){
         FileChooser dialog = new FileChooser();
-        ResourceBundle resource = ResourceBundle.getBundle("snapshotResources", new Locale(HeapStatsUtils.getLanguage()));
+        ResourceBundle resource = ResourceBundle.getBundle("threadrecorderResources", new Locale(HeapStatsUtils.getLanguage()));
         
         dialog.setTitle(resource.getString("dialog.filechooser.title"));
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
