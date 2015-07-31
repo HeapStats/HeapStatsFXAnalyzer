@@ -42,7 +42,7 @@
   </rowConstraints>
 <children><StackPane GridPane.columnIndex="1" GridPane.rowIndex="1">
                                  <children>
-                                    <LineChart id="threadChart" fx:id="threadChart" animated="false" createSymbols="false" minHeight="0.0" minWidth="0.0" onMouseExited="#onChartMouseExited" onMouseMoved="#onChartMouseMoved" title="Threads">
+                                    <LineChart id="threadChart" fx:id="threadChart" animated="false" createSymbols="false" legendVisible="false" minHeight="0.0" minWidth="0.0" onMouseExited="#onChartMouseExited" onMouseMoved="#onChartMouseMoved" title="Threads">
         <xAxis>
           <CategoryAxis side="BOTTOM" tickLabelsVisible="false" />
         </xAxis>
@@ -98,7 +98,7 @@
                               </StackPane>
                               <StackPane minHeight="0.0" minWidth="0.0" GridPane.rowIndex="2">
                                  <children>
-                                    <LineChart id="safepointChart" fx:id="safepointChart" animated="false" createSymbols="false" minHeight="0.0" minWidth="0.0" onMouseExited="#onChartMouseExited" onMouseMoved="#onChartMouseMoved" title="Safepoint Count">
+                                    <LineChart id="safepointChart" fx:id="safepointChart" animated="false" createSymbols="false" legendVisible="false" minHeight="0.0" minWidth="0.0" onMouseExited="#onChartMouseExited" onMouseMoved="#onChartMouseMoved" title="Safepoint Count">
       <xAxis>
       <CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" visible="false" />
       </xAxis>
@@ -111,7 +111,7 @@
                               </StackPane>
                               <StackPane minHeight="0.0" minWidth="0.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                  <children>
-                                    <LineChart id="safepointTimeChart" fx:id="safepointTimeChart" animated="false" createSymbols="false" minHeight="0.0" minWidth="0.0" onMouseExited="#onChartMouseExited" onMouseMoved="#onChartMouseMoved" title="Safepoint Time">
+                                    <LineChart id="safepointTimeChart" fx:id="safepointTimeChart" animated="false" createSymbols="false" legendVisible="false" minHeight="0.0" minWidth="0.0" onMouseExited="#onChartMouseExited" onMouseMoved="#onChartMouseMoved" title="Safepoint Time">
       <xAxis>
       <CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" visible="false" />
       </xAxis>
@@ -124,7 +124,7 @@
                               </StackPane>
                               <StackPane minHeight="0.0" minWidth="0.0" GridPane.rowIndex="3">
                                  <children>
-                                    <LineChart id="monitorChart" fx:id="monitorChart" animated="false" createSymbols="false" minHeight="0.0" minWidth="0.0" onMouseExited="#onChartMouseExited" onMouseMoved="#onChartMouseMoved" title="Monitor Contention">
+                                    <LineChart id="monitorChart" fx:id="monitorChart" animated="false" createSymbols="false" legendVisible="false" minHeight="0.0" minWidth="0.0" onMouseExited="#onChartMouseExited" onMouseMoved="#onChartMouseMoved" title="Monitor Contention">
                                       <xAxis>
                                         <CategoryAxis side="BOTTOM" tickLabelsVisible="false" />
                                       </xAxis>

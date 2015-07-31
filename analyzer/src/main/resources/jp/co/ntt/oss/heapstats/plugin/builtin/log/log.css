@@ -74,9 +74,11 @@
 
 /* VSZ */
 #javaMemoryChart .default-color0.chart-series-line { -fx-stroke: blue; }
+#javaMemoryChart .default-color0.chart-line-symbol { -fx-background-color: blue, white; }
 
 /* RSS */
 #javaMemoryChart .default-color1.chart-series-line { -fx-stroke: red; }
+#javaMemoryChart .default-color1.chart-line-symbol { -fx-background-color: red, white; }
 
 
 /* Safepoint chart */
