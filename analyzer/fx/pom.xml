@@ -5,6 +5,7 @@
         <artifactId>heapstats</artifactId>
         <groupId>jp.co.ntt.oss.heapstats</groupId>
         <version>2.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <groupId>jp.co.ntt.oss.heapstats</groupId>

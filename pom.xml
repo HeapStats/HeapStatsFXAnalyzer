@@ -6,10 +6,10 @@
     <version>2.0</version>
     <packaging>pom</packaging>
     <modules>
-        <module>mbean</module>
-        <module>core</module>
-        <module>cli</module>
-        <module>analyzer</module>
+        <module>mbean/java</module>
+        <module>analyzer/core</module>
+        <module>analyzer/cli</module>
+        <module>analyzer/fx</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

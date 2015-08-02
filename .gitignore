@@ -9,8 +9,7 @@ out/
 .idea_modules/
 atlassian-ide-plugin.xml
 com_crashlytics_export_strings.xml
-/mbean/target/
-/core/target/
-/cli/target/
-/analyzer/target/
-/analyzer/contrib/RefTreePlugin/target/
+analyzer/cli/target/
+analyzer/core/target/
+analyzer/fx/target/
+mbean/java/target/
