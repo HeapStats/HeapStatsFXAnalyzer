@@ -47,8 +47,6 @@ public abstract class PluginController implements Initializable{
     
     private ProgressIndicator progress;
     
-    private ChangeListener windowResizeEvent;
-    
     public abstract String getPluginName();
     
     /**
@@ -117,7 +115,6 @@ public abstract class PluginController implements Initializable{
     }
  
     public void setOnWindowResize(ChangeListener<? super Number> event){
-        this.windowResizeEvent = event;
         WindowController.getInstance().getOwner().widthProperty().addListener(event);
         WindowController.getInstance().getOwner().heightProperty().addListener(event);
     }

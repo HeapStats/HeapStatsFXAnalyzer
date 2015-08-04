@@ -50,9 +50,6 @@ public class ThreadRecorderController extends PluginController implements Initia
     private static final int TIMELINE_PADDING = 8;
 
     @FXML
-    private Button openBtn;
-
-    @FXML
     private TextField fileNameBox;
 
     @FXML
@@ -248,25 +245,6 @@ public class ThreadRecorderController extends PluginController implements Initia
             }
         }
         throw new IllegalStateException("Not found ScrollBar.");
-    }
-
-    private void updateTime(LocalDateTime time, boolean start) {
-        if (timelineView.getItems().size() > 0) {
-            List<ThreadStatViewModel> updatedModels = timelineView.getItems().stream()
-                    .map(model -> {
-                        if (start) {
-                            model.setStartTime(time);
-                        } else {
-                            model.setEndTime(time);
-                        }
-                        return model;
-                    }).collect(Collectors.toList());
-            ObservableList<ThreadStatViewModel> newViewModels = FXCollections.observableArrayList(updatedModels);
-            threadListView.getItems().clear();
-            threadListView.setItems(newViewModels);
-            timelineView.getItems().clear();
-            timelineView.setItems(newViewModels);
-        }
     }
 
 }
