@@ -82,86 +82,86 @@ import jp.co.ntt.oss.heapstats.utils.TaskAdapter;
  * @author Yasumasa Suenaga
  */
 public class LogController extends PluginController implements Initializable{
-    
+
     @FXML
     private ComboBox<LocalDateTime> startCombo;
-    
+
     @FXML
     private ComboBox<LocalDateTime> endCombo;
-    
+
     @FXML
     private TextField logFileList;
-    
+
     @FXML
     private GridPane chartGrid;
-    
+
     @FXML
     private StackedAreaChart<String, Double> javaCPUChart;
-    
+
     private XYChart.Series<String, Double> javaUserUsage;
-    
+
     private XYChart.Series<String, Double> javaSysUsage;
-    
+
     @FXML
     private StackedAreaChart<String, Double> systemCPUChart;
-    
+
     private XYChart.Series<String, Double> systemUserUsage;
-    
+
     private XYChart.Series<String, Double> systemNiceUsage;
-    
+
     private XYChart.Series<String, Double> systemSysUsage;
-    
+
     private XYChart.Series<String, Double> systemIdleUsage;
-    
+
     private XYChart.Series<String, Double> systemIOWaitUsage;
-    
+
     private XYChart.Series<String, Double> systemIRQUsage;
-    
+
     private XYChart.Series<String, Double> systemSoftIRQUsage;
-    
+
     private XYChart.Series<String, Double> systemStealUsage;
-    
+
     private XYChart.Series<String, Double> systemGuestUsage;
-    
+
     @FXML
     private LineChart<String, Long> javaMemoryChart;
-    
+
     private XYChart.Series<String, Long> javaVSZUsage;
-    
+
     private XYChart.Series<String, Long> javaRSSUsage;
-    
+
     @FXML
     private LineChart<String, Long> safepointChart;
-    
+
     private XYChart.Series<String, Long> safepoints;
-    
+
     @FXML
     private LineChart<String, Long> safepointTimeChart;
-    
+
     private XYChart.Series<String, Long> safepointTime;
-    
+
     @FXML
     private LineChart<String, Long> threadChart;
-    
+
     private XYChart.Series<String, Long> threads;
-    
+
     @FXML
     private LineChart<String, Long> monitorChart;
-    
+
     private XYChart.Series<String, Long> monitors;
-    
+
     @FXML
     private TableView<SummaryData.SummaryDataEntry> procSummary;
-    
+
     @FXML
     private TableColumn<SummaryData.SummaryDataEntry, String> categoryColumn;
 
     @FXML
     private TableColumn<SummaryData.SummaryDataEntry, String> valueColumn;
-    
+
     @FXML
     private ComboBox<ArchiveData> archiveCombo;
-    
+
     @FXML
     private TableView<Map.Entry<String, String>> archiveEnvInfoTable;
 
@@ -173,24 +173,24 @@ public class LogController extends PluginController implements Initializable{
 
     @FXML
     private ComboBox<String> fileCombo;
-    
+
     @FXML
     private TextArea logArea;
-    
+
     @FXML
     private Button okBtn;
 
     List<LogData> logEntries;
-    
+
     List<DiffData> diffEntries;
-    
+
     private Popup chartPopup;
-    
+
     private Text popupText;
-    
+
     private List<LocalDateTime> suspectList;
-    
-    
+
+
     /**
      * Initialize Series in Chart.
      * This method uses to avoid RuntimeException which is related to:
@@ -208,7 +208,7 @@ public class LogController extends PluginController implements Initializable{
         javaSysUsage = new XYChart.Series<>();
         javaSysUsage.setName("sys");
         javaCPUChart.getData().addAll(javaUserUsage, javaSysUsage);
-        
+
         systemUserUsage = new XYChart.Series<>();
         systemUserUsage.setName("user");
         systemNiceUsage = new XYChart.Series<>();
@@ -230,42 +230,42 @@ public class LogController extends PluginController implements Initializable{
         systemCPUChart.getData().addAll(systemUserUsage, systemNiceUsage, systemSysUsage,
                                          systemIdleUsage, systemIOWaitUsage, systemIRQUsage,
                                          systemSoftIRQUsage, systemStealUsage, systemGuestUsage);
-        
+
         javaVSZUsage = new XYChart.Series<>();
         javaVSZUsage.setName("VSZ");
         javaRSSUsage = new XYChart.Series<>();
         javaRSSUsage.setName("RSS");
         javaMemoryChart.getData().addAll(javaVSZUsage, javaRSSUsage);
-        
+
         safepoints = new XYChart.Series<>();
         safepoints.setName("Safepoints");
         safepointChart.getData().add(safepoints);
-        
+
         safepointTime = new XYChart.Series<>();
         safepointTime.setName("Safepoint Time");
         safepointTimeChart.getData().add(safepointTime);
-        
+
         monitors = new XYChart.Series<>();
         monitors.setName("Monitors");
         monitorChart.getData().add(monitors);
     }
-    
+
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         super.initialize(url, rb);
-        
+
         startCombo.setConverter(new LocalDateTimeConverter());
         endCombo.setConverter(new LocalDateTimeConverter());
         archiveCombo.setConverter(new ArchiveDataConverter());
-        
+
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
         valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         archiveKeyColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
         archiveVauleColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
-        
+
         String bgcolor = "-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";";
         javaCPUChart.lookup(".chart").setStyle(bgcolor);
         systemCPUChart.lookup(".chart").setStyle(bgcolor);
@@ -274,24 +274,24 @@ public class LogController extends PluginController implements Initializable{
         safepointTimeChart.lookup(".chart").setStyle(bgcolor);
         threadChart.lookup(".chart").setStyle(bgcolor);
         monitorChart.lookup(".chart").setStyle(bgcolor);
-        
+
         initializeChartSeries();
-        
+
         chartPopup = new Popup();
         popupText = new Text();
         chartPopup.getContent().add(popupText);
-        
+
         okBtn.disableProperty().bind(startCombo.getSelectionModel().selectedIndexProperty().greaterThanOrEqualTo(endCombo.getSelectionModel().selectedIndexProperty()));
-        
+
         setOnWindowResize((v, o, n) -> Platform.runLater(() -> {
                                                                   drawArchiveLine();
                                                                   drawRebootSuspectLine();
                                                                }));
     }
-    
+
     /**
      * onSucceeded event handler for LogFileParser.
-     * 
+     *
      * @param parser Targeted LogFileParser.
      */
     private void onLogFileParserSucceeded(ParseLogFile parser){
@@ -303,7 +303,7 @@ public class LogController extends PluginController implements Initializable{
         diffEntries = parser.getDiffEntries();
         List<LocalDateTime> timeline = logEntries.stream()
                                                  .map(d -> d.getDateTime())
-                                                 .collect(Collectors.toList());        
+                                                 .collect(Collectors.toList());
         startCombo.getItems().addAll(timeline);
         startCombo.getSelectionModel().selectFirst();
         endCombo.getItems().addAll(timeline);
@@ -313,12 +313,12 @@ public class LogController extends PluginController implements Initializable{
                   .filter(d -> d.getArchivePath() != null)
                   .map(new FunctionWrapper<>(ArchiveData::new))
                   .peek(new ConsumerWrapper<>(a -> a.parseArchive()))
-                  .forEach(archiveCombo.getItems()::add);                                          
+                  .forEach(archiveCombo.getItems()::add);
     }
-    
+
     /**
      * Event handler of LogFile button.
-     * 
+     *
      * @param event ActionEvent of this event.
      */
     @FXML
@@ -329,9 +329,9 @@ public class LogController extends PluginController implements Initializable{
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
         dialog.getExtensionFilters().addAll(new ExtensionFilter("Log file (*.csv)", "*.csv"),
                                             new ExtensionFilter("All files", "*.*"));
-        
+
         List<File> logList = dialog.showOpenMultipleDialog(WindowController.getInstance().getOwner());
-        
+
         if(logList != null){
             HeapStatsUtils.setDefaultDirectory(logList.get(0).getParent());
             String logListStr = logList.stream()
@@ -339,62 +339,69 @@ public class LogController extends PluginController implements Initializable{
                                        .collect(Collectors.joining("; "));
 
             logFileList.setText(logListStr);
-            
+
             TaskAdapter<ParseLogFile> task = new TaskAdapter<>(new ParseLogFile(logList));
             task.setOnSucceeded(evt -> onLogFileParserSucceeded(task.getTask()));
             super.bindTask(task);
-            
+
             Thread parseThread = new Thread(task);
             parseThread.start();
         }
-        
+
     }
-    
+
     private void drawLineInternal(StackPane target, List<String> drawList, String style){
         AnchorPane anchor = null;
         XYChart chart = null;
-        
+
         for(Node node : ((StackPane)target).getChildren()){
-            
+
             if(node instanceof AnchorPane){
                 anchor = (AnchorPane)node;
             }
             else if(node instanceof XYChart){
                 chart = (XYChart)node;
             }
-            
+
             if((anchor != null) && (chart != null)){
                 break;
             }
-            
+
         }
-        
+
         if((anchor == null) || (chart == null)){
             throw new IllegalStateException("Could not find node to draw line.");
         }
-                                                        
+
+        ObservableList<Node> anchorChildren = anchor.getChildren();
+        anchorChildren.removeAll(anchorChildren.stream()
+                                               .filter(n -> n instanceof Rectangle)
+                                               .map(n -> (Rectangle)n)
+                                               .filter(r -> r.getStyle().equals(style))
+                                               .collect(Collectors.toList()));
+
         CategoryAxis xAxis = (CategoryAxis)chart.getXAxis();
         Axis yAxis = chart.getYAxis();
         Label chartTitle = (Label)chart.getChildrenUnmodifiable().stream()
                                                                  .filter(n -> n.getStyleClass().contains("chart-title"))
                                                                  .findFirst()
                                                                  .get();
-        
+
         double startX = xAxis.getLayoutX() + xAxis.getStartMargin() - 1.0d;
         double yPos = yAxis.getLayoutY() + chartTitle.getLayoutY() + chartTitle.getHeight();
         List<Rectangle> rectList = drawList.stream()
                                            .map(s -> new Rectangle(xAxis.getDisplayPosition(s) + startX, yPos, 2.0d, yAxis.getHeight()))
                                            .peek(r -> ((Rectangle)r).setStyle(style))
                                            .collect(Collectors.toList());
-        anchor.getChildren().addAll(rectList);
+        anchorChildren.addAll(rectList);
     }
-    
+
     private void drawArchiveLine(){
-        
+
         if(archiveCombo.getItems().isEmpty()){
             return;
         }
-        
+
         LocalDateTimeConverter converter = new LocalDateTimeConverter();
         List<String> archiveDateList = archiveCombo.getItems().stream()
                                                               .map(a -> converter.toString(a.getDate()))
@@ -403,18 +410,18 @@ public class LogController extends PluginController implements Initializable{
                                .filter(n -> n instanceof StackPane)
                                .forEach(p -> drawLineInternal((StackPane)p, archiveDateList, "-fx-fill: black;"));
     }
-    
+
     /**
      * Draw line which represents to suspect to reboot.
      * This method does not clear AnchorPane to draw lines.
      * So this method must be called after drawArchiveLine().
      */
     private void drawRebootSuspectLine(){
-        
+
         if((suspectList == null) || suspectList.isEmpty()){
             return;
         }
-        
+
         LocalDateTimeConverter converter = new LocalDateTimeConverter();
         List<String> suspectRebootDateList = suspectList.stream()
                                                         .map(d -> converter.toString(d))
@@ -423,17 +430,17 @@ public class LogController extends PluginController implements Initializable{
                                .filter(n -> n instanceof StackPane)
                                .forEach(p -> drawLineInternal((StackPane)p, suspectRebootDateList, "-fx-fill: goldenrod;"));
     }
-    
+
     /**
      * Task class for drawing log chart data.
      */
     private class DrawLogChartTask extends Task<Void>{
-        
+
         /**
          * Start time which is drawn.
          */
         private final LocalDateTime start;
-        
+
         /**
          * End time which is drawn.
          */
@@ -441,7 +448,7 @@ public class LogController extends PluginController implements Initializable{
 
         /**
          * Constructor of DrawLogChartTask.
-         * 
+         *
          * @param start Start Time
          * @param end End time
          */
@@ -449,7 +456,7 @@ public class LogController extends PluginController implements Initializable{
             this.start = start;
             this.end = end;
         }
-        
+
         @Override
         protected Void call() throws Exception {
             LocalDateTimeConverter converter = new LocalDateTimeConverter();
@@ -459,7 +466,7 @@ public class LogController extends PluginController implements Initializable{
             List<DiffData> targetDiffData = diffEntries.parallelStream()
                                                        .filter(d -> ((d.getDateTime().compareTo(start) >= 0) && (d.getDateTime().compareTo(end) <= 0)))
                                                        .collect(Collectors.toList());
-        
+
             /* Java CPU */
             ObservableList<XYChart.Data<String, Double>> javaUserUsageBuf = FXCollections.observableArrayList();
             ObservableList<XYChart.Data<String, Double>> javaSysUsageBuf = FXCollections.observableArrayList();
@@ -488,14 +495,14 @@ public class LogController extends PluginController implements Initializable{
 
             /* Monitor contantion */
             ObservableList<XYChart.Data<String, Long>> monitorsBuf = FXCollections.observableArrayList();
-            
+
             LongAdder counter = new LongAdder();
             long totalLoopCount = targetDiffData.size() + targetLogData.size();
-        
+
             /* Generate graph data */
             targetDiffData.forEach(d -> {
                                            String time = converter.toString(d.getDateTime());
-                                              
+
                                            javaUserUsageBuf.add(new XYChart.Data<>(time, d.getJavaUserUsage()));
                                            javaSysUsageBuf.add(new XYChart.Data<>(time, d.getJavaSysUsage()));
                                            systemUserUsageBuf.add(new XYChart.Data<>(time, d.getCpuUserUsage()));
@@ -510,7 +517,7 @@ public class LogController extends PluginController implements Initializable{
                                            monitorsBuf.add(new XYChart.Data<>(time, d.getJvmSyncPark()));
                                            safepointsBuf.add(new XYChart.Data<>(time, d.getJvmSafepoints()));
                                            safepointTimeBuf.add(new XYChart.Data<>(time, d.getJvmSafepointTime()));
-                                                  
+
                                            counter.increment();
                                            updateProgress(counter.longValue(), totalLoopCount);
                                         });
@@ -525,7 +532,7 @@ public class LogController extends PluginController implements Initializable{
                                                  counter.increment();
                                                  updateProgress(counter.longValue(), totalLoopCount);
                                               });
-        
+
             Platform.runLater(() -> {
                                        /* Replace new chart data */
                                        javaUserUsage.setData(javaUserUsageBuf);
@@ -563,7 +570,7 @@ public class LogController extends PluginController implements Initializable{
                                                                                               new SummaryData.SummaryDataEntry(resource.getString("summary.threads.average"), String.format("%.1f", summary.getAverageLiveThreads())),
                                                                                               new SummaryData.SummaryDataEntry(resource.getString("summary.threads.peak"), Long.toString(summary.getMaxLiveThreads()))
                                                                                              ));
-                                       
+
                                        /*
                                         * drawArchiveLine() needs positions in each chart.
                                         * So I call it next event.
@@ -577,15 +584,15 @@ public class LogController extends PluginController implements Initializable{
                                                                   drawRebootSuspectLine();
                                                                });
                                     });
-            
+
             return null;
         }
-        
+
     }
 
     /**
      * Event handler of OK button.
-     * 
+     *
      * @param event ActionEvent of this event.
      */
     @FXML
@@ -593,17 +600,17 @@ public class LogController extends PluginController implements Initializable{
         /* Get range */
         LocalDateTime start = startCombo.getValue();
         LocalDateTime end   = endCombo.getValue();
-        
+
         DrawLogChartTask task = new DrawLogChartTask(start, end);
         super.bindTask(task);
         Thread drawChartThread = new Thread(task);
-        drawChartThread.start();        
+        drawChartThread.start();
     }
-    
+
     /**
      * Event handler of archive combobox.
      * This handler is fired that user select archive.
-     * 
+     *
      * @param event ActionEvent of this event.
      */
     @FXML
@@ -611,11 +618,11 @@ public class LogController extends PluginController implements Initializable{
         archiveEnvInfoTable.getItems().clear();
         fileCombo.getItems().clear();
         ArchiveData target = archiveCombo.getValue();
-        
+
         if(target == null){
             return;
         }
-        
+
         /*
          * Convert Map to List.
          * Map.Entry of HashMap (HashMap$Node) is package private class. So JavaFX
@@ -623,22 +630,22 @@ public class LogController extends PluginController implements Initializable{
          * Thus I convert Map.Entry to AbstractMap.SimpleEntry.
          */
         target.getEnvInfo().entrySet().forEach(e -> archiveEnvInfoTable.getItems().add(new AbstractMap.SimpleEntry<>(e)));
-        
+
         fileCombo.getItems().addAll(target.getFileList());
     }
-    
-    
+
+
     /**
      * Event handler of selecting log in this archive.
      * This handler is fired that user select log.
-     * 
+     *
      * @param event ActionEvent of this event.
      */
     @FXML
     private void onFileComboAction(ActionEvent event){
         ArchiveData target = archiveCombo.getValue();
         String file = fileCombo.getValue();
-        
+
         try {
             logArea.setText(target.getFileContents(file));
         } catch (IOException ex) {
@@ -647,10 +654,10 @@ public class LogController extends PluginController implements Initializable{
         }
 
     }
-    
+
     /**
      * Show popup window with pointing data in chart.
-     * 
+     *
      * @param chart Target chart.
      * @param xValue value in X Axis.
      * @param event Mouse event.
@@ -667,27 +674,27 @@ public class LogController extends PluginController implements Initializable{
         popupText.setText(xValue + "\n" + label);
         chartPopup.show(chart, event.getScreenX() + 3.0d, event.getScreenY() + 3.0d);
     }
-    
+
     @FXML
     @SuppressWarnings("unchecked")
     private void onChartMouseMoved(MouseEvent event){
         XYChart<String, Number> chart = (XYChart<String, Number>)event.getSource();
         CategoryAxis xAxis = (CategoryAxis)chart.getXAxis();
         double startXPoint = xAxis.getLayoutX() + xAxis.getStartMargin();
-        
+
         Optional.ofNullable(chart.getXAxis().getValueForDisplay(event.getX() - startXPoint))
                 .ifPresent(v -> showChartPopup(chart, v, event));
     }
-    
+
     @FXML
     private void onChartMouseExited(MouseEvent event){
         chartPopup.hide();
     }
-    
+
     /**
      * Returns plugin name.
      * This value is used to show in main window tab.
-     * 
+     *
      * @return Plugin name.
      */
     @Override
@@ -719,13 +726,13 @@ public class LogController extends PluginController implements Initializable{
     public void setData(Object data, boolean select) {
         super.setData(data, select);
         logFileList.setText((String)data);
-        
+
         TaskAdapter<ParseLogFile> task = new TaskAdapter<>(new ParseLogFile(Arrays.asList(new File((String)data))));
         task.setOnSucceeded(evt -> onLogFileParserSucceeded(task.getTask()));
         super.bindTask(task);
-        
+
         Thread parseThread = new Thread(task);
         parseThread.start();
     }
-    
+
 }
