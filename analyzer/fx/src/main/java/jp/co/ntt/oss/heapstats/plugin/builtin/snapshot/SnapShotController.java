@@ -35,6 +35,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -436,6 +437,80 @@ public class SnapShotController extends PluginController implements Initializabl
         Thread diffThread = new Thread(diff);
         diffThread.start();
     }
+    
+    private class CalcurateGCSummaryTask extends Task<Void>{
+        
+        private int processedIndex;
+
+        private final LocalDateTimeConverter converter;
+        
+        /* Java Heap Usage Chart */
+        private final ObservableList<XYChart.Data<String, Long>> youngUsageBuf;
+        private final ObservableList<XYChart.Data<String, Long>> oldUsageBuf;
+        private final ObservableList<XYChart.Data<String, Long>> freeBuf;
+        
+        /* GC time Chart */
+        private final ObservableList<XYChart.Data<String, Long>> gcTimeBuf;
+        
+        /* Metaspace Chart */
+        private final ObservableList<XYChart.Data<String, Long>> metaspaceUsageBuf;
+        private final ObservableList<XYChart.Data<String, Long>> metaspaceCapacityBuf;
+        
+        public CalcurateGCSummaryTask(){
+            converter = new LocalDateTimeConverter();
+            
+            youngUsageBuf = FXCollections.observableArrayList();
+            oldUsageBuf = FXCollections.observableArrayList();
+            freeBuf = FXCollections.observableArrayList();
+            gcTimeBuf = FXCollections.observableArrayList();
+            metaspaceUsageBuf = FXCollections.observableArrayList();
+            metaspaceCapacityBuf = FXCollections.observableArrayList();
+        }
+        
+        private void processSnapShotHeader(SnapShotHeader header){
+            String time = converter.toString(header.getSnapShotDate());
+
+            youngUsageBuf.add(new XYChart.Data<>(time, header.getNewHeap() / 1024 / 1024));
+            oldUsageBuf.add(new XYChart.Data<>(time, header.getOldHeap() / 1024 / 1024));
+            freeBuf.add(new XYChart.Data<>(time, (header.getTotalCapacity() - header.getNewHeap() - header.getOldHeap()) / 1024 / 1024));
+
+            gcTimeBuf.add(new XYChart.Data<>(time, header.getGcTime()));
+
+            metaspaceUsageBuf.add(new XYChart.Data<>(time, header.getMetaspaceUsage() / 1024 / 1024));
+            metaspaceCapacityBuf.add(new XYChart.Data<>(time, header.getMetaspaceCapacity() / 1024 / 1024));
+
+            currentClassNameSet.addAll(header.getSnapShot(HeapStatsUtils.getReplaceClassName())
+                                             .values()
+                                             .stream()
+                                             .map(s -> s.getName())
+                                             .collect(Collectors.toSet()));
+            
+            updateProgress(++processedIndex, currentTarget.size());
+        }
+
+        @Override
+        protected Void call() throws Exception {
+            updateMessage("Calcurating GC summary...");
+            processedIndex = 0;
+            currentTarget.stream()
+                         .forEachOrdered(d -> processSnapShotHeader(d));
+            return null;
+        }
+
+        @Override
+        protected void succeeded() {
+            /* Replace new chart data */
+            youngUsage.setData(youngUsageBuf);
+            oldUsage.setData(oldUsageBuf);
+            free.setData(freeBuf);
+
+            gcTime.setData(gcTimeBuf);
+
+            metaspaceUsage.setData(metaspaceUsageBuf);
+            metaspaceCapacity.setData(metaspaceCapacityBuf);
+        }
+        
+    }
 
     /**
      * Event handler of OK button.
@@ -467,36 +542,12 @@ public class SnapShotController extends PluginController implements Initializabl
         
         currentClassNameSet = new HashSet<>();
 
-        currentTarget.stream()
-                     .forEachOrdered(d -> {
-                                             String time = converter.toString(d.getSnapShotDate());
-                                      
-                                             youngUsageBuf.add(new XYChart.Data<>(time, d.getNewHeap() / 1024 / 1024));
-                                             oldUsageBuf.add(new XYChart.Data<>(time, d.getOldHeap() / 1024 / 1024));
-                                             freeBuf.add(new XYChart.Data<>(time, (d.getTotalCapacity() - d.getNewHeap() - d.getOldHeap()) / 1024 / 1024));
-                                      
-                                             gcTimeBuf.add(new XYChart.Data<>(time, d.getGcTime()));
-                                      
-                                             metaspaceUsageBuf.add(new XYChart.Data<>(time, d.getMetaspaceUsage() / 1024 / 1024));
-                                             metaspaceCapacityBuf.add(new XYChart.Data<>(time, d.getMetaspaceCapacity() / 1024 / 1024));
-                                             
-                                             currentClassNameSet.addAll(d.getSnapShot(HeapStatsUtils.getReplaceClassName())
-                                                                         .values()
-                                                                         .stream()
-                                                                         .map(s -> s.getName())
-                                                                         .collect(Collectors.toSet()));
-                                          });
-        
-        /* Replace new chart data */
-        youngUsage.setData(youngUsageBuf);
-        oldUsage.setData(oldUsageBuf);
-        free.setData(freeBuf);
-        
-        gcTime.setData(gcTimeBuf);
-        
-        metaspaceUsage.setData(metaspaceUsageBuf);
-        metaspaceCapacity.setData(metaspaceCapacityBuf);
-        
+        CalcurateGCSummaryTask task = new CalcurateGCSummaryTask();
+        super.bindTask(task);
+            
+        Thread parseThread = new Thread(task);
+        parseThread.start();
+
         SummaryData summary = new SummaryData(currentTarget);
         ResourceBundle resource = ResourceBundle.getBundle("snapshotResources", new Locale(HeapStatsUtils.getLanguage()));
         summaryTable.setItems(FXCollections.observableArrayList(new SummaryData.SummaryDataEntry(resource.getString("summary.snapshot.count"), Integer.toString(summary.getCount())),
