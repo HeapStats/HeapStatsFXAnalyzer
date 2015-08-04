@@ -144,14 +144,18 @@ public class ThreadRecordParser {
 
         while(ch.read(buffer) != -1){
             buffer.flip();
-            ThreadStat stat = new ThreadStat(buffer.getLong(), buffer.getLong(), buffer.getLong(), buffer.getLong());
+            
+            while(buffer.hasRemaining()){
+                ThreadStat stat = new ThreadStat(buffer.getLong(), buffer.getLong(), buffer.getLong(), buffer.getLong());
 
-            /* Reaches End Of Ring Buffer */
-            if(stat.getEvent() == ThreadEvent.Unused){
-                break;
+                /* Reaches End Of Ring Buffer */
+                if(stat.getEvent() == ThreadEvent.Unused){
+                    break;
+                }
+
+                result.add(stat);
             }
-
-            result.add(stat);
+            
             buffer.flip();
         }
 
@@ -165,7 +169,7 @@ public class ThreadRecordParser {
      * @throws IOException 
      */
     public void parse(Path path) throws IOException{
-        ByteBuffer buffer = ByteBuffer.allocateDirect(32);
+        ByteBuffer buffer = ByteBuffer.allocateDirect(1024 * 1024); // 1MB
 
         try(SeekableByteChannel ch = Files.newByteChannel(path, StandardOpenOption.READ)){
             buffer.order(getByteOrder(ch, buffer));

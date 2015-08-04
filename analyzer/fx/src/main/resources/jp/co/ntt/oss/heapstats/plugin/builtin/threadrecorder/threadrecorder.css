@@ -34,6 +34,10 @@
     -fx-fill: #ff4500;
 }
 
+.rect-fusion {
+    -fx-fill: darkgray;
+}
+
 .rect-socketread {
     -fx-fill: #808000;
 }

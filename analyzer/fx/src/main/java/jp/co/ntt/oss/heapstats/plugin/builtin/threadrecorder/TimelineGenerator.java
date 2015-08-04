@@ -182,6 +182,9 @@ public class TimelineGenerator {
         
         }
         
+        Rectangle fusionRect = new Rectangle(0, RECT_HEIGHT);
+        fusionRect.getStyleClass().add(CSS_CLASS_PREFIX + "fusion");
+        
         for(int Cnt = startIndex; Cnt < threadStatList.size(); Cnt++){
             ThreadStat threadStat = threadStatList.get(Cnt);
             long additionalData;
@@ -194,11 +197,31 @@ public class TimelineGenerator {
                 additionalData = prevAdditionalData;
             }
             
-            rects.add(createThreadRect(prevTime, threadStat.getTime(), prevEvent, additionalData));
+            Rectangle rect = createThreadRect(prevTime, threadStat.getTime(), prevEvent, additionalData);
+            
+            if(rect.getWidth() < 1.0d){
+                fusionRect.setWidth(fusionRect.getWidth() + rect.getWidth());
+            }
+            else{
+                
+                if(fusionRect.getWidth() > 0.0d){
+                    rects.add(fusionRect);
+                    fusionRect = new Rectangle(0, RECT_HEIGHT);
+                    fusionRect.getStyleClass().add(CSS_CLASS_PREFIX + "fusion");
+                    Tooltip.install(fusionRect, new Tooltip("Very short time event."));
+                }
+                
+                rects.add(rect);
+            }
             
             prevTime = threadStat.getTime();
             prevAdditionalData = threadStat.getAdditionalData();
             prevEvent = convertToThreadEvent(threadStat.getEvent());
+        }
+        
+        if(fusionRect.getWidth() > 0.0d){
+            rects.add(fusionRect);
+            Tooltip.install(fusionRect, new Tooltip("Very short time event."));
         }
         
         container.getChildren().addAll(rects);
