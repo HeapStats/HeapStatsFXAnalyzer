@@ -179,7 +179,8 @@ public class Options {
         System.out.println("mode:");
         System.out.println("  -log     : Processs HeapStats resource log file.");
         System.out.println("  -snapshot: Processs HeapStats snapshot file.");
-        System.out.println("  -record  : Processs HeapStats thread recorder file.");
+        System.out.println("  -event   : Processs HeapStats thread recorder file.");
+        System.out.println("  -jmx     : Control remote HeapStats agent through JMX.");
         System.out.println();
         System.out.println("options:");
         System.out.println("  -log:");
