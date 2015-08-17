@@ -519,24 +519,9 @@ public class SnapShotController extends PluginController implements Initializabl
      */
     @FXML
     private void onOkClick(ActionEvent event){
-        LocalDateTimeConverter converter = new LocalDateTimeConverter();
-        
         int startIdx = startCombo.getSelectionModel().getSelectedIndex();
         int endIdx = endCombo.getSelectionModel().getSelectedIndex();
         currentTarget = startCombo.getItems().subList(startIdx, endIdx + 1);
-        
-        /* Java Heap Usage Chart */
-        ObservableList<XYChart.Data<String, Long>> youngUsageBuf = FXCollections.observableArrayList();
-        ObservableList<XYChart.Data<String, Long>> oldUsageBuf = FXCollections.observableArrayList();
-        ObservableList<XYChart.Data<String, Long>> freeBuf = FXCollections.observableArrayList();
-        
-        /* GC time Chart */
-        ObservableList<XYChart.Data<String, Long>> gcTimeBuf = FXCollections.observableArrayList();
-        
-        /* Metaspace Chart */
-        ObservableList<XYChart.Data<String, Long>> metaspaceUsageBuf = FXCollections.observableArrayList();
-        ObservableList<XYChart.Data<String, Long>> metaspaceCapacityBuf = FXCollections.observableArrayList();
-
         snapShotTimeCombo.setItems(FXCollections.observableArrayList(currentTarget));
         drawTopNData(currentTarget, true, null);
         
