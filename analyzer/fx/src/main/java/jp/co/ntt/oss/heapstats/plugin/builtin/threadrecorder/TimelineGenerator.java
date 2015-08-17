@@ -34,7 +34,7 @@ public class TimelineGenerator {
         Unused,
         Run,
         MonitorWait,
-        MonitorContendedEnter,
+        MonitorContended,
         ThreadSleep,
         Park,
         FileWrite,
@@ -127,7 +127,7 @@ public class TimelineGenerator {
                 return ThreadEvent.MonitorWait;
 
             case MonitorContendedEnter:
-                return ThreadEvent.MonitorContendedEnter;
+                return ThreadEvent.MonitorContended;
 
             case ThreadSleepStart:
                 return ThreadEvent.ThreadSleep;
