@@ -19,6 +19,7 @@
 package jp.co.ntt.oss.heapstats;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.DirectoryStream;
@@ -48,6 +49,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
@@ -97,16 +99,14 @@ public class WindowController implements Initializable {
     @FXML
     private void onRankLevelClick(ActionEvent event){
         TextInputDialog dialog = new TextInputDialog(Integer.toString(HeapStatsUtils.getRankLevel()));
-
-        /* TODO: Can we add icon to TextInputDialog? */
-        /*
+        
         try(InputStream icon = getClass().getResourceAsStream("heapstats-icon.png")){
-            dialog.getIcons().add(new Image(icon));
+            Stage dialogStage = (Stage)dialog.getDialogPane().getScene().getWindow();
+            dialogStage.getIcons().add(new Image(icon));
         }
         catch(IOException e){
             HeapStatsUtils.showExceptionDialog(e);
         }
-        */
         
         dialog.setTitle("Rank Level setting");
         dialog.setHeaderText("Rank Level setting");
