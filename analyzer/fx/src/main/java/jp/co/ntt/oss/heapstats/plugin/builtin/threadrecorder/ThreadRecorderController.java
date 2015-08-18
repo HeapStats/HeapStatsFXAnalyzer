@@ -31,13 +31,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import javafx.geometry.Orientation;
-import javafx.scene.Node;
 import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 
 /**
@@ -59,9 +56,6 @@ public class ThreadRecorderController extends PluginController implements Initia
     private Label endTimeLabel;
 
     @FXML
-    private TableView<ThreadStatViewModel> threadListView;
-
-    @FXML
     private TableColumn<ThreadStatViewModel, Boolean> showColumn;
 
     @FXML
@@ -78,8 +72,6 @@ public class ThreadRecorderController extends PluginController implements Initia
     
     @FXML
     private Button okBtn;
-    
-    private boolean boundScrollBar = false;
     
     private List<ThreadStat> threadStatList;
     
@@ -131,9 +123,11 @@ public class ThreadRecorderController extends PluginController implements Initia
         threadNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         timelineColumn.setCellValueFactory(new PropertyValueFactory<>("threadStats"));
         timelineColumn.setCellFactory(param -> new TimelineCell(rangeStart, rangeEnd));
-        timelineColumn.prefWidthProperty().bind(timelineView.widthProperty().subtract(TIMELINE_PADDING));
+        timelineColumn.prefWidthProperty().bind(timelineView.widthProperty()
+                                                            .subtract(showColumn.widthProperty())
+                                                            .subtract(threadNameColumn.widthProperty())
+                                                            .subtract(TIMELINE_PADDING));
         rangePane.getItems().forEach(n -> SplitPane.setResizableWithParent(n, false));
-        timelineView.itemsProperty().bind(threadListView.itemsProperty());
     }
     
     /**
@@ -183,12 +177,6 @@ public class ThreadRecorderController extends PluginController implements Initia
      */
     @FXML
     private void onOkBtnClick(ActionEvent event){
-        
-        if (boundScrollBar != true) {
-            bindScroll();
-            boundScrollBar = true;
-        }
-        
         Map<Long, List<ThreadStat>> statById = threadStatList.stream()
                                                              .filter(s -> s.getTime().isAfter(rangeStart.get()) && s.getTime().isBefore(rangeEnd.get()))
                                                              .collect(Collectors.groupingBy(ThreadStat::getId));
@@ -196,7 +184,7 @@ public class ThreadRecorderController extends PluginController implements Initia
                                 .sorted()
                                 .map(k -> new ThreadStatViewModel(k, idMap.get(k), rangeStart.get(), rangeEnd.get(), statById.get(k)))
                                 .collect(Collectors.toList()));
-        threadListView.setItems(threadStats);
+        timelineView.setItems(threadStats);
     }
     
     @Override
@@ -222,29 +210,6 @@ public class ThreadRecorderController extends PluginController implements Initia
     @Override
     public Runnable getOnCloseRequest() {
         return null;
-    }
-
-    public TableView<ThreadStatViewModel> getTimelineView() {
-        return timelineView;
-    }
-
-    private void bindScroll() {
-        ScrollBar leftScrollBar = getVerticalScrollBar(threadListView);
-        ScrollBar rightScrollBar = getVerticalScrollBar(timelineView);
-        leftScrollBar.valueProperty().bindBidirectional(rightScrollBar.valueProperty());
-    }
-
-    private ScrollBar getVerticalScrollBar(TableView<?> tableView) {
-        Set<Node> nodes = tableView.lookupAll(".scroll-bar");
-        for (Node node : nodes) {
-            if (node instanceof ScrollBar) {
-                ScrollBar scrollBar = (ScrollBar) node;
-                if (scrollBar.getOrientation() == Orientation.VERTICAL) {
-                    return scrollBar;
-                }
-            }
-        }
-        throw new IllegalStateException("Not found ScrollBar.");
     }
 
 }
