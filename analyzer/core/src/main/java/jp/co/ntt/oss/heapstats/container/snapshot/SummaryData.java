@@ -19,7 +19,6 @@
 package jp.co.ntt.oss.heapstats.container.snapshot;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Summary data class.<br/>
@@ -165,40 +164,40 @@ public class SummaryData {
     
     private class MaxSummaryStatistics{
         
-        private final AtomicLong maxGCTime;
+        private long maxGCTime;
         
-        private final AtomicLong maxSnapshotSize;
+        private long maxSnapshotSize;
         
-        private final AtomicLong maxEntryCount;
+        private long maxEntryCount;
         
         public MaxSummaryStatistics(){
-            maxGCTime = new AtomicLong();
-            maxSnapshotSize = new AtomicLong();
-            maxEntryCount = new AtomicLong();
+            maxGCTime = 0;
+            maxSnapshotSize = 0;
+            maxEntryCount = 0;
         }
         
         public void accept(SnapShotHeader header){
-            maxGCTime.accumulateAndGet(header.getGcTime(), Math::max);
-            maxSnapshotSize.accumulateAndGet(header.getSnapShotSize(), Math::max);
-            maxEntryCount.accumulateAndGet(header.getNumEntries(), Math::max);
+            maxGCTime = Math.max(maxGCTime, header.getGcTime());
+            maxSnapshotSize = Math.max(maxSnapshotSize, header.getSnapShotSize());
+            maxEntryCount = Math.max(maxEntryCount, header.getNumEntries());
         }
         
         public void combine(MaxSummaryStatistics other){
-            maxGCTime.accumulateAndGet(other.maxGCTime.get(), Math::max);
-            maxSnapshotSize.accumulateAndGet(other.maxSnapshotSize.get(), Math::max);
-            maxEntryCount.accumulateAndGet(other.maxEntryCount.get(), Math::max);
+            maxGCTime = Math.max(maxGCTime, other.maxGCTime);
+            maxSnapshotSize = Math.max(maxSnapshotSize, other.maxSnapshotSize);
+            maxEntryCount = Math.max(maxEntryCount, other.maxEntryCount);
         }
         
         public long getMaxGCTime(){
-            return maxGCTime.get();
+            return maxGCTime;
         }
         
         public long getMaxSnapshotSize(){
-            return maxSnapshotSize.get();
+            return maxSnapshotSize;
         }
         
         public long getMaxEntryCount(){
-            return maxEntryCount.get();
+            return maxEntryCount;
         }
         
     }

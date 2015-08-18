@@ -20,8 +20,6 @@ package jp.co.ntt.oss.heapstats.container.log;
 
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.LongAdder;
 
 /**
  * Summary data class.<br/>
@@ -172,81 +170,78 @@ public class SummaryData {
      */
     private class DiffSummaryStatistics{
         
-        private final LongAdder count;
+        private long count;
         
-        private final LongAdder vsz;
+        private long vsz;
         
-        private final AtomicLong maxVSZ;
+        private long maxVSZ;
         
-        private final LongAdder rss;
+        private long rss;
         
-        private final AtomicLong maxRSS;
+        private long maxRSS;
         
-        private final LongAdder liveThreads;
+        private long liveThreads;
         
-        private final AtomicLong maxLiveThreads;
+        private long maxLiveThreads;
         
         public DiffSummaryStatistics(){
-            count = new LongAdder();
-
-            vsz = new LongAdder();
-            maxVSZ = new AtomicLong();
-            
-            rss = new LongAdder();
-            maxRSS = new AtomicLong();
-            
-            liveThreads = new LongAdder();
-            maxLiveThreads = new AtomicLong();
+            count = 0;
+            vsz = 0;
+            maxVSZ = 0;
+            rss = 0;
+            maxRSS = 0;
+            liveThreads = 0;
+            maxLiveThreads = 0;
         }
         
         public void accept(LogData logData){
-            count.increment();
+            count++;
             
-            vsz.add(logData.getJavaVSSize());
-            maxVSZ.accumulateAndGet(logData.getJavaVSSize(), Math::max);
+            vsz += logData.getJavaVSSize();
+            maxVSZ = Math.max(maxVSZ, logData.getJavaVSSize());
             
-            rss.add(logData.getJavaRSSize());
-            maxRSS.accumulateAndGet(logData.getJavaRSSize(), Math::max);
+            rss += logData.getJavaRSSize();
+            maxRSS = Math.max(maxRSS, logData.getJavaRSSize());
             
-            liveThreads.add(logData.getJvmLiveThreads());
-            maxLiveThreads.accumulateAndGet(logData.getJvmLiveThreads(), Math::max);
+            liveThreads += logData.getJvmLiveThreads();
+            maxLiveThreads = Math.max(maxLiveThreads, logData.getJvmLiveThreads());
         }
         
         public void combine(DiffSummaryStatistics other){
-            count.add(other.count.intValue());
+            count += other.count;
             
-            vsz.add(other.vsz.longValue());
-            maxVSZ.accumulateAndGet(other.maxVSZ.get(), Math::max);
+            vsz += other.vsz;
+            maxVSZ = Math.max(maxVSZ, other.maxVSZ);
             
-            rss.add(other.rss.longValue());
-            maxRSS.accumulateAndGet(other.maxRSS.get(), Math::max);
+            rss += other.rss;
+            maxRSS = Math.max(maxRSS, other.maxRSS);
             
-            liveThreads.add(other.liveThreads.longValue());
-            maxLiveThreads.accumulateAndGet(other.maxLiveThreads.get(), Math::max);
+            liveThreads += other.liveThreads;
+            maxLiveThreads = Math.max(maxLiveThreads, other.maxLiveThreads);
         }
         
         public double getAverageVSZ(){
-            return vsz.doubleValue() / count.doubleValue();
+            return (double)vsz / (double)count;
         }
         
         public long getMaxVSZ(){
-            return maxVSZ.get();
+            return maxVSZ;
         }
         
         public double getAverageRSS(){
-            return rss.doubleValue() / count.doubleValue();
+            return (double)rss / (double)count;
         }
         
         public long getMaxRSS(){
-            return maxRSS.get();
+            return maxRSS;
         }
         
         public double getAverageLiveThreads(){
-            return liveThreads.doubleValue() / count.doubleValue();
+            return (double)liveThreads / (double)count;
         }
         
         public long getMaxLiveThreads(){
-            return maxLiveThreads.get();
+            return maxLiveThreads;
         }
         
     }
