@@ -120,6 +120,7 @@ public class ThreadRecorderController extends PluginController implements Initia
 
         showColumn.setCellValueFactory(new PropertyValueFactory<>("show"));
         showColumn.setCellFactory(CheckBoxTableCell.forTableColumn(showColumn));
+        showColumn.setSortType(TableColumn.SortType.DESCENDING);
         threadNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         timelineColumn.setCellValueFactory(new PropertyValueFactory<>("threadStats"));
         timelineColumn.setCellFactory(param -> new TimelineCell(rangeStart, rangeEnd));
@@ -185,6 +186,7 @@ public class ThreadRecorderController extends PluginController implements Initia
                                 .map(k -> new ThreadStatViewModel(k, idMap.get(k), rangeStart.get(), rangeEnd.get(), statById.get(k)))
                                 .collect(Collectors.toList()));
         timelineView.setItems(threadStats);
+        timelineView.getSortOrder().add(showColumn);
     }
     
     @Override

@@ -52,7 +52,14 @@ public class ThreadStatViewModel {
         this.startTime = startTime;
         this.endTime = endTime;
         this.threadStats = new ReadOnlyObjectWrapper<>(threadStats);
-        this.show = new SimpleBooleanProperty(true);
+        
+        if((threadStats == null) || threadStats.isEmpty()){
+            this.show = new SimpleBooleanProperty(false);
+        }
+        else{
+            this.show = new SimpleBooleanProperty(true);
+        }
+        
     }
     
     public BooleanProperty showProperty(){
