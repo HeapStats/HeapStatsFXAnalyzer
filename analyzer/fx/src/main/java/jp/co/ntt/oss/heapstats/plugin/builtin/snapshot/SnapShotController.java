@@ -279,6 +279,7 @@ public class SnapShotController extends PluginController implements Initializabl
         classLoaderColumn.setCellValueFactory(new PropertyValueFactory<>("classLoaderName"));
         instanceColumn.setCellValueFactory(new PropertyValueFactory<>("instances"));
         totalSizeColumn.setCellValueFactory(new PropertyValueFactory<>("totalSize"));
+        totalSizeColumn.setSortType(TableColumn.SortType.DESCENDING);
 
         snapShotSummaryKey.setCellValueFactory(new PropertyValueFactory<>("key"));
         snapShotSummaryValue.setCellValueFactory(new PropertyValueFactory<>("value"));
@@ -299,6 +300,7 @@ public class SnapShotController extends PluginController implements Initializabl
         objClassLoaderColumn.setCellValueFactory(new PropertyValueFactory<>("loaderName"));
         objInstancesColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
         objSizeColumn.setCellValueFactory(new PropertyValueFactory<>("totalSize"));
+        objSizeColumn.setSortType(TableColumn.SortType.DESCENDING);
         
         searchList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         
@@ -405,6 +407,7 @@ public class SnapShotController extends PluginController implements Initializabl
                                                                             .forEachOrdered(o -> buildTopNChartData(h, seriesMap, o)));
         
         lastDiffTable.getItems().addAll(diff.getLastDiffList());
+        lastDiffTable.getSortOrder().add(totalSizeColumn);
         snapShotTimeCombo.getSelectionModel().selectLast();
         topNChart.getData().forEach(this::setTopNChartColor);
         
@@ -595,6 +598,7 @@ public class SnapShotController extends PluginController implements Initializabl
         
         objDataTable.setItems(FXCollections.observableArrayList(
                 header.getSnapShot(HeapStatsUtils.getReplaceClassName()).values().stream().collect(Collectors.toList())));
+        objDataTable.getSortOrder().add(objSizeColumn);
     }
     
     /**
