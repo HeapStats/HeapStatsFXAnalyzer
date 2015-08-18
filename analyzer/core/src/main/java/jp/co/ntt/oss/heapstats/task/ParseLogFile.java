@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import jp.co.ntt.oss.heapstats.container.log.DiffData;
@@ -44,15 +45,19 @@ public class ParseLogFile extends ProgressRunnable{
     
     private final List<File> fileList;
     
+    private final boolean parseAsPossible;
+    
     /**
      * Constructor of LogFileParser.
      * 
      * @param fileList List of log to be parsed.
+     * @param parseAsPossible Parse log before occuring error.
      */
-    public ParseLogFile(List<File> fileList){
+    public ParseLogFile(List<File> fileList, boolean parseAsPossible){
         logEntries = new ArrayList<>();
         diffEntries = new ArrayList<>();
         this.fileList = fileList;
+        this.parseAsPossible = parseAsPossible;
     }
     
     /**
@@ -111,9 +116,22 @@ public class ParseLogFile extends ProgressRunnable{
         AtomicLong progress = new AtomicLong();
         
         /* Parse log files */
-        fileList.stream()
-                .map(File::getAbsolutePath)
-                .forEach(new ConsumerWrapper<>(f -> parse(f, progress)));
+        ConsumerWrapper<String> parseMethod = new ConsumerWrapper<>(f -> parse(f, progress));
+        Optional<Exception> parseError = Optional.empty();
+        
+        try{
+            fileList.stream()
+                    .map(File::getAbsolutePath)
+                    .forEach(parseMethod);
+        }
+        catch(Exception e){
+            parseError = Optional.of(e);
+            
+            if(!parseAsPossible){
+                throw e;
+            }
+            
+        }
         
         /* Sort log files order by date&time */
         logEntries.sort(Comparator.naturalOrder());
@@ -134,6 +152,11 @@ public class ParseLogFile extends ProgressRunnable{
                                                           diffEntries.add(new DiffData(x, y));
                                                           return y;
                                                        });
+        
+        if(parseError.isPresent()){
+            throw new RuntimeException(parseError.get());
+        }
+        
     }
     
 }

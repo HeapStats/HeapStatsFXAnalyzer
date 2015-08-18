@@ -17,6 +17,7 @@
  */
 package jp.co.ntt.oss.heapstats.utils;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import jp.co.ntt.oss.heapstats.task.ProgressRunnable;
 
@@ -51,7 +52,14 @@ public class TaskAdapter<T extends ProgressRunnable> extends Task<Void>{
     
     @Override
     protected Void call() throws Exception {
-        task.run();
+        
+        try{
+            task.run();
+        }
+        catch(Exception e){
+            Platform.runLater(() -> HeapStatsUtils.showExceptionDialog(e));
+        }
+        
         return null;
     }
     

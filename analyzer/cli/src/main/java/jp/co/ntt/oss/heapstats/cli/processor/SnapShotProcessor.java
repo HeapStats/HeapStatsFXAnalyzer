@@ -179,7 +179,7 @@ public class SnapShotProcessor implements CliProcessor{
     public void process() {
         ParseHeader headerParser = new ParseHeader(options.getFile().stream()
                                                                     .map(p -> p.toString())
-                                                                    .collect(Collectors.toList()), true);
+                                                                    .collect(Collectors.toList()), true, false);
         headerParser.run();
         List<SnapShotHeader> snapShots = headerParser.getSnapShotList();
         int start = options.getStart().orElse(0);

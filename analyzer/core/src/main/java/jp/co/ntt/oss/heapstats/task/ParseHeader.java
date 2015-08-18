@@ -21,9 +21,11 @@ package jp.co.ntt.oss.heapstats.task;
 import java.io.File;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import jp.co.ntt.oss.heapstats.container.snapshot.SnapShotHeader;
+import jp.co.ntt.oss.heapstats.lambda.ConsumerWrapper;
 import jp.co.ntt.oss.heapstats.parser.SnapShotParser;
 import jp.co.ntt.oss.heapstats.parser.handler.SnapShotListHandler;
 
@@ -37,6 +39,8 @@ public class ParseHeader extends ProgressRunnable{
     
     private final boolean needJavaStyle;
     
+    private final boolean parseAsPossible;
+    
     private List<SnapShotHeader> snapShotList;
     
     /**
@@ -44,14 +48,16 @@ public class ParseHeader extends ProgressRunnable{
      * 
      * @param files List of HeapStats SnapShot files.
      * @param needJavaStyle true if class name should be converted to Java-Style
+     * @param parseAsPossible Parse SnapShot before occuring error.
      */
-    public ParseHeader(List<String> files, boolean needJavaStyle) {
+    public ParseHeader(List<String> files, boolean needJavaStyle, boolean parseAsPossible) {
         this.files = files;
         setTotal(this.files.stream()
                            .map(f -> new File(f))
                            .mapToLong(f -> f.length())
                            .sum());
         this.needJavaStyle = needJavaStyle;
+        this.parseAsPossible = parseAsPossible;
         snapShotList = null;
     }
 
@@ -69,11 +75,29 @@ public class ParseHeader extends ProgressRunnable{
         SnapShotListHandler handler = new SnapShotListHandler(p -> updateProgress.ifPresent(c -> c.accept(progress.addAndGet(p))));
         SnapShotParser parser = new SnapShotParser(needJavaStyle);
         
-        files.forEach(f -> parser.parse2(f, handler));
+        ConsumerWrapper<String> parseMethod = new ConsumerWrapper<>(f -> parser.parse(f, handler));
+        Optional<Exception> parseError = Optional.empty();
+        
+        try{
+            files.forEach(parseMethod);
+        }
+        catch(Exception e){
+            parseError = Optional.of(e);
+            
+            if(!parseAsPossible){
+                throw e;
+            }
+            
+        }
         
         snapShotList = handler.getHeaders().stream()
                                            .sorted(Comparator.naturalOrder())
                                            .collect(Collectors.toList());
+        
+        if(parseError.isPresent()){
+            throw new RuntimeException(parseError.get());
+        }
+        
     }
     
 }

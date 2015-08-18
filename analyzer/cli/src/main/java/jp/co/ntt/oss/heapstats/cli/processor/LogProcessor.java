@@ -43,7 +43,7 @@ public class LogProcessor implements CliProcessor{
         this.options = options;
         this.parser = new ParseLogFile(options.getFile().stream()
                                                         .map(p -> p.toFile())
-                                                        .collect(Collectors.toList()));
+                                                        .collect(Collectors.toList()), false);
     }
     
     @Override

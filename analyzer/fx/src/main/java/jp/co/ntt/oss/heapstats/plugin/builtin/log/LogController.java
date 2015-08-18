@@ -340,7 +340,7 @@ public class LogController extends PluginController implements Initializable{
 
             logFileList.setText(logListStr);
 
-            TaskAdapter<ParseLogFile> task = new TaskAdapter<>(new ParseLogFile(logList));
+            TaskAdapter<ParseLogFile> task = new TaskAdapter<>(new ParseLogFile(logList, true));
             task.setOnSucceeded(evt -> onLogFileParserSucceeded(task.getTask()));
             super.bindTask(task);
 
@@ -727,7 +727,7 @@ public class LogController extends PluginController implements Initializable{
         super.setData(data, select);
         logFileList.setText((String)data);
 
-        TaskAdapter<ParseLogFile> task = new TaskAdapter<>(new ParseLogFile(Arrays.asList(new File((String)data))));
+        TaskAdapter<ParseLogFile> task = new TaskAdapter<>(new ParseLogFile(Arrays.asList(new File((String)data)), true));
         task.setOnSucceeded(evt -> onLogFileParserSucceeded(task.getTask()));
         super.bindTask(task);
 

@@ -339,7 +339,7 @@ public class SnapShotController extends PluginController implements Initializabl
                                                  .collect(Collectors.toList());
             snapshotList.setText(files.stream().collect(Collectors.joining("; ")));
             
-            TaskAdapter<ParseHeader> task = new TaskAdapter<>(new ParseHeader(files, HeapStatsUtils.getReplaceClassName()));
+            TaskAdapter<ParseHeader> task = new TaskAdapter<>(new ParseHeader(files, HeapStatsUtils.getReplaceClassName(), true));
             task.setOnSucceeded(evt -> {
                                          ObservableList<SnapShotHeader> list = FXCollections.observableArrayList(task.getTask().getSnapShotList());
                                          startCombo.setItems(list);
@@ -831,7 +831,7 @@ public class SnapShotController extends PluginController implements Initializabl
         super.setData(data, select);
         snapshotList.setText((String)data);
         
-        TaskAdapter<ParseHeader> task = new TaskAdapter<>(new ParseHeader(Arrays.asList((String)data), HeapStatsUtils.getReplaceClassName()));
+        TaskAdapter<ParseHeader> task = new TaskAdapter<>(new ParseHeader(Arrays.asList((String)data), HeapStatsUtils.getReplaceClassName(), true));
         task.setOnSucceeded(evt ->{
                                      startCombo.setItems(FXCollections.observableArrayList(task.getTask().getSnapShotList()));
                                      endCombo.setItems(FXCollections.observableArrayList(task.getTask().getSnapShotList()));

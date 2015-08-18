@@ -185,22 +185,6 @@ public class SnapShotParser {
     }
 
     /**
-     * Parse HeapStats SnapShot file.
-     * This method may raise UncheckedIOException.
-     *
-     * @param fname the file java heap information.
-     * @param handler the ParserEventHandler.
-     * @return Return the Reading results file
-     */
-    public boolean parse2(String fname, SnapShotParserEventHandler handler) {
-        try {
-            return parse(fname, handler);
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
-    }
-    
-    /**
      * Extracting the header information of the snapshot.
      *
      * @param stream the file Java Heap Information.
