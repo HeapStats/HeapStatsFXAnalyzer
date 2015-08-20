@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -661,12 +662,13 @@ public class LogController extends PluginController implements Initializable{
      * @param chart Target chart.
      * @param xValue value in X Axis.
      * @param event Mouse event.
+     * @param labelFunc Function to format label string.
      */
-    private void showChartPopup(XYChart<String, Number> chart, String xValue, MouseEvent event){
+    private void showChartPopup(XYChart<String, ? extends Number> chart, String xValue, MouseEvent event, Function<? super Number, String> labelFunc){
         String label = chart.getData().stream()
                                       .map(s -> s.getName() + " = " + s.getData().stream()
                                                                                  .filter(d -> d.getXValue().equals(xValue))
-                                                                                 .map(d -> d.getYValue().toString())
+                                                                                 .map(d -> labelFunc.apply(d.getYValue()))
                                                                                  .findAny()
                                                                                  .orElse("<none>"))
                                       .collect(Collectors.joining("\n"));
@@ -678,12 +680,26 @@ public class LogController extends PluginController implements Initializable{
     @FXML
     @SuppressWarnings("unchecked")
     private void onChartMouseMoved(MouseEvent event){
-        XYChart<String, Number> chart = (XYChart<String, Number>)event.getSource();
+        XYChart<String, ? extends Number> chart = (XYChart<String, ? extends Number>)event.getSource();
         CategoryAxis xAxis = (CategoryAxis)chart.getXAxis();
         double startXPoint = xAxis.getLayoutX() + xAxis.getStartMargin();
-
+        Function<? super Number, String> labelFunc;
+        
+        if((chart == javaCPUChart) || (chart == systemCPUChart)){
+            labelFunc = d -> String.format("%.02f %%", d);
+        }
+        else if(chart == javaMemoryChart){
+            labelFunc = d -> String.format("%d MB", d);
+        }
+        else if(chart == safepointTimeChart){
+            labelFunc = d -> String.format("%d ms", d);
+        }
+        else{
+            labelFunc = d -> d.toString();
+        }
+        
         Optional.ofNullable(chart.getXAxis().getValueForDisplay(event.getX() - startXPoint))
-                .ifPresent(v -> showChartPopup(chart, v, event));
+                .ifPresent(v -> showChartPopup(chart, v, event, labelFunc));
     }
 
     @FXML
