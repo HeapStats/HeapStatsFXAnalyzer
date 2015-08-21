@@ -139,7 +139,7 @@ public class SnapShotProcessor implements CliProcessor{
         System.out.println("Direction: " + (options.isRefToParent() ? "Parent" : "Child"));
         System.out.println("\tTag\tClass\tClassLoader\tInstances\tSize(KB)");
         
-        ReferenceTracker refTracker = new ReferenceTracker(snapShot, OptionalInt.empty(), Optional.of(options.getFilterPredicate()));
+        ReferenceTracker refTracker = new ReferenceTracker(snapShot, OptionalInt.empty(), Optional.ofNullable(options.getFilterPredicate()));
         
         List<ObjectData> objectList = options.isRefToParent() ? refTracker.getParents(refStart, true)
                                                               : refTracker.getChildren(refStart, true);
