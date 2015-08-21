@@ -26,7 +26,7 @@ import java.util.Optional;
  * 
  * @author Yasumasa Suenaga
  */
-public class DiffData implements Comparable<DiffData>{
+public class DiffData {
     
     private final long tag;
     
@@ -127,11 +127,5 @@ public class DiffData implements Comparable<DiffData>{
     public boolean isRanked() {
         return ranked;
     }
-
-    @Override
-    public int compareTo(DiffData o) {
-        return Long.compare(totalSize, o.totalSize);
-    }
-    
 
 }

@@ -75,7 +75,7 @@ public class DiffCalculator extends ProgressRunnable{
                                      .values()
                                      .parallelStream()
                                      .filter(filter.orElse(o -> true))
-                                     .sorted(Comparator.reverseOrder())
+                                     .sorted(Comparator.comparingLong(ObjectData::getTotalSize).reversed())
                                      .limit(rankLevel)
                                      .collect(Collectors.toList());
         

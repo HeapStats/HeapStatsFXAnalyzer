@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import jp.co.ntt.oss.heapstats.cli.Options;
+import jp.co.ntt.oss.heapstats.container.snapshot.DiffData;
 import jp.co.ntt.oss.heapstats.container.snapshot.ObjectData;
 import jp.co.ntt.oss.heapstats.container.snapshot.SnapShotHeader;
 import jp.co.ntt.oss.heapstats.snapshot.ReferenceTracker;
@@ -116,7 +117,7 @@ public class SnapShotProcessor implements CliProcessor{
         System.out.println("Tag\tClass\tClassLoader\tInstances\tSize(KB)");
         
         diffCalc.getLastDiffList().stream()
-                                  .sorted(Comparator.reverseOrder())
+                                  .sorted(Comparator.comparingLong(DiffData::getTotalSize).reversed())
                                   .map(d -> (new StringJoiner("\t")).add("0x" + Long.toHexString(d.getTag()))
                                                                     .add(d.getClassName())
                                                                     .add(d.getClassLoaderName())

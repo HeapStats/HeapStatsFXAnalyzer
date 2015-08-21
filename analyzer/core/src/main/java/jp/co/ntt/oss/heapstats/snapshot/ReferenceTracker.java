@@ -113,8 +113,8 @@ public class ReferenceTracker {
         }
 
         /* This comparator is reverse order. */
-        Comparator<ObjectData> comparator = sortBySize ? Comparator.reverseOrder()
-                                                       : Comparator.comparing(ObjectData::getCount).reversed();
+        Comparator<ObjectData> comparator = sortBySize ? Comparator.comparingLong(ObjectData::getTotalSize).reversed()
+                                                       : Comparator.comparingLong(ObjectData::getCount).reversed();
         
         Stream<ObjectData> result = parentStream.map(o -> buildParentObjData(o, startTag))
                                                 .filter(o -> o.isPresent())
@@ -152,8 +152,8 @@ public class ReferenceTracker {
         }
         
         /* This comparator is reverse order. */
-        Comparator<ChildObjectData> comparator = sortBySize ? Comparator.comparing(ChildObjectData::getTotalSize).reversed()
-                                                            : Comparator.comparing(ChildObjectData::getInstances).reversed();
+        Comparator<ChildObjectData> comparator = sortBySize ? Comparator.comparingLong(ChildObjectData::getTotalSize).reversed()
+                                                            : Comparator.comparingLong(ChildObjectData::getInstances).reversed();
         result = result.sorted(comparator);
         
         if(rankLevel.isPresent()){

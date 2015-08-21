@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  * <br>
  * Contains information about the classes loaded in the java virtual machine.
  */
-public class ObjectData implements Serializable, Cloneable, Comparable<ObjectData> {
+public class ObjectData implements Serializable, Cloneable {
     /** serialVersionUID. */
     private static final long serialVersionUID = -1685786847473848152L;
 
@@ -318,18 +318,6 @@ public class ObjectData implements Serializable, Cloneable, Comparable<ObjectDat
         }
         
         return this.tag == ((ObjectData)obj).tag;
-    }
-
-    /**
-     * Compare method ofObjectData.
-     * This method is based on totalSize.
-     * 
-     * @param o
-     * @return 
-     */
-    @Override
-    public int compareTo(ObjectData o) {
-        return Long.compare(totalSize, o.totalSize);
     }
 
 }
