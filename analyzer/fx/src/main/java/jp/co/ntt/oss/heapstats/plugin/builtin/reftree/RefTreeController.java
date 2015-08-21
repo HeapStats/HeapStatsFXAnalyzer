@@ -18,6 +18,7 @@
 
 package jp.co.ntt.oss.heapstats.plugin.builtin.reftree;
 
+import jp.co.ntt.oss.heapstats.snapshot.ReferenceTracker;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
@@ -35,6 +36,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
 import javafx.application.Platform;
@@ -230,22 +233,19 @@ public class RefTreeController extends PluginController implements Initializable
      * @param parentCell Parent cell
      * @param child Child data.
      */
-    private void addReferenceCell(ReferenceCell parentCell, ChildObjectData child){
+    private void addReferenceCell(ReferenceCell parentCell, ObjectData objData){
         ReferenceCell cell = null;
         mxCell tmp = (mxCell)parentCell.getParent();
                                        
         for(int i = 0; i < tmp.getChildCount(); i++){
             mxICell target = tmp.getChildAt(i);
                                          
-            if(target.isVertex() && (((ReferenceCell)target).getTag() == child.getTag())){
+            if(target.isVertex() && (((ReferenceCell)target).getTag() == objData.getTag())){
                 cell = (ReferenceCell)target;
             }
                                          
         }
 
-        ObjectData objData = snapShot.get(child.getTag()).clone();
-        objData.setCount(child.getInstances());
-        objData.setTotalSize(child.getTotalSize());
         ReferenceCell edge = new ReferenceCell(objData, false, true);
 
         if(cell == null){
@@ -275,9 +275,11 @@ public class RefTreeController extends PluginController implements Initializable
             return;
         }
 
-        ReferenceTracker refTracker = new ReferenceTracker(snapShot, parentCell.getTag());
-        List<ChildObjectData> objectList = radioParent.isSelected() ? refTracker.getParents(radioSize.isSelected())
-                                                                    : refTracker.getChildren(radioSize.isSelected());
+        OptionalInt rankLevel = rankCheckBox.isSelected() ? OptionalInt.of(HeapStatsUtils.getRankLevel())
+                                                          : OptionalInt.empty();
+        ReferenceTracker refTracker = new ReferenceTracker(snapShot, rankLevel, Optional.empty());
+        List<ObjectData> objectList = radioParent.isSelected() ? refTracker.getParents(parentCell.getTag(), radioSize.isSelected())
+                                                               : refTracker.getChildren(parentCell.getTag(), radioSize.isSelected());
 
         if(objectList.isEmpty()){
             return;
@@ -285,9 +287,7 @@ public class RefTreeController extends PluginController implements Initializable
 
         graph.getModel().beginUpdate();
         {
-            Stream<ChildObjectData> stream = rankCheckBox.isSelected() ? objectList.stream().limit(HeapStatsUtils.getRankLevel())
-                                                                       : objectList.stream();
-            stream.forEachOrdered(c -> addReferenceCell(parentCell, c));
+            objectList.forEach(o -> addReferenceCell(parentCell, o));
 
             if(mxGraphTransferable.dataFlavor == null){
                 try{

@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -29,6 +31,7 @@ import java.util.stream.Stream;
 import jp.co.ntt.oss.heapstats.cli.Options;
 import jp.co.ntt.oss.heapstats.container.snapshot.ObjectData;
 import jp.co.ntt.oss.heapstats.container.snapshot.SnapShotHeader;
+import jp.co.ntt.oss.heapstats.snapshot.ReferenceTracker;
 import jp.co.ntt.oss.heapstats.task.CSVDumpGC;
 import jp.co.ntt.oss.heapstats.task.CSVDumpHeap;
 import jp.co.ntt.oss.heapstats.task.DiffCalculator;
@@ -136,43 +139,19 @@ public class SnapShotProcessor implements CliProcessor{
         System.out.println("Direction: " + (options.isRefToParent() ? "Parent" : "Child"));
         System.out.println("\tTag\tClass\tClassLoader\tInstances\tSize(KB)");
         
-        Stream<ObjectData> stream;
+        ReferenceTracker refTracker = new ReferenceTracker(snapShot, OptionalInt.empty(), Optional.of(options.getFilterPredicate()));
         
-        if(options.isRefToParent()){
-            stream = snapShot.values().stream()
-                                      .filter(o -> o.getReferenceList() != null)
-                                      .map(o -> o.getReferenceList().stream()
-                                                                    .filter(c -> (c.getTag() == refStart))
-                                                                    .findAny()
-                                                                    .map(c -> new ObjectData(c.getTag(), o.getName(), o.getClassLoader(),
-                                                                                     o.getClassLoaderTag(), c.getInstances(), c.getTotalSize(),
-                                                                                                                          o.getLoaderName(), null)))
-                                      .filter(o -> o.isPresent())
-                                      .map(o -> o.get());
-        }
-        else{
-            stream = snapShot.get(refStart).getReferenceList().stream()
-                                                              .map(c -> {
-                                                                          ObjectData obj = snapShot.get(c.getTag());
-                                                                          return new ObjectData(c.getTag(), obj.getName(), obj.getClassLoader(),
-                                                                                         obj.getClassLoaderTag(), c.getInstances(), c.getTotalSize(),
-                                                                                                                             obj.getLoaderName(), null);
-                                                                        });
-        }
-        
-        if(options.getFilterPredicate() != null){
-            stream = stream.filter(options.getFilterPredicate());
-        }
-        
-        stream.sorted((o1, o2) -> Long.compare(o2.getTotalSize(), o1.getTotalSize()))
-              .map(o -> (new StringJoiner("\t")).add("\t")
-                                                .add("0x" + Long.toHexString(o.getTag()))
-                                                .add(o.getName())
-                                                .add(o.getLoaderName())
-                                                .add(Long.toString(o.getCount()))
-                                                .add(Long.toString(o.getTotalSize() / 1024))
-                                                .toString())
-              .forEachOrdered(System.out::println);
+        List<ObjectData> objectList = options.isRefToParent() ? refTracker.getParents(refStart, true)
+                                                              : refTracker.getChildren(refStart, true);
+        objectList.stream()
+                  .map(o -> (new StringJoiner("\t")).add("\t")
+                                                    .add("0x" + Long.toHexString(o.getTag()))
+                                                    .add(o.getName())
+                                                    .add(o.getLoaderName())
+                                                    .add(Long.toString(o.getCount()))
+                                                    .add(Long.toString(o.getTotalSize() / 1024))
+                                                    .toString())
+                  .forEachOrdered(System.out::println);
     }
 
     @Override
