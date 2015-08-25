@@ -115,6 +115,11 @@ public class SnapShotController extends PluginController implements Initializabl
     private XYChart.Series<String, Long> free;
     
     @FXML
+    private LineChart<String, Long> instanceChart;
+    
+    private XYChart.Series<String, Long> instances;
+    
+    @FXML
     private LineChart<String, Long> gcTimeChart;
     
     private XYChart.Series<String, Long> gcTime;
@@ -231,6 +236,10 @@ public class SnapShotController extends PluginController implements Initializabl
         free.setName("Free");
         heapChart.getData().addAll(youngUsage, oldUsage, free);
         
+        instances = new XYChart.Series<>();
+        instances.setName("Instances");
+        instanceChart.getData().add(instances);
+        
         gcTime = new XYChart.Series<>();
         gcTime.setName("GC Time");
         gcTimeChart.getData().add(gcTime);
@@ -305,6 +314,7 @@ public class SnapShotController extends PluginController implements Initializabl
         searchList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         
         heapChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
+        instanceChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
         gcTimeChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
         metaspaceChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
         topNChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
@@ -452,6 +462,9 @@ public class SnapShotController extends PluginController implements Initializabl
         private final ObservableList<XYChart.Data<String, Long>> oldUsageBuf;
         private final ObservableList<XYChart.Data<String, Long>> freeBuf;
         
+        /* Instances */
+        private final ObservableList<XYChart.Data<String, Long>> instanceBuf;
+        
         /* GC time Chart */
         private final ObservableList<XYChart.Data<String, Long>> gcTimeBuf;
         
@@ -465,6 +478,7 @@ public class SnapShotController extends PluginController implements Initializabl
             youngUsageBuf = FXCollections.observableArrayList();
             oldUsageBuf = FXCollections.observableArrayList();
             freeBuf = FXCollections.observableArrayList();
+            instanceBuf = FXCollections.observableArrayList();
             gcTimeBuf = FXCollections.observableArrayList();
             metaspaceUsageBuf = FXCollections.observableArrayList();
             metaspaceCapacityBuf = FXCollections.observableArrayList();
@@ -476,6 +490,8 @@ public class SnapShotController extends PluginController implements Initializabl
             youngUsageBuf.add(new XYChart.Data<>(time, header.getNewHeap() / 1024 / 1024));
             oldUsageBuf.add(new XYChart.Data<>(time, header.getOldHeap() / 1024 / 1024));
             freeBuf.add(new XYChart.Data<>(time, (header.getTotalCapacity() - header.getNewHeap() - header.getOldHeap()) / 1024 / 1024));
+            
+            instanceBuf.add(new XYChart.Data<>(time, header.getNumInstances()));
 
             gcTimeBuf.add(new XYChart.Data<>(time, header.getGcTime()));
 
@@ -506,6 +522,8 @@ public class SnapShotController extends PluginController implements Initializabl
             youngUsage.setData(youngUsageBuf);
             oldUsage.setData(oldUsageBuf);
             free.setData(freeBuf);
+            
+            instances.setData(instanceBuf);
 
             gcTime.setData(gcTimeBuf);
 
