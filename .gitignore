@@ -13,3 +13,4 @@ analyzer/cli/target/
 analyzer/core/target/
 analyzer/fx/target/
 mbean/java/target/
+nb-configuration.xml
