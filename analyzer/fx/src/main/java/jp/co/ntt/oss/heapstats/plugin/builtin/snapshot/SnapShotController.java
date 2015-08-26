@@ -43,13 +43,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.StackedAreaChart;
-import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableCell;
@@ -94,6 +95,9 @@ public class SnapShotController extends PluginController implements Initializabl
 
     @FXML
     private TextField snapshotList;
+
+    @FXML
+    private RadioButton radioInstance;
 
     @FXML
     private TableView<SummaryData.SummaryDataEntry> summaryTable;
@@ -147,6 +151,9 @@ public class SnapShotController extends PluginController implements Initializabl
 
     @FXML
     private StackedAreaChart<String, Long> topNChart;
+
+    @FXML
+    private NumberAxis topNYAxis;
 
     @FXML
     private TableView<DiffData> lastDiffTable;
@@ -393,11 +400,13 @@ public class SnapShotController extends PluginController implements Initializabl
 
         LocalDateTimeConverter converter = new LocalDateTimeConverter();
         String time = converter.toString(header.getSnapShotDate());
-        long yValue = objData.getTotalSize() / 1024 / 1024;
+        long yValue = radioInstance.isSelected() ? objData.getCount()
+                : objData.getTotalSize() / 1024 / 1024;
         XYChart.Data<String, Long> data = new XYChart.Data<>(time, yValue);
 
         series.getData().add(data);
-        String tip = String.format("%s: %s, %d MB", series.getName(), time, yValue);
+        String unit = radioInstance.isSelected() ? "instances" : "MB";
+        String tip = String.format("%s: %s, %d " + unit, series.getName(), time, yValue);
         Tooltip.install(data.getNode(), new Tooltip(tip));
     }
 
@@ -428,7 +437,10 @@ public class SnapShotController extends PluginController implements Initializabl
                 .mapToLong(Long::longValue)
                 .max()
                 .getAsLong();
-        ((ValueAxis) topNChart.getYAxis()).setUpperBound(maxVal * 1.05d);
+
+        topNYAxis.setUpperBound(maxVal * 1.05d);
+        topNYAxis.setTickUnit(maxVal / 20);
+        topNYAxis.setLabel(radioInstance.isSelected() ? "instances" : "MB");
     }
 
     /**
@@ -443,7 +455,8 @@ public class SnapShotController extends PluginController implements Initializabl
         lastDiffTable.getItems().clear();
         Map<String, XYChart.Series<String, Long>> seriesMap = new HashMap<>();
 
-        TaskAdapter<DiffCalculator> diff = new TaskAdapter<>(new DiffCalculator(target, HeapStatsUtils.getRankLevel(), includeOthers, predicate, HeapStatsUtils.getReplaceClassName()));
+        TaskAdapter<DiffCalculator> diff = new TaskAdapter<>(new DiffCalculator(target, HeapStatsUtils.getRankLevel(),
+                includeOthers, predicate, HeapStatsUtils.getReplaceClassName(), radioInstance.isSelected()));
         diff.setOnSucceeded(evt -> onDiffTaskSucceeded(diff.getTask(), seriesMap));
         super.bindTask(diff);
         Thread diffThread = new Thread(diff);
