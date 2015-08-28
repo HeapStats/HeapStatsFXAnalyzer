@@ -18,6 +18,7 @@
 
 package jp.co.ntt.oss.heapstats.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -128,6 +129,12 @@ public class HeapStatsUtils {
         /* Default directory for dialogs. */
         if(prop.getProperty("defaultdir") == null){
             prop.setProperty("defaultdir", getHeapStatsHomeDirectory().toString());
+        } else {
+            /* check if defaultdir exists */
+            File defaultDir = new File(prop.getProperty("defaultdir"));
+            if (!defaultDir.exists() || !defaultDir.isDirectory()) {
+                prop.setProperty("defaultdir", getHeapStatsHomeDirectory().toString());
+            }
         }
 
         /* Log file list to parse. */
