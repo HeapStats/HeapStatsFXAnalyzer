@@ -218,6 +218,10 @@ public class SnapShotController extends PluginController implements Initializabl
     private List<SnapShotHeader> currentTarget;
 
     private Set<String> currentClassNameSet;
+    
+    private boolean isInstanceGraph;
+    
+    private boolean changeDataFormat;
 
     private Map<LocalDateTime, List<ObjectData>> topNList;
 
@@ -291,6 +295,7 @@ public class SnapShotController extends PluginController implements Initializabl
         classNameColumn.setCellValueFactory(new PropertyValueFactory<>("className"));
         classLoaderColumn.setCellValueFactory(new PropertyValueFactory<>("classLoaderName"));
         instanceColumn.setCellValueFactory(new PropertyValueFactory<>("instances"));
+        instanceColumn.setSortType(TableColumn.SortType.DESCENDING);
         totalSizeColumn.setCellValueFactory(new PropertyValueFactory<>("totalSize"));
         totalSizeColumn.setSortType(TableColumn.SortType.DESCENDING);
 
@@ -312,6 +317,7 @@ public class SnapShotController extends PluginController implements Initializabl
         objClassNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         objClassLoaderColumn.setCellValueFactory(new PropertyValueFactory<>("loaderName"));
         objInstancesColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
+        objInstancesColumn.setSortType(TableColumn.SortType.DESCENDING);
         objSizeColumn.setCellValueFactory(new PropertyValueFactory<>("totalSize"));
         objSizeColumn.setSortType(TableColumn.SortType.DESCENDING);
 
@@ -400,12 +406,12 @@ public class SnapShotController extends PluginController implements Initializabl
 
         LocalDateTimeConverter converter = new LocalDateTimeConverter();
         String time = converter.toString(header.getSnapShotDate());
-        long yValue = radioInstance.isSelected() ? objData.getCount()
+        long yValue = isInstanceGraph ? objData.getCount()
                 : objData.getTotalSize() / 1024 / 1024;
         XYChart.Data<String, Long> data = new XYChart.Data<>(time, yValue);
 
         series.getData().add(data);
-        String unit = radioInstance.isSelected() ? "instances" : "MB";
+        String unit = isInstanceGraph ? "instances" : "MB";
         String tip = String.format("%s: %s, %d " + unit, series.getName(), time, yValue);
         Tooltip.install(data.getNode(), new Tooltip(tip));
     }
@@ -425,8 +431,7 @@ public class SnapShotController extends PluginController implements Initializabl
                         .forEachOrdered(o -> buildTopNChartData(h, seriesMap, o)));
 
         lastDiffTable.getItems().addAll(diff.getLastDiffList());
-        lastDiffTable.getSortOrder().add(totalSizeColumn);
-        snapShotTimeCombo.getSelectionModel().selectLast();
+        lastDiffTable.getSortOrder().add(isInstanceGraph ? instanceColumn : totalSizeColumn);
         topNChart.getData().forEach(this::setTopNChartColor);
 
         long maxVal = topNChart.getData().stream()
@@ -440,7 +445,13 @@ public class SnapShotController extends PluginController implements Initializabl
 
         topNYAxis.setUpperBound(maxVal * 1.05d);
         topNYAxis.setTickUnit(maxVal / 20);
-        topNYAxis.setLabel(radioInstance.isSelected() ? "instances" : "MB");
+        topNYAxis.setLabel(isInstanceGraph ? "instances" : "MB");
+        
+        if (changeDataFormat) {
+            /* Refresh PieChart to adapt to new data format. */
+            snapShotTimeCombo.setItems(FXCollections.observableArrayList(currentTarget));
+        }
+        snapShotTimeCombo.getSelectionModel().selectLast();
     }
 
     /**
@@ -456,7 +467,7 @@ public class SnapShotController extends PluginController implements Initializabl
         Map<String, XYChart.Series<String, Long>> seriesMap = new HashMap<>();
 
         TaskAdapter<DiffCalculator> diff = new TaskAdapter<>(new DiffCalculator(target, HeapStatsUtils.getRankLevel(),
-                includeOthers, predicate, HeapStatsUtils.getReplaceClassName(), radioInstance.isSelected()));
+                includeOthers, predicate, HeapStatsUtils.getReplaceClassName(), isInstanceGraph));
         diff.setOnSucceeded(evt -> onDiffTaskSucceeded(diff.getTask(), seriesMap));
         super.bindTask(diff);
         Thread diffThread = new Thread(diff);
@@ -552,6 +563,9 @@ public class SnapShotController extends PluginController implements Initializabl
      */
     @FXML
     private void onOkClick(ActionEvent event) {
+        changeDataFormat = !(isInstanceGraph == radioInstance.isSelected());
+        isInstanceGraph = radioInstance.isSelected();
+        
         int startIdx = startCombo.getSelectionModel().getSelectedIndex();
         int endIdx = endCombo.getSelectionModel().getSelectedIndex();
         currentTarget = startCombo.getItems().subList(startIdx, endIdx + 1);
@@ -621,14 +635,14 @@ public class SnapShotController extends PluginController implements Initializabl
                 new AbstractMap.SimpleEntry<>(resource.getString("snapshot.gctime"), String.format("%d ms", header.getGcTime())));
 
         usagePieChart.getData().addAll(topNList.get(header.getSnapShotDate()).stream()
-                .map(o -> new PieChart.Data(o.getName(), o.getTotalSize()))
+                .map(o -> new PieChart.Data(o.getName(), isInstanceGraph ? o.getCount() : o.getTotalSize()))
                 .collect(Collectors.toList()));
         usagePieChart.getData().stream()
                 .forEach(d -> d.getNode().setStyle("-fx-pie-color: " + ChartColorManager.getNextColor(d.getName())));
 
         objDataTable.setItems(FXCollections.observableArrayList(
                 header.getSnapShot(HeapStatsUtils.getReplaceClassName()).values().stream().collect(Collectors.toList())));
-        objDataTable.getSortOrder().add(objSizeColumn);
+        objDataTable.getSortOrder().add(isInstanceGraph ? objInstancesColumn : objSizeColumn);
     }
 
     /**

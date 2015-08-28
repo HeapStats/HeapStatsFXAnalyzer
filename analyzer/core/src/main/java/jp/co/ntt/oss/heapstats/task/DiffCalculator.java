@@ -51,7 +51,7 @@ public class DiffCalculator extends ProgressRunnable {
 
     private final boolean needJavaStyle;
 
-    private final boolean isInstance;
+    private final boolean isInstanceGraph;
 
     private long progressCounter;
     
@@ -61,7 +61,7 @@ public class DiffCalculator extends ProgressRunnable {
     }
 
     public DiffCalculator(List<SnapShotHeader> snapShots, int rankLevel, boolean includeOthers,
-            Predicate<? super ObjectData> filter, boolean needJavaStyle, boolean isInstance) {
+            Predicate<? super ObjectData> filter, boolean needJavaStyle, boolean isInstanceGraph) {
         this.snapShots = snapShots;
         this.topNList = new HashMap<>();
         this.lastDiffList = new ArrayList<>();
@@ -69,7 +69,7 @@ public class DiffCalculator extends ProgressRunnable {
         this.includeOthers = includeOthers;
         this.filter = Optional.ofNullable(filter);
         this.needJavaStyle = needJavaStyle;
-        this.isInstance = isInstance;
+        this.isInstanceGraph = isInstanceGraph;
 
         setTotal(this.snapShots.size());
     }
@@ -80,11 +80,11 @@ public class DiffCalculator extends ProgressRunnable {
      * @param header SnapShot header to build.
      */
     private void buildTopNData(SnapShotHeader header) {
-        List<ObjectData> buf = header.getSnapShot(needJavaStyle)
+        List<ObjectData> topNBuffer = header.getSnapShot(needJavaStyle)
                 .values()
                 .parallelStream()
                 .filter(filter.orElse(o -> true))
-                .sorted(Comparator.comparingLong(isInstance ?
+                .sorted(Comparator.comparingLong(isInstanceGraph ?
                         ObjectData::getCount : ObjectData::getTotalSize).reversed())
                 .limit(rankLevel)
                 .collect(Collectors.toList());
@@ -92,20 +92,20 @@ public class DiffCalculator extends ProgressRunnable {
         if (includeOthers) {
             ObjectData other = new ObjectData();
             other.setName("Others");
-            
-            if (isInstance) {
+
+            if (isInstanceGraph) {
                 other.setCount(
-                        buf.stream().mapToLong(d -> d.getCount()).sum()
+                        header.getNumInstances() -
+                        topNBuffer.stream().mapToLong(d -> d.getCount()).sum()
                 );
             } else {
-                other.setTotalSize(header.getNewHeap() + header.getOldHeap() - buf.stream()
+                other.setTotalSize(header.getNewHeap() + header.getOldHeap() - topNBuffer.stream()
                     .mapToLong(d -> d.getTotalSize())
                     .sum());
             }
-            buf.add(other);
+            topNBuffer.add(other);
         }
-
-        topNList.put(header.getSnapShotDate(), buf);
+        topNList.put(header.getSnapShotDate(), topNBuffer);
         progressCounter++;
         updateProgress.ifPresent(c -> c.accept(progressCounter));
     }
