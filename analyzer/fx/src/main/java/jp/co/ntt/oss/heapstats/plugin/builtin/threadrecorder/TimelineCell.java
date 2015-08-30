@@ -36,6 +36,12 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
     
     private final ObjectProperty<LocalDateTime> rangeEnd;
 
+    /**
+     * Constructor of TielineCell.
+     * 
+     * @param rangeStart Start time.
+     * @param rangeEnd End time.
+     */
     public TimelineCell(ObjectProperty<LocalDateTime> rangeStart, ObjectProperty<LocalDateTime> rangeEnd) {
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         setAlignment(Pos.CENTER_LEFT);

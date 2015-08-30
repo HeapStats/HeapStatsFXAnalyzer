@@ -72,6 +72,16 @@ public class JdpReceiver extends Task<Void>{
     
     private Optional<String> jconsolePath;
     
+    /**
+     * Constructor of JdpReceiver.
+     * 
+     * @param jdpAddr JDP multicast address.
+     * @param jdpPort JDP port.
+     * @param jdpList ListView which includes JDP packet data.
+     * @param threadPool ThreadPool which processes JDP packet decording.
+     * @param jconsolePath Path to JConsole.
+     * @param jmxPool ThreadPool which processes JMX access.
+     */
     public JdpReceiver(InetAddress jdpAddr, int jdpPort, ListView<JdpDecoder> jdpList, ExecutorService threadPool, Optional<String> jconsolePath, ExecutorService jmxPool){
         this.jdpAddr = jdpAddr;
         this.jdpPort = jdpPort;
@@ -81,6 +91,16 @@ public class JdpReceiver extends Task<Void>{
         this.jmxProcPool = jmxPool;
     }
     
+    /**
+     * Constructor of JdpReceiver.
+     * 
+     * @param jdpList ListView which includes JDP packet data.
+     * @param threadPool ThreadPool which processes JDP packet decording.
+     * @param jconsolePath Path to JConsole.
+     * @param jmxPool ThreadPool which processes JMX access.
+     * 
+     * @throws UnknownHostException 
+     */
     public JdpReceiver(ListView<JdpDecoder> jdpList, ExecutorService threadPool, Optional<String> jconsolePath, ExecutorService jmxPool) throws UnknownHostException{
         this(InetAddress.getByName(Optional.ofNullable(System.getProperty(JDP_ADDRESS_PROP_NAME)).orElse(JDP_DEFAULT_ADDRESS)),
                    Optional.ofNullable(System.getProperty(JDP_PORT_PROP_NAME)).map(p -> Integer.parseInt(p)).orElse(JDP_DEFAULT_PORT),

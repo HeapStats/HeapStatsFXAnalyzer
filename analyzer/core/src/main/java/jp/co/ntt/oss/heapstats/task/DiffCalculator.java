@@ -53,6 +53,15 @@ public class DiffCalculator extends ProgressRunnable{
     
     private long progressCounter;
 
+    /**
+     * Constructor of DiffCalcurator.
+     * 
+     * @param snapShots SnapShot list to calculate.
+     * @param rankLevel Rank (TopN) level to calculate.
+     * @param includeOthers true if result should be included TopN and "Others" data.
+     * @param filter Class filter.
+     * @param needJavaStyle true if class name should be Java-style FQCN. false means JNI-style.
+     */
     public DiffCalculator(List<SnapShotHeader> snapShots, int rankLevel, boolean includeOthers, Predicate<? super ObjectData> filter, boolean needJavaStyle) {
         this.snapShots = snapShots;
         this.topNList = new HashMap<>();
@@ -93,6 +102,9 @@ public class DiffCalculator extends ProgressRunnable{
         updateProgress.ifPresent(c -> c.accept(progressCounter));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void run() {
         progressCounter = 0;
@@ -129,10 +141,18 @@ public class DiffCalculator extends ProgressRunnable{
         
     }
 
+    /**
+     * Get TopN list which is a result of this task.
+     * @return TopN list.
+     */
     public Map<LocalDateTime, List<ObjectData>> getTopNList() {
         return topNList;
     }
 
+    /**
+     * Get diff data - Top of list and tail of list.
+     * @return Diff Data.
+     */
     public List<DiffData> getLastDiffList() {
         return lastDiffList;
     }

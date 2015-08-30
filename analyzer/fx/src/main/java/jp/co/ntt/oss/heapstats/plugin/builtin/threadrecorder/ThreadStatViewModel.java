@@ -45,6 +45,15 @@ public class ThreadStatViewModel {
 
     private final ReadOnlyObjectWrapper<List<ThreadStat>> threadStats;
 
+    /**
+     * Constructor of ThreadStatViewModel
+     * 
+     * @param id Thread ID
+     * @param name Thread Name
+     * @param startTime Start time
+     * @param endTime End time
+     * @param threadStats List of ThreadStat to draw.
+     */
     public ThreadStatViewModel(long id, String name, LocalDateTime startTime, LocalDateTime endTime,
             List<ThreadStat> threadStats) {
         this.id = id;
@@ -62,46 +71,97 @@ public class ThreadStatViewModel {
         
     }
     
+    /**
+     * Get show property.
+     * 
+     * @return show property.
+     */
     public BooleanProperty showProperty(){
         return show;
     }
 
+    /**
+     * Get Thread ID.
+     * 
+     * @return Thread ID.
+     */
     public long getId() {
         return id;
     }
 
+    /**
+     * Set Thread ID.
+     * @param id New Thread ID.
+     */
     public void setId(long id) {
         this.id = id;
     }
 
+    /**
+     * Get Thread name.
+     * @return Thread name.
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Set Thread name.
+     * @param name New Thread name.
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Get Start time of Thread Recorder events.
+     * 
+     * @return Start time.
+     */
     public LocalDateTime getStartTime() {
         return startTime;
     }
 
+    /**
+     * Set Start time of Thread Recorder events.
+     * 
+     * @param startTime New start time.
+     */
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
+    /**
+     * Get End time of Thread Recorder events.
+     * 
+     * @return End time.
+     */
     public LocalDateTime getEndTime() {
         return endTime;
     }
 
+    /**
+     * Set End time of Thread Recorder events.
+     * 
+     * @param endTime New end time.
+     */
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
     }
 
+    /**
+     * Get list of ThreadStat.
+     * 
+     * @return ThreadStat list.
+     */
     public List<ThreadStat> getThreadStats() {
         return threadStats.get();
     }
 
+    /**
+     * Get threadStats property.
+     * @return threadStats property.
+     */
     public ReadOnlyObjectProperty<List<ThreadStat>> threadStatsProperty() {
         return threadStats.getReadOnlyProperty();
     }

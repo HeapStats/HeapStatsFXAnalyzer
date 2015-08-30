@@ -41,18 +41,29 @@ public class SnapShotListHandler implements SnapShotParserEventHandler{
     
     private final Optional<Consumer<? super Long>> progressUpdater;
 
+    /**
+     * Constructor of SnapShotListHandler
+     * 
+     * @param progressUpdater Consumer for ProgressIndicator.
+     */
     public SnapShotListHandler(Consumer<? super Long> progressUpdater) {
         this.headers = new ArrayList<>();
         this.instances = 0;
         this.progressUpdater = Optional.ofNullable(progressUpdater);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ParseResult onStart(long off) {
         this.instances = 0;
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ParseResult onNewSnapShot(SnapShotHeader header, String parent) {
         currentHeader = header;
@@ -60,18 +71,27 @@ public class SnapShotListHandler implements SnapShotParserEventHandler{
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ParseResult onEntry(ObjectData data) {
         instances += data.getCount();
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ParseResult onChildEntry(long parentClassTag, ChildObjectData child) {
         /* Nothing to do */
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ParseResult onFinish(long off) {
         long snapshotSize = off - currentHeader.getFileOffset();
@@ -81,6 +101,11 @@ public class SnapShotListHandler implements SnapShotParserEventHandler{
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
+    /**
+     * Get SnapShot headers which are result of this task.
+     * 
+     * @return List of SnapShot header.
+     */
     public List<SnapShotHeader> getHeaders() {
         return headers;
     }

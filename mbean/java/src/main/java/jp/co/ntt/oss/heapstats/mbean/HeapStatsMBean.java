@@ -32,6 +32,10 @@ import java.util.Map;
  */
 public interface HeapStatsMBean{
 
+  /**
+   * Enumeration of log level.
+   * These values links loglevel directive in heapstats.conf .
+   */
   public static enum LogLevel{
     UNKNOWN,
     CRIT,
@@ -40,6 +44,10 @@ public interface HeapStatsMBean{
     DEBUG
   }
 
+  /**
+   * Enumeration of rank order.
+   * These values links rank_order directive in heapstats.conf .
+   */
   public static enum RankOrder{
     DELTA,
     USAGE
@@ -115,21 +123,25 @@ public interface HeapStatsMBean{
 
   /**
    * This function is for WildFly/JBoss.
+   * @throws java.lang.Exception
    */
   public void create() throws Exception;
 
   /**
    * This function is for WildFly/JBoss.
+   * @throws java.lang.Exception
    */
   public void start() throws Exception;
 
   /**
    * This function is for WildFly/JBoss.
+   * @throws java.lang.Exception
    */
   public void stop() throws Exception;
 
   /**
    * This function is for WildFly/JBoss.
+   * @throws java.lang.Exception
    */
   public void destroy() throws Exception;
 

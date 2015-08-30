@@ -95,6 +95,14 @@ public class ErrorReportDecoder extends Task<Void>{
     /** InetSocketAddress for crash JVM. */
     private final InetSocketAddress sockAddr;
 
+    /**
+     * Constructor of ErrorReportDecorder.
+     * 
+     * @param crashList List of crash jvms.
+     * @param ch AsynchronousSocketChannel to crash jvm.
+     * 
+     * @throws IOException 
+     */
     public ErrorReportDecoder(ObservableList<ErrorReportDecoder> crashList, AsynchronousSocketChannel ch) throws IOException{
         crashedTime = LocalDateTime.now();
         

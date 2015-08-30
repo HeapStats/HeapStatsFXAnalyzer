@@ -30,6 +30,9 @@ public abstract class ProgressRunnable implements Runnable{
     
     protected Optional<Consumer<Long>> updateProgress;
     
+    /**
+     * Constructor of ProgressRunnable.
+     */
     public ProgressRunnable(){
         this.total = 0;
         this.updateProgress = Optional.empty();

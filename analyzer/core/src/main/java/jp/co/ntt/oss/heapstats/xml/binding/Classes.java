@@ -23,7 +23,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 
 /**
- * This class will be used in removing film.
+ * This class will be used in removing filter.
  * 
  * @author Yasumasa Suenaga
  * 

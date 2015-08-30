@@ -42,10 +42,22 @@ public class ErrorReportServer extends Task<Void>{
     
     private final ExecutorService hsErrProcPool;
     
+    /**
+     * Constructor of ErrorReportServer.
+     * 
+     * @param crashList List of crash jvms.
+     * @param hsErrProcPool ThreadPool which processes ErrorReport.
+     */
     public ErrorReportServer(ObservableList<ErrorReportDecoder> crashList, ExecutorService hsErrProcPool){
         this(DEFAULT_ERROR_REPORT_SERVER_PORT, crashList, hsErrProcPool);
     }
     
+    /**
+     * Constructor of ErrorReportServer.
+     * @param port Port number of ErrorReportServer.
+     * @param crashList List of crash jvms.
+     * @param hsErrProcPool ThreadPool which processes ErrorReport.
+     */
     public ErrorReportServer(int port, ObservableList<ErrorReportDecoder> crashList, ExecutorService hsErrProcPool){
         this.port = port;
         this.crashList = crashList;

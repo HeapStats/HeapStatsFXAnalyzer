@@ -31,8 +31,9 @@ import jp.co.ntt.oss.heapstats.utils.HeapStatsConfigException;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
 /**
- *
- * @author yasuenag
+ * Configuration of JVMLive.
+ * 
+ * @author Yasumasa Suenaga
  */
 public class JVMLiveConfig {
     

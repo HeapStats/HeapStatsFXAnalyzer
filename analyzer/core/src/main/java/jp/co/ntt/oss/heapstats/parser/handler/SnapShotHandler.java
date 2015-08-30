@@ -37,18 +37,27 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
     
     private ObjectData currentObjectData;
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ParseResult onStart(long off) {
         /* Nothing to do */
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ParseResult onNewSnapShot(SnapShotHeader header, String parent) {
         snapShotData = new HashMap<>();
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ParseResult onEntry(ObjectData data) {
         snapShotData.put(data.getTag(), data);
@@ -56,6 +65,9 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ParseResult onChildEntry(long parentClassTag, ChildObjectData child) {
         List<ChildObjectData> referenceList = currentObjectData.getReferenceList();
@@ -70,12 +82,20 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ParseResult onFinish(long off) {
         snapShotData.forEach((k, v) -> v.setLoaderName(snapShotData));
         return ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
+    /**
+     * Get SnapShot.
+     * 
+     * @return SnapShot.
+     */
     public Map<Long, ObjectData> getSnapShot() {
         return snapShotData;
     }

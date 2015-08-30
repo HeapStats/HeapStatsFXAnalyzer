@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Filter class in XML filter.
+ * This class will use in JAXB.
  * 
  * @author Yasumasa Suenaga
  */

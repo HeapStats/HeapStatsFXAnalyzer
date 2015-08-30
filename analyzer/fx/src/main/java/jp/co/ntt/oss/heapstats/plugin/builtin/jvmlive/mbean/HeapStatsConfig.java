@@ -43,6 +43,12 @@ public class HeapStatsConfig {
     
     private final BooleanProperty changed;
     
+    /**
+     * Constructor of HeapStatsConfig.
+     * 
+     * @param key Configuration key.
+     * @param value Configuration value.
+     */
     @SuppressWarnings("unchecked")
     public HeapStatsConfig(String key, Object value){
         this.key = new SimpleStringProperty(key);
@@ -73,22 +79,48 @@ public class HeapStatsConfig {
         this.cellContent = null;
     }
     
+    /**
+     * Get configuration key.
+     * 
+     * @return Configuration key.
+     */
     public StringProperty keyProperty(){
         return key;
     }
     
+    /**
+     * Get configuration value.
+     * 
+     * @return Configuration value.
+     */
     public Property valueProperty(){
         return value;
     }
 
+    /**
+     * Get change property.
+     * true if this configuration is changed.
+     * 
+     * @return Change property.
+     */
     public BooleanProperty changedProperty(){
         return changed;
     }
 
+    /**
+     * Get table cell control of this configuration.
+     * 
+     * @return Control in TableCell.
+     */
     public Control getCellContent() {
         return cellContent;
     }
 
+    /**
+     * Set table cell control of this configuration.
+     * 
+     * @param cellContent New control in TableCell.
+     */
     public void setCellContent(Control cellContent) {
         this.cellContent = cellContent;
     }

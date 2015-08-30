@@ -31,8 +31,9 @@ import javafx.scene.shape.Rectangle;
 import jp.co.ntt.oss.heapstats.container.threadrecord.ThreadStat;
 
 /**
- *
- * @author Yasu
+ * Generate Thread Recorder timeline.
+ * 
+ * @author Yasumasa Suenaga
  */
 public class TimelineGenerator {
     
@@ -65,6 +66,12 @@ public class TimelineGenerator {
     
     private TemporalUnit unit;
 
+    /**
+     * Constructor of TimelineGenerator.
+     * 
+     * @param viewModel ViewModel to draw.
+     * @param prefWidth prefWidth to bind.
+     */
     public TimelineGenerator(ThreadStatViewModel viewModel, DoubleProperty prefWidth) {
         this.viewModel = viewModel;
         this.prefWidth = prefWidth;
@@ -95,6 +102,11 @@ public class TimelineGenerator {
 
     }
     
+    /**
+     * Create timeline cells.
+     * 
+     * @return HBox which includes Thread Recorder events.
+     */
     public HBox createTimeline(){
         List<ThreadStat> threadStatList = viewModel.threadStatsProperty().get();
         
@@ -108,6 +120,13 @@ public class TimelineGenerator {
         return createTimeline(start, end);
     }
     
+    /**
+     * Create timeline cells.
+     * 
+     * @param start Start time.
+     * @param end End time.
+     * @return HBox which includes Thread Recorder events.
+     */
     public HBox createTimeline(LocalDateTime start, LocalDateTime end){
         HBox container = new HBox();
         container.setAlignment(Pos.CENTER_LEFT);

@@ -160,7 +160,7 @@ public class Options {
     private String configKey;
     
     /**
-     * New configuration key of HeapStats agent.
+     * New configuration value of HeapStats agent.
      * This value affects -jmx only.
      */
     private String newConfigValue;
@@ -606,10 +606,18 @@ public class Options {
         return jmxURL;
     }
 
+    /**
+     * Get configuration key of HeapStats agent.
+     * @return Configuration key.
+     */
     public String getConfigKey() {
         return configKey;
     }
 
+    /**
+     * Get new configuration value of HeapStats agent.
+     * @return New configuration value.
+     */
     public String getNewConfigValue() {
         return newConfigValue;
     }

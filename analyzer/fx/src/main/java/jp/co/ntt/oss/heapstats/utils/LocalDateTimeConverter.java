@@ -26,7 +26,7 @@ import javafx.util.StringConverter;
  * StringConverter for LocalDateTime. <br/>
  * This class is used at JavaFX controls.
  * 
- * @author Yasu
+ * @author Yasumasa Suenaga
  */
 public class LocalDateTimeConverter extends StringConverter<LocalDateTime>{
     

@@ -24,7 +24,6 @@ package jp.co.ntt.oss.heapstats.parser;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;

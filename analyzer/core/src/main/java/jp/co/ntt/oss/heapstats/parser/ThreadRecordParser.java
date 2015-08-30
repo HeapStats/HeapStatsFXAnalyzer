@@ -183,10 +183,19 @@ public class ThreadRecordParser {
 
     }
 
+    /**
+     * Get Thread ID - Thread Name map.
+     * @return Thread ID - Thread Name map.
+     */
     public Map<Long, String> getIdMap() {
         return idMap;
     }
 
+    /**
+     * Get list of ThreadStat.
+     * 
+     * @return ThreadStat list.
+     */
     public List<ThreadStat> getThreadStatList() {
         return threadStatList;
     }

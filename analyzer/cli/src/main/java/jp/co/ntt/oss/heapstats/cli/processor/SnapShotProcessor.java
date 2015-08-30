@@ -46,6 +46,11 @@ public class SnapShotProcessor implements CliProcessor{
     
     private final Options options;
     
+    /**
+     * Constructor of SnapShotProcessor.
+     * 
+     * @param options Options to use.
+     */
     public SnapShotProcessor(Options options){
         this.options = options;
     }
@@ -82,7 +87,7 @@ public class SnapShotProcessor implements CliProcessor{
     
     /**
      * Show class histogram.
-     * @param header SnapSHot header.
+     * @param header SnapShot header.
      */
     private void showClassHistogram(SnapShotHeader header){
         System.out.println(header.getSnapShotDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -155,6 +160,9 @@ public class SnapShotProcessor implements CliProcessor{
                   .forEachOrdered(System.out::println);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void process() {
         ParseHeader headerParser = new ParseHeader(options.getFile().stream()

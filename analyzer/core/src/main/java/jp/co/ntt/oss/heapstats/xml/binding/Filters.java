@@ -23,7 +23,9 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- *
+ * Exclude class filter list.
+ * This class will use in JAXB.
+ * 
  * @author Yasumasa Suenaga
  */
 @XmlRootElement(name="filters")

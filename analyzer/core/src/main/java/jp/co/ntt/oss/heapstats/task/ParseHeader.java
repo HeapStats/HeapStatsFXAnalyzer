@@ -69,6 +69,9 @@ public class ParseHeader extends ProgressRunnable{
         return snapShotList;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void run() {
         AtomicLong progress = new AtomicLong();

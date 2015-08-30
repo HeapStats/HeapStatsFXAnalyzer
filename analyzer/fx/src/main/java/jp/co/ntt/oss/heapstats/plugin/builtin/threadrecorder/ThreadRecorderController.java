@@ -52,7 +52,7 @@ import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 /**
  * FXML Controller class
  *
- * @author Yasu
+ * @author Yasumasa Suenaga
  */
 public class ThreadRecorderController extends PluginController implements Initializable {
 

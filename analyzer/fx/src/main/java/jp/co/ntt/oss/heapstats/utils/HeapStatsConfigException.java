@@ -21,7 +21,7 @@ package jp.co.ntt.oss.heapstats.utils;
 /**
  * Exception class when config loader encounters error.
  * This exception shows that user sets invalid value into configuration file (heapstats.properties) .
- * @author Yasu
+ * @author Yasumasa Suenaga
  */
 public class HeapStatsConfigException extends Exception{
     

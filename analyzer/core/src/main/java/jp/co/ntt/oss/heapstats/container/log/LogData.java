@@ -25,7 +25,7 @@ import java.time.ZoneId;
 
 /**
  * Container class for log data.
- * @author Yasu
+ * @author Yasumasa Suenaga
  */
 public class LogData implements Comparable<LogData>{
 

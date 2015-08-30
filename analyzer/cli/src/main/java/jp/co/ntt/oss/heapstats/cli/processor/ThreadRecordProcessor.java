@@ -35,12 +35,20 @@ public class ThreadRecordProcessor implements CliProcessor{
     
     private final Options options;
 
+    /**
+     * Constructor of ThreadRecordProcessor.
+     * 
+     * @param options Options to use.
+     */
     public ThreadRecordProcessor(Options options) {
         this.options = options;
     }
     
     
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void process() {
         ThreadRecordParseTask threadRecordParser = new ThreadRecordParseTask(options.getFile().get(0).toFile());

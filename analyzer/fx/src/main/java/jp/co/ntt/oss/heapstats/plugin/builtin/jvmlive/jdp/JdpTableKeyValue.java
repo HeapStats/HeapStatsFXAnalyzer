@@ -23,8 +23,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 /**
- *
- * @author Yasu
+ * JDP key and value which is used in TableView.
+ * 
+ * @author Yasumasa Suenaga
  */
 public class JdpTableKeyValue {
     
@@ -32,15 +33,29 @@ public class JdpTableKeyValue {
     
     private final ObjectProperty<Object> value;
     
+    /**
+     * Constructor of JdpTableKeyValue.
+     * 
+     * @param key JDP key.
+     * @param value JDP value.
+     */
     public JdpTableKeyValue(String key, Object value){
         this.key = new SimpleStringProperty(key);
         this.value = new SimpleObjectProperty<>(value);
     }
     
+    /**
+     * JDP key property.
+     * @return Key property.
+     */
     public StringProperty keyProperty(){
         return key;
     }
     
+    /**
+     * JDP value property.
+     * @return Value property.
+     */
     public ObjectProperty<Object> valueProperty(){
         return value;
     }

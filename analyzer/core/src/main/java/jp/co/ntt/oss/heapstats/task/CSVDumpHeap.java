@@ -54,7 +54,7 @@ public class CSVDumpHeap extends ProgressRunnable{
      * @param csvFile File name of csv file to dump.
      * @param target List of SnapShot to dump.
      * @param filter Filter list to dump.
-     * @param needJavaStyle
+     * @param needJavaStyle true if class name should be Java-style. false if class name should be JNI-style.
      */
     public CSVDumpHeap(File csvFile, List<SnapShotHeader> target, Predicate<? super ObjectData> filter, boolean needJavaStyle) {
         this.csvFile = csvFile;
@@ -76,6 +76,9 @@ public class CSVDumpHeap extends ProgressRunnable{
         return joiner.toString();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void run() {
         

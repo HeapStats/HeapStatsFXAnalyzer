@@ -35,7 +35,7 @@ import jp.co.ntt.oss.heapstats.lambda.ConsumerWrapper;
 
 /**
  * HeapStats log file (CSV) parser.
- * @author Yasu
+ * @author Yasumasa Suenaga
  */
 public class ParseLogFile extends ProgressRunnable{
     
@@ -108,6 +108,9 @@ public class ParseLogFile extends ProgressRunnable{
         return diffEntries;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void run() {
         setTotal(fileList.stream()

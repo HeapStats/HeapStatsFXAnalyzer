@@ -43,7 +43,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import javafx.util.converter.IntegerStringConverter;
 import javafx.util.converter.LongStringConverter;
 import jp.co.ntt.oss.heapstats.WindowController;
@@ -71,8 +70,6 @@ public class HeapStatsMBeanController implements Initializable {
     TableColumn<HeapStatsConfig, Object> valueColumn;
     
     private JMXHelper jmxHelper;
-    
-    private Stage stage;
     
     
     private static class ConfigKeyTableCell extends TableCell<HeapStatsConfig, String>{
@@ -163,14 +160,27 @@ public class HeapStatsMBeanController implements Initializable {
         valueColumn.setCellFactory(p -> new VariousTableCell());
     }    
 
+    /**
+     * Get JMXHelper instance.
+     * 
+     * @return Instance of JMXHelper.
+     */
     public JMXHelper getJmxHelper() {
         return jmxHelper;
     }
 
+    /**
+     * Set JMXHelper instance.
+     * 
+     * @param jmxHelper New JMXHelper instance.
+     */
     public void setJmxHelper(JMXHelper jmxHelper) {
         this.jmxHelper = jmxHelper;
     }
     
+    /**
+     * Load all configs from remote HeapStats agent through JMX.
+     */
     public void loadAllConfigs(){
         headerLabel.setText(jmxHelper.getUrl().toString());
         configTable.setItems(jmxHelper.getMbean().getConfigurationList()
@@ -274,14 +284,6 @@ public class HeapStatsMBeanController implements Initializable {
             }
         }
         
-    }
-
-    public Stage getStage() {
-        return stage;
-    }
-
-    public void setStage(Stage stage) {
-        this.stage = stage;
     }
 
 }

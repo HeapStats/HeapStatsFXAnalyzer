@@ -47,6 +47,9 @@ public class ThreadRecordParseTask extends ProgressRunnable{
         file = files;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void run() {
         ThreadRecordParser parser = new ThreadRecordParser();
@@ -63,10 +66,20 @@ public class ThreadRecordParseTask extends ProgressRunnable{
         
     }
 
+    /**
+     * Get Thread ID - Thread Name map.
+     * 
+     * @return Thread ID - Thread Name map.
+     */
     public Map<Long, String> getIdMap() {
         return idMap;
     }
 
+    /**
+     * Get Thread stat list.
+     * 
+     * @return  List of ThreadStat.
+     */
     public List<ThreadStat> getThreadStatList() {
         return threadStatList;
     }

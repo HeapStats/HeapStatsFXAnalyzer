@@ -50,7 +50,7 @@ import jp.co.ntt.oss.heapstats.plugin.builtin.threadrecorder.ThreadRecorderContr
 
 /**
  * Utility class for HeapStats FX Analyzer.
- * @author Yasu
+ * @author Yasumasa Suenaga
  */
 public class HeapStatsUtils {
 
@@ -181,6 +181,10 @@ public class HeapStatsUtils {
         Runtime.getRuntime().addShutdownHook(new Thread(savePropImpl));
     }
 
+    /**
+     * Get plugin list.
+     * @return Plugin list.
+     */
     public static List<String> getPlugins(){
         List<String> pluginList = new ArrayList<>();
         pluginList.add(LogController.class.getPackage().getName());
@@ -197,14 +201,29 @@ public class HeapStatsUtils {
                          .collect(Collectors.toList());
     }
 
+    /**
+     * Get class name replacement.
+     * @return true if replace (Java-style).
+     */
     public static boolean getReplaceClassName(){
         return Boolean.parseBoolean(prop.getProperty("replace"));
     }
 
+    /**
+     * Get default directory.
+     * This value will be overriden when any file is opened.
+     * 
+     * @return Current default directory.
+     */
     public static String getDefaultDirectory(){
         return prop.getProperty("defaultdir");
     }
-
+    
+    /**
+     * Set default directory.
+     * 
+     * @param currentDir New current directory.
+     */
     public static void setDefaultDirectory(String currentDir){
 
         if(currentDir != null){
@@ -213,22 +232,48 @@ public class HeapStatsUtils {
 
     }
 
+    /**
+     * Get rank level.
+     * 
+     * @return Rank level.
+     */
     public static int getRankLevel(){
         return Integer.parseInt(prop.getProperty("ranklevel"));
     }
 
+    /**
+     * Set rank level.
+     * 
+     * @param rankLevel New rank level.
+     */
     public static void setRankLevel(int rankLevel){
         prop.setProperty("ranklevel", Integer.toString(rankLevel));
     }
 
+    /**
+     * Get background color of chart.
+     * 
+     * @return Background color of chart.
+     */
     public static String getChartBgColor(){
         return prop.getProperty("bgcolor");
     }
 
+    /**
+     * Get language.
+     * 
+     * @return Language
+     */
     public static String getLanguage(){
         return prop.getProperty("language");
     }
 
+    /**
+     * Get ResourceBundle.
+     * This value depends on getLanguage().
+     * 
+     * @return ResourceBundle.
+     */
     public static ResourceBundle getResourceBundle(){
         return ResourceBundle.getBundle("HeapStatsResources", new Locale(getLanguage()));
     }

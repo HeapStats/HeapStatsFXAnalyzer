@@ -42,8 +42,8 @@ import jp.co.ntt.oss.heapstats.lambda.SupplierWrapper;
 import jp.co.ntt.oss.heapstats.mbean.HeapStatsMBean;
 
 /**
- *
- * @author Yasu
+ * Helper class for JMX access to HeapStats agent.
+ * @author Yasumasa Suenaga
  */
 public class JMXHelper implements AutoCloseable{
     
@@ -55,10 +55,26 @@ public class JMXHelper implements AutoCloseable{
     
     private final HeapStatsMBean mbean;
     
+    /**
+     * Constructor of JMXHelper.
+     * 
+     * @param url JMX URL to connect.
+     * 
+     * @throws MalformedURLException
+     * @throws IOException
+     * @throws MalformedObjectNameException 
+     */
     public JMXHelper(String url) throws MalformedURLException, IOException, MalformedObjectNameException{
         this(new JMXServiceURL(url));
     }
     
+    /**
+     * Constructor of JMXHelper.
+     * @param url JMX URL to connect.
+     * 
+     * @throws IOException
+     * @throws MalformedObjectNameException 
+     */
     public JMXHelper(JMXServiceURL url) throws IOException, MalformedObjectNameException{
         this.url = url;
         connector = JMXConnectorFactory.connect(url);
@@ -66,11 +82,19 @@ public class JMXHelper implements AutoCloseable{
         mbean = MBeanServerInvocationHandler.newProxyInstance(connection, new ObjectName(DEFAULT_OBJECT_NAME), HeapStatsMBean.class, false);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void close() throws IOException {
         connector.close();
     }
 
+    /**
+     * Get HeapStats MBean instance.
+     * 
+     * @return Instance of HeapStatsMBean.
+     */
     public HeapStatsMBean getMbean() {
         return mbean;
     }
@@ -110,14 +134,38 @@ public class JMXHelper implements AutoCloseable{
         }
     }
     
+    /**
+     * Get SnapShot from remote.
+     * 
+     * @param path Path to save file.
+     * 
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws ExecutionException 
+     */
     public void getSnapShot(Path path) throws IOException, InterruptedException, ExecutionException{
         getFileInternal(path, true);
     }
     
+    /**
+     * Get Resource log from remote.
+     * 
+     * @param path Path to save file.
+     * 
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws ExecutionException 
+     */
     public void getResourceLog(Path path) throws IOException, InterruptedException, ExecutionException{
         getFileInternal(path, false);
     }
     
+    /**
+     * Change configuration of remote HeapStats.
+     * 
+     * @param key Key name.
+     * @param value Value string.
+     */
     public void changeConfigurationThroughString(String key, String value){
         Object currentObj = mbean.getConfiguration(key);
         Object newObj = value;
@@ -141,6 +189,11 @@ public class JMXHelper implements AutoCloseable{
         mbean.changeConfiguration(key, newObj);
     }
 
+    /**
+     * Get JMX URL.
+     * 
+     * @return JMX URL
+     */
     public JMXServiceURL getUrl() {
         return url;
     }

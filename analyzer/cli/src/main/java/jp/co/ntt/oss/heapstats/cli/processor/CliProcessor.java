@@ -26,6 +26,9 @@ package jp.co.ntt.oss.heapstats.cli.processor;
 @FunctionalInterface
 public interface CliProcessor {
     
+    /**
+     * Process CLI processor task.
+     */
     public void process();
     
 }

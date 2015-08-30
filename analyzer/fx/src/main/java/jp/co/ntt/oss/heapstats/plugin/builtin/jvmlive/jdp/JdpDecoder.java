@@ -113,6 +113,15 @@ public class JdpDecoder extends Task<Void>{
     
     private JdpTableKeyValue heapstatsValue;
     
+    /**
+     * Constructor of JdpDecorder.
+     * 
+     * @param sourceAddr Source address of JDP packet.
+     * @param rawData JDP raw data.
+     * @param jdpList ListView which includes JDP.
+     * @param jconsolePath Path to JConsole.
+     * @param jmxProcPool ThreadPool which processes JMX access.
+     */
     public JdpDecoder(InetSocketAddress sourceAddr, ByteBuffer rawData, ListView<JdpDecoder> jdpList, Optional<String> jconsolePath, ExecutorService jmxProcPool){
         this.receivedTime = LocalDateTime.now();
         this.sourceAddr = sourceAddr;
@@ -248,50 +257,106 @@ public class JdpDecoder extends Task<Void>{
         return null;
     }
 
+    /**
+     * Get time of this JDP packet was received.
+     * 
+     * @return Received time.
+     */
     public LocalDateTime getReceivedTime() {
         return receivedTime;
     }
 
+    /**
+     * Get source address of JDP packet.
+     * 
+     * @return Source address of JDP.
+     */
     public InetSocketAddress getSourceAddr() {
         return sourceAddr;
     }
 
+    /**
+     * Get main class in JDP packet.
+     * 
+     * @return Main class.
+     */
     public String getMainClass() {
         return mainClass;
     }
 
+    /**
+     * Get JMX URL in JDP packet.
+     * 
+     * @return JDP URL.
+     */
     public String getJmxServiceURL() {
         return jmxServiceURL;
     }
 
+    /**
+     * Get PID in JDP packet.
+     * @return PID
+     */
     public int getPid() {
         return pid;
     }
 
+    /**
+     * Get UUID in JDP packet.
+     * @return UUID
+     */
     public UUID getUuid() {
         return uuid;
     }
 
+    /**
+     * Get instance name in JDP packet.
+     * @return Instance name.
+     */
     public String getInstanceName() {
         return instanceName;
     }
 
+    /**
+     * Get broadcast interval in JDP packet.
+     * 
+     * @return JDP broadcast interval.
+     */
     public int getBroadcastInterval() {
         return broadcastInterval;
     }
     
+    /**
+     * Set invalidate to this JDP packet.
+     */
     public void setInvalidate(){
         invalidate.set(true);
     }
     
+    /**
+     * Get invalidate property.
+     * 
+     * @return Invalidate property.
+     */
     public BooleanProperty invalidateProperty(){
         return this.invalidate;
     }
     
+    /**
+     * Get JDP packet data list.
+     * This method returns key-value list.
+     * 
+     * @return JDP packet data list.
+     */
     public ObjectProperty<ObservableList<JdpTableKeyValue>> jdpTableKeyValueProperty(){
         return this.jdpTableKeyValue;
     }
     
+    /**
+     * Get JDP Key-Value.
+     * 
+     * @return JDP packet data.
+     */
     public JdpTableKeyValue getHeapStatsTableKeyValue(){
         return this.heapstatsValue;
     }

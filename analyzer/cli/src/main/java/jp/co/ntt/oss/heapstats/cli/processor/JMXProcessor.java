@@ -25,17 +25,26 @@ import jp.co.ntt.oss.heapstats.cli.Options;
 import jp.co.ntt.oss.heapstats.jmx.JMXHelper;
 
 /**
- *
- * @author Yasu
+ * CLI task for JMX access.
+ * 
+ * @author Yasumasa Suenaga
  */
 public class JMXProcessor implements CliProcessor{
     
     private final Options options;
 
+    /**
+     * Constructor of JMXProcessor.
+     * 
+     * @param options Options to use.
+     */
     public JMXProcessor(Options options) {
         this.options = options;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void process() {
         try(JMXHelper jmx = new JMXHelper(options.getJmxURL())){

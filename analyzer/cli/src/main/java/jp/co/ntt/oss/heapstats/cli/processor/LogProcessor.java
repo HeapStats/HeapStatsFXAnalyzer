@@ -39,6 +39,11 @@ public class LogProcessor implements CliProcessor{
     
     private final ParseLogFile parser;
     
+    /**
+     * Constructor of LogProcessor.
+     * 
+     * @param options Options to use.
+     */
     public LogProcessor(Options options){
         this.options = options;
         this.parser = new ParseLogFile(options.getFile().stream()
@@ -46,6 +51,9 @@ public class LogProcessor implements CliProcessor{
                                                         .collect(Collectors.toList()), false);
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void process(){
         parser.run();
