@@ -244,7 +244,6 @@ public class JVMLiveController extends PluginController implements Initializable
             HeapStatsUtils.showExceptionDialog(e);
         }
         
-        mbeanController.setStage(dialog);
         dialog.setScene(mbeanDialogScene);
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setResizable(false);
