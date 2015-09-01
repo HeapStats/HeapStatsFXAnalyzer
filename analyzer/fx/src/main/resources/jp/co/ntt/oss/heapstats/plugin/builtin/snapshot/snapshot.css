@@ -37,6 +37,9 @@
 #heapChart .default-color2.chart-area-symbol  { -fx-background-color: red, white; }
 #heapChart .default-color2.area-legend-symbol { -fx-background-color: red, white; }
 
+/* instance */
+#instanceChart .default-color0.chart-series-line { -fx-stroke: blue; }
+#instanceChart .default-color0.chart-line-symbol { -fx-background-color: blue, white; }
 
 /* GC time */
 #gcTimeChart .default-color0.chart-series-line { -fx-stroke: yellow; }
