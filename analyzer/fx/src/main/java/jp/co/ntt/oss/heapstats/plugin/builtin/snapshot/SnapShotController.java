@@ -775,10 +775,10 @@ public class SnapShotController extends PluginController implements Initializabl
      * selected, this method returns tag which is selected. Other case, this
      * method returns tag which is selected in snapshot data tab.
      *
-     * If no object is selected, throws IllegalStateException.
+     * If any object is not selected, throws IllegalStateException.
      *
      * @return class tag which is selected.
-     * @throws IllegalStateException no object is selected.
+     * @throws IllegalStateException If any object is not selected.
      */
     public long getSelectedClassTag() throws IllegalStateException {
 
@@ -787,7 +787,8 @@ public class SnapShotController extends PluginController implements Initializabl
         } else if (objDataTable.getSelectionModel().getSelectedItem() != null) {
             return objDataTable.getSelectionModel().getSelectedItem().getTag();
         } else {
-            throw new IllegalStateException("Object is not selected");
+            /* This message will help user to solve this error. */
+            throw new IllegalStateException("Please select Object which you want to see the reference at [SnapShot Data] Tab.");
         }
 
     }
