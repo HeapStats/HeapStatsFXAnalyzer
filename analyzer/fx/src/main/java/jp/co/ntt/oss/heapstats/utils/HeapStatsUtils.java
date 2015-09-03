@@ -162,15 +162,9 @@ public class HeapStatsUtils {
         }
 
         /* Java Heap order */
-        String heapOrder = prop.getProperty("heaporder");
+        String heapOrder = prop.getProperty("heaporder_bottom_young");
         if (heapOrder == null) {
-            prop.setProperty("heaporder", "0");
-        } else {
-            try {
-                Integer.decode(heapOrder);
-            } catch (NumberFormatException e) {
-                throw new HeapStatsConfigException("Invalid option: heaporder=" + heapOrder, e);
-            }
+            prop.setProperty("heaporder", "true");
         }
 
         /* Load resource bundle */
@@ -268,21 +262,21 @@ public class HeapStatsUtils {
     }
     
     /**
-     * Get java heap order.
+     * Get whether the bottom of java heap order is young or not.
      *
-     * @return heap order.
+     * @return whether the bottom is young or not..
      */
-    public static int getHeapOrder() {
-        return Integer.parseInt(prop.getProperty("heaporder"));
+    public static boolean getHeapOrder() {
+        return Boolean.parseBoolean(prop.getProperty("heaporder_bottom_young"));
     }
 
     /**
-     * Set java heap order.
+     * Set whethr the bottom of java heap order is young or not..
      *
-     * @param heapOrder New heap order.
+     * @param heapOrder whether the bottom is young or not..
      */
-    public static void setHeapOrder(int heapOrder) {
-        prop.setProperty("heaporder", Integer.toString(heapOrder));
+    public static void setHeapOrder(boolean heapOrder) {
+        prop.setProperty("heaporder_bottom_young", Boolean.toString(heapOrder));
     }
 
     /**

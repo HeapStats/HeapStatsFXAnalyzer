@@ -243,14 +243,24 @@ public class SnapShotController extends PluginController implements Initializabl
         oldUsage.setName("Old");
         free = new XYChart.Series<>();
         free.setName("Free");
-        switch (HeapStatsUtils.getHeapOrder()) {
-            case 1:
-                heapChart.getData().addAll(oldUsage, youngUsage, free);
-                Platform.runLater(new ChangeHeapChartColor());
-                break;
-            default:
-                heapChart.getData().addAll(youngUsage, oldUsage, free);
+        String[] colors = {"blue", "lime", "red"};
+        if (HeapStatsUtils.getHeapOrder()) {
+            heapChart.getData().addAll(youngUsage, oldUsage, free);
+        } else {
+            heapChart.getData().addAll(oldUsage, youngUsage, free);
+            /* swap color order */
+            colors[0] = "lime";
+            colors[1] = "blue";
         }
+        /* Set heapChart colors */
+        Platform.runLater(() -> {
+            for (int i = 0; i < colors.length; i++) {
+                heapChart.lookup(".default-color" + i + ".chart-series-area-fill").setStyle(String.format("-fx-fill: %s;", colors[i]));
+                heapChart.lookup(".default-color" + i + ".chart-series-area-line").setStyle(String.format("-fx-stroke: %s;", colors[i]));
+                heapChart.lookup(".default-color" + i + ".area-legend-symbol").setStyle(String.format("-fx-background-color: %s, white;", colors[i]));
+                heapChart.lookup(".default-color" + i + ".chart-area-symbol").setStyle(String.format("-fx-background-color: %s, white;", colors[i]));
+            }
+        });
 
         instances = new XYChart.Series<>();
         instances.setName("Instances");
@@ -268,28 +278,6 @@ public class SnapShotController extends PluginController implements Initializabl
 
         searchFilterEnable = false;
         excludeFilterEnable = false;
-    }
-
-    /**
-     * Change colors of heapChart because user changes the order.
-     * @author KUBOTA Yuji
-     */
-    private class ChangeHeapChartColor implements Runnable {
-
-        @Override
-        public void run() {
-            // old usage
-            heapChart.lookup(".default-color0.area-legend-symbol").setStyle("-fx-background-color: lime, white;");
-            heapChart.lookup(".default-color0.chart-area-symbol").setStyle("-fx-background-color: lime, white;");
-            heapChart.lookup(".default-color0.chart-series-area-fill").setStyle("-fx-fill: lime;");
-            heapChart.lookup(".default-color0.chart-series-area-line").setStyle("-fx-stroke: lime;");
-            // young usage
-            heapChart.lookup(".default-color1.chart-series-area-fill").setStyle("-fx-fill: blue;");
-            heapChart.lookup(".default-color1.chart-series-area-line").setStyle("-fx-stroke: blue;");
-            heapChart.lookup(".default-color1.area-legend-symbol").setStyle("-fx-background-color: blue, white;");
-            heapChart.lookup(".default-color1.chart-area-symbol").setStyle("-fx-background-color: blue, white;");
-        }
-
     }
 
     /**

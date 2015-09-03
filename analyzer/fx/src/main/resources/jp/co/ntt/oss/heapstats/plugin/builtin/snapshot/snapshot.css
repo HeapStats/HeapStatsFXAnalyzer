@@ -21,22 +21,6 @@
     Author     : Yasumasa Suenaga
 */
 
-/* Java Heap */
-#heapChart .default-color0.chart-series-area-fill { -fx-fill: blue; }
-#heapChart .default-color0.chart-series-area-line { -fx-stroke: blue; }
-#heapChart .default-color0.chart-area-symbol  { -fx-background-color: blue, white; }
-#heapChart .default-color0.area-legend-symbol { -fx-background-color: blue, white; }
-
-#heapChart .default-color1.chart-series-area-fill { -fx-fill: lime; }
-#heapChart .default-color1.chart-series-area-line { -fx-stroke: lime; }
-#heapChart .default-color1.chart-area-symbol  { -fx-background-color: lime, white; }
-#heapChart .default-color1.area-legend-symbol { -fx-background-color: lime, white; }
-
-#heapChart .default-color2.chart-series-area-fill { -fx-fill: red; }
-#heapChart .default-color2.chart-series-area-line { -fx-stroke: red; }
-#heapChart .default-color2.chart-area-symbol  { -fx-background-color: red, white; }
-#heapChart .default-color2.area-legend-symbol { -fx-background-color: red, white; }
-
 /* instance */
 #instanceChart .default-color0.chart-series-line { -fx-stroke: blue; }
 #instanceChart .default-color0.chart-line-symbol { -fx-background-color: blue, white; }
