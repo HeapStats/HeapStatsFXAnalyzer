@@ -15,7 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
 package jp.co.ntt.oss.heapstats.utils;
 
 import java.io.File;
@@ -50,6 +49,7 @@ import jp.co.ntt.oss.heapstats.plugin.builtin.threadrecorder.ThreadRecorderContr
 
 /**
  * Utility class for HeapStats FX Analyzer.
+ *
  * @author Yasumasa Suenaga
  */
 public class HeapStatsUtils {
@@ -63,13 +63,13 @@ public class HeapStatsUtils {
     /* Resource bundle for HeapStats Analyzer. */
     private static ResourceBundle resource;
 
-    public static Path getHeapStatsHomeDirectory(){
+    public static Path getHeapStatsHomeDirectory() {
 
-        if(currentPath == null){
+        if (currentPath == null) {
             String appJar = Stream.of(System.getProperty("java.class.path").split(System.getProperty("path.separator")))
-                                         .filter(s -> s.endsWith("heapstats-analyzer.jar"))
-                                         .findFirst()
-                                         .get();
+                    .filter(s -> s.endsWith("heapstats-analyzer.jar"))
+                    .findFirst()
+                    .get();
             currentPath = Paths.get(appJar).toAbsolutePath().getParent();
         }
 
@@ -78,17 +78,17 @@ public class HeapStatsUtils {
 
     /**
      * Load HeapStats property file.
+     *
      * @author Yasumasa Suenaga
      * @throws IOException - I/O error to parse property file.
      * @throws HeapStatsConfigException - Invalid value.
      */
-    public static void load() throws IOException, HeapStatsConfigException{
+    public static void load() throws IOException, HeapStatsConfigException {
         Path properties = Paths.get(getHeapStatsHomeDirectory().toString(), "heapstats.properties");
 
-        try(InputStream in = Files.newInputStream(properties, StandardOpenOption.READ)){
+        try (InputStream in = Files.newInputStream(properties, StandardOpenOption.READ)) {
             prop.load(in);
-        }
-        catch(NoSuchFileException e){
+        } catch (NoSuchFileException e) {
             // use default values.
         }
 
@@ -96,23 +96,20 @@ public class HeapStatsUtils {
 
         /* Language */
         String language = prop.getProperty("language");
-        if(language == null){
+        if (language == null) {
             prop.setProperty("language", "en");
-        }
-        else if(!language.equals("en") && !language.equals("ja")){
+        } else if (!language.equals("en") && !language.equals("ja")) {
             throw new HeapStatsConfigException("Invalid option: language=" + language);
         }
 
         /* RankLevel */
         String rankLevelStr = prop.getProperty("ranklevel");
-        if(rankLevelStr == null){
+        if (rankLevelStr == null) {
             prop.setProperty("ranklevel", "5");
-        }
-        else{
-            try{
+        } else {
+            try {
                 Integer.decode(rankLevelStr);
-            }
-            catch(NumberFormatException e){
+            } catch (NumberFormatException e) {
                 throw new HeapStatsConfigException("Invalid option: ranklevel=" + rankLevelStr, e);
             }
         }
@@ -122,12 +119,12 @@ public class HeapStatsUtils {
          * If user sets invalid value, Boolean will treat "true" .
          * See javadoc of java.lang.Boolean .
          */
-        if(prop.getProperty("replace") == null){
+        if (prop.getProperty("replace") == null) {
             prop.setProperty("replace", "false");
         }
 
         /* Default directory for dialogs. */
-        if(prop.getProperty("defaultdir") == null){
+        if (prop.getProperty("defaultdir") == null) {
             prop.setProperty("defaultdir", getHeapStatsHomeDirectory().toString());
         } else {
             /* check if defaultdir exists */
@@ -138,31 +135,41 @@ public class HeapStatsUtils {
         }
 
         /* Log file list to parse. */
-        if(prop.getProperty("logfile") == null){
+        if (prop.getProperty("logfile") == null) {
             prop.setProperty("logfile", "redhat-release,cmdline,status,smaps,limits");
         }
 
         /* Socket endpoint file to parse. */
-        if(prop.getProperty("socketend") == null){
+        if (prop.getProperty("socketend") == null) {
             prop.setProperty("socketend", "tcp,udp,tcp6,udp6");
         }
 
         /* Socket owner file to parse. */
-        if(prop.getProperty("owner") == null){
+        if (prop.getProperty("owner") == null) {
             prop.setProperty("owner", "sockowner");
         }
 
         /* Background color to draw graphs. */
         String bgColorStr = prop.getProperty("bgcolor");
-        if(bgColorStr == null){
+        if (bgColorStr == null) {
             prop.setProperty("bgcolor", "white");
-        }
-        else{
-            try{
+        } else {
+            try {
                 Color.web(bgColorStr);
-            }
-            catch(IllegalArgumentException e){
+            } catch (IllegalArgumentException e) {
                 throw new HeapStatsConfigException("Invalid option: bgcolor=" + bgColorStr, e);
+            }
+        }
+
+        /* Java Heap order */
+        String heapOrder = prop.getProperty("heaporder");
+        if (heapOrder == null) {
+            prop.setProperty("heaporder", "0");
+        } else {
+            try {
+                Integer.decode(heapOrder);
+            } catch (NumberFormatException e) {
+                throw new HeapStatsConfigException("Invalid option: heaporder=" + heapOrder, e);
             }
         }
 
@@ -171,21 +178,21 @@ public class HeapStatsUtils {
 
         /* Add shutdown hook for saving current settings. */
         Runnable savePropImpl = () -> {
-                                         try(OutputStream out = Files.newOutputStream(properties, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)){
-                                            prop.store(out, null);
-                                         }
-                                         catch(IOException ex){
-                                             Logger.getLogger(HeapStatsUtils.class.getName()).log(Level.SEVERE, null, ex);
-                                         }
-                                      };
+            try (OutputStream out = Files.newOutputStream(properties, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)) {
+                prop.store(out, null);
+            } catch (IOException ex) {
+                Logger.getLogger(HeapStatsUtils.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        };
         Runtime.getRuntime().addShutdownHook(new Thread(savePropImpl));
     }
 
     /**
      * Get plugin list.
+     *
      * @return Plugin list.
      */
-    public static List<String> getPlugins(){
+    public static List<String> getPlugins() {
         List<String> pluginList = new ArrayList<>();
         pluginList.add(LogController.class.getPackage().getName());
         pluginList.add(SnapShotController.class.getPackage().getName());
@@ -195,38 +202,39 @@ public class HeapStatsUtils {
         pluginList.addAll(Arrays.asList(prop.getProperty("plugins", "").split(";")));
 
         return pluginList.stream()
-                         .map(s -> s.trim())
-                         .filter(s -> s.length() > 0)
-                         .distinct()
-                         .collect(Collectors.toList());
+                .map(s -> s.trim())
+                .filter(s -> s.length() > 0)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     /**
      * Get class name replacement.
+     *
      * @return true if replace (Java-style).
      */
-    public static boolean getReplaceClassName(){
+    public static boolean getReplaceClassName() {
         return Boolean.parseBoolean(prop.getProperty("replace"));
     }
 
     /**
-     * Get default directory.
-     * This value will be overriden when any file is opened.
-     * 
+     * Get default directory. This value will be overriden when any file is
+     * opened.
+     *
      * @return Current default directory.
      */
-    public static String getDefaultDirectory(){
+    public static String getDefaultDirectory() {
         return prop.getProperty("defaultdir");
     }
-    
+
     /**
      * Set default directory.
-     * 
+     *
      * @param currentDir New current directory.
      */
-    public static void setDefaultDirectory(String currentDir){
+    public static void setDefaultDirectory(String currentDir) {
 
-        if(currentDir != null){
+        if (currentDir != null) {
             prop.setProperty("defaultdir", currentDir);
         }
 
@@ -234,65 +242,82 @@ public class HeapStatsUtils {
 
     /**
      * Get rank level.
-     * 
+     *
      * @return Rank level.
      */
-    public static int getRankLevel(){
+    public static int getRankLevel() {
         return Integer.parseInt(prop.getProperty("ranklevel"));
     }
 
     /**
      * Set rank level.
-     * 
+     *
      * @param rankLevel New rank level.
      */
-    public static void setRankLevel(int rankLevel){
+    public static void setRankLevel(int rankLevel) {
         prop.setProperty("ranklevel", Integer.toString(rankLevel));
     }
 
     /**
      * Get background color of chart.
-     * 
+     *
      * @return Background color of chart.
      */
-    public static String getChartBgColor(){
+    public static String getChartBgColor() {
         return prop.getProperty("bgcolor");
+    }
+    
+    /**
+     * Get java heap order.
+     *
+     * @return heap order.
+     */
+    public static int getHeapOrder() {
+        return Integer.parseInt(prop.getProperty("heaporder"));
+    }
+
+    /**
+     * Set java heap order.
+     *
+     * @param heapOrder New heap order.
+     */
+    public static void setHeapOrder(int heapOrder) {
+        prop.setProperty("heaporder", Integer.toString(heapOrder));
     }
 
     /**
      * Get language.
-     * 
+     *
      * @return Language
      */
-    public static String getLanguage(){
+    public static String getLanguage() {
         return prop.getProperty("language");
     }
 
     /**
-     * Get ResourceBundle.
-     * This value depends on getLanguage().
-     * 
+     * Get ResourceBundle. This value depends on getLanguage().
+     *
      * @return ResourceBundle.
      */
-    public static ResourceBundle getResourceBundle(){
+    public static ResourceBundle getResourceBundle() {
         return ResourceBundle.getBundle("HeapStatsResources", new Locale(getLanguage()));
     }
 
     /**
      * Convert stack trace to String.
+     *
      * @param e Throwable object to convert.
      *
      * @return String result of e.printStackTrace()
      */
-    public static String stackTarceToString(Throwable e){
+    public static String stackTarceToString(Throwable e) {
         String result = null;
 
-        try(StringWriter strWriter = new StringWriter();
-            PrintWriter printWriter = new PrintWriter(strWriter)){
+        try (StringWriter strWriter = new StringWriter();
+                PrintWriter printWriter = new PrintWriter(strWriter)) {
             e.printStackTrace(printWriter);
             result = strWriter.toString();
-        }
-        catch(IOException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(HeapStatsUtils.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -304,7 +329,7 @@ public class HeapStatsUtils {
      *
      * @param e Throwable instance to show.
      */
-    public static void showExceptionDialog(Throwable e){
+    public static void showExceptionDialog(Throwable e) {
         TextArea details = new TextArea(HeapStatsUtils.stackTarceToString(e));
         details.setEditable(false);
 

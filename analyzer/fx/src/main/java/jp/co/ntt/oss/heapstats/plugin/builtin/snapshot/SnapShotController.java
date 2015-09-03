@@ -32,6 +32,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -218,9 +219,9 @@ public class SnapShotController extends PluginController implements Initializabl
     private List<SnapShotHeader> currentTarget;
 
     private Set<String> currentClassNameSet;
-    
+
     private boolean isInstanceGraph;
-    
+
     private boolean changeDataFormat;
 
     private Map<LocalDateTime, List<ObjectData>> topNList;
@@ -242,7 +243,14 @@ public class SnapShotController extends PluginController implements Initializabl
         oldUsage.setName("Old");
         free = new XYChart.Series<>();
         free.setName("Free");
-        heapChart.getData().addAll(youngUsage, oldUsage, free);
+        switch (HeapStatsUtils.getHeapOrder()) {
+            case 1:
+                heapChart.getData().addAll(oldUsage, youngUsage, free);
+                Platform.runLater(new ChangeHeapChartColor());
+                break;
+            default:
+                heapChart.getData().addAll(youngUsage, oldUsage, free);
+        }
 
         instances = new XYChart.Series<>();
         instances.setName("Instances");
@@ -260,6 +268,28 @@ public class SnapShotController extends PluginController implements Initializabl
 
         searchFilterEnable = false;
         excludeFilterEnable = false;
+    }
+
+    /**
+     * Change colors of heapChart because user changes the order.
+     * @author KUBOTA Yuji
+     */
+    private class ChangeHeapChartColor implements Runnable {
+
+        @Override
+        public void run() {
+            // old usage
+            heapChart.lookup(".default-color0.area-legend-symbol").setStyle("-fx-background-color: lime, white;");
+            heapChart.lookup(".default-color0.chart-area-symbol").setStyle("-fx-background-color: lime, white;");
+            heapChart.lookup(".default-color0.chart-series-area-fill").setStyle("-fx-fill: lime;");
+            heapChart.lookup(".default-color0.chart-series-area-line").setStyle("-fx-stroke: lime;");
+            // young usage
+            heapChart.lookup(".default-color1.chart-series-area-fill").setStyle("-fx-fill: blue;");
+            heapChart.lookup(".default-color1.chart-series-area-line").setStyle("-fx-stroke: blue;");
+            heapChart.lookup(".default-color1.area-legend-symbol").setStyle("-fx-background-color: blue, white;");
+            heapChart.lookup(".default-color1.chart-area-symbol").setStyle("-fx-background-color: blue, white;");
+        }
+
     }
 
     /**
@@ -446,7 +476,7 @@ public class SnapShotController extends PluginController implements Initializabl
         topNYAxis.setUpperBound(maxVal * 1.05d);
         topNYAxis.setTickUnit(maxVal / 20);
         topNYAxis.setLabel(isInstanceGraph ? "instances" : "MB");
-        
+
         if (changeDataFormat) {
             /* Refresh PieChart to adapt to new data format. */
             snapShotTimeCombo.setItems(FXCollections.observableArrayList(currentTarget));
@@ -565,7 +595,7 @@ public class SnapShotController extends PluginController implements Initializabl
     private void onOkClick(ActionEvent event) {
         changeDataFormat = !(isInstanceGraph == radioInstance.isSelected());
         isInstanceGraph = radioInstance.isSelected();
-        
+
         int startIdx = startCombo.getSelectionModel().getSelectedIndex();
         int endIdx = endCombo.getSelectionModel().getSelectedIndex();
         currentTarget = startCombo.getItems().subList(startIdx, endIdx + 1);
