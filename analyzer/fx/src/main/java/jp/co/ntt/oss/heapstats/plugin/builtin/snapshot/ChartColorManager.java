@@ -22,45 +22,44 @@ import java.util.Map;
 
 /**
  * Color management class for chart and table cell.
- * 
+ *
  * @author Yasumasa Suenaga
  */
 public class ChartColorManager {
-    
+
     private static final String[] chartColorArray;
-    
+
     private static int colorIndex;
-    
+
     private static final Map<String, String> colorCache;
-    
-    static{
+
+    static {
         String colors[] = {"aquamarine", "bisque", "blueviolet", "brown", "blue", "chartreuse", "coral",
-                         "cornflowerblue", "crimson", "darkcyan", "darkgoldenrod", "darkgreen", "darkkhaki",
-                          "darkmagenta", "darkorange", "darksalmon", "darkseagreen", "deeppink", "dodgerblue",
-                          "gold", "green", "orangered", "orchid", "plum", "red", "sandybrown", "slateblue",
-                          "lime", "tomato", "turquoise", "violet", "yellow"};
-        
+            "cornflowerblue", "crimson", "darkcyan", "darkgoldenrod", "darkgreen", "darkkhaki",
+            "darkmagenta", "darkorange", "darksalmon", "darkseagreen", "deeppink", "dodgerblue",
+            "gold", "green", "orangered", "orchid", "plum", "red", "sandybrown", "slateblue",
+            "lime", "tomato", "turquoise", "violet", "orange"};
+
         chartColorArray = colors;
         colorIndex = 0;
         colorCache = new HashMap<>();
     }
-    
+
     /**
-     * Get next color from sequence.
-     * If color which relates className has been returned, this method returns
-     * same color.
-     * 
+     * Get next color from sequence. If color which relates className has been
+     * returned, this method returns same color.
+     *
      * @param className Class name to get.
      * @return Color string which relates className.
      */
-    public static String getNextColor(String className){
+    public static String getNextColor(String className) {
         String result = colorCache.computeIfAbsent(className, k -> chartColorArray[colorIndex++]);
-        
-        if(colorIndex == chartColorArray.length){
+
+        if (colorIndex == chartColorArray.length) {
             colorIndex = 0;
         }
-        
+
         return result;
     }
-    
+
 }

@@ -32,6 +32,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -43,6 +44,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.Axis;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
@@ -50,6 +53,7 @@ import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.SelectionMode;
@@ -62,6 +66,8 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javax.xml.bind.JAXB;
@@ -218,6 +224,8 @@ public class SnapShotController extends PluginController implements Initializabl
 
     private List<SnapShotHeader> currentTarget;
 
+    private SummaryData summaryData;
+
     private Set<String> currentClassNameSet;
 
     private boolean isInstanceGraph;
@@ -243,13 +251,13 @@ public class SnapShotController extends PluginController implements Initializabl
         oldUsage.setName("Old");
         free = new XYChart.Series<>();
         free.setName("Free");
-        String[] colors = {"blue", "lime", "red"};
+        String[] colors = {"blue", "limegreen", "red"};
         if (HeapStatsUtils.getHeapOrder()) {
             heapChart.getData().addAll(youngUsage, oldUsage, free);
         } else {
             heapChart.getData().addAll(oldUsage, youngUsage, free);
             /* swap color order */
-            colors[0] = "lime";
+            colors[0] = "limegreen";
             colors[1] = "blue";
         }
         /* Set heapChart colors */
@@ -351,6 +359,9 @@ public class SnapShotController extends PluginController implements Initializabl
 
         okBtn.disableProperty().bind(startCombo.getSelectionModel().selectedIndexProperty().greaterThanOrEqualTo(endCombo.getSelectionModel().selectedIndexProperty()));
         selectFilterApplyBtn.disableProperty().bind(searchList.selectionModelProperty().getValue().selectedItemProperty().isNull());
+
+        setOnWindowResize((v, o, n) -> Platform.runLater(() -> Stream.of(heapChart, instanceChart, gcTimeChart, metaspaceChart, topNChart)
+                .forEach(c -> Platform.runLater(() -> drawRebootSuspectLine(c)))));
     }
 
     /**
@@ -451,6 +462,7 @@ public class SnapShotController extends PluginController implements Initializabl
         lastDiffTable.getItems().addAll(diff.getLastDiffList());
         lastDiffTable.getSortOrder().add(isInstanceGraph ? instanceColumn : totalSizeColumn);
         topNChart.getData().forEach(this::setTopNChartColor);
+        Platform.runLater(() -> drawRebootSuspectLine(topNChart));
 
         long maxVal = topNChart.getData().stream()
                 .flatMap(s -> s.dataProperty().get().stream())
@@ -570,6 +582,9 @@ public class SnapShotController extends PluginController implements Initializabl
 
             metaspaceUsage.setData(metaspaceUsageBuf);
             metaspaceCapacity.setData(metaspaceCapacityBuf);
+
+            Stream.of(heapChart, instanceChart, gcTimeChart, metaspaceChart)
+                    .forEach(c -> Platform.runLater(() -> drawRebootSuspectLine(c)));
         }
 
     }
@@ -588,6 +603,7 @@ public class SnapShotController extends PluginController implements Initializabl
         int endIdx = endCombo.getSelectionModel().getSelectedIndex();
         currentTarget = startCombo.getItems().subList(startIdx, endIdx + 1);
         snapShotTimeCombo.setItems(FXCollections.observableArrayList(currentTarget));
+        summaryData = new SummaryData(currentTarget);
         drawTopNData(currentTarget, true, null);
 
         currentClassNameSet = new HashSet<>();
@@ -598,15 +614,14 @@ public class SnapShotController extends PluginController implements Initializabl
         Thread parseThread = new Thread(task);
         parseThread.start();
 
-        SummaryData summary = new SummaryData(currentTarget);
         ResourceBundle resource = ResourceBundle.getBundle("snapshotResources", new Locale(HeapStatsUtils.getLanguage()));
-        summaryTable.setItems(FXCollections.observableArrayList(new SummaryData.SummaryDataEntry(resource.getString("summary.snapshot.count"), Integer.toString(summary.getCount())),
-                new SummaryData.SummaryDataEntry(resource.getString("summary.gc.count"), String.format("%d (Full: %d, Young: %d)", summary.getFullCount() + summary.getYngCount(), summary.getFullCount(), summary.getYngCount())),
-                new SummaryData.SummaryDataEntry(resource.getString("summary.heap.usage"), String.format("%.1f MB", summary.getLatestHeapUsage() / 1024.0d / 1024.0d)),
-                new SummaryData.SummaryDataEntry(resource.getString("summary.metaspace.usage"), String.format("%.1f MB", summary.getLatestMetaspaceUsage() / 1024.0d / 1024.0d)),
-                new SummaryData.SummaryDataEntry(resource.getString("summary.gc.time"), String.format("%d ms", summary.getMaxGCTime())),
-                new SummaryData.SummaryDataEntry(resource.getString("summary.snapshot.size"), String.format("%.1f KB", summary.getMaxSnapshotSize() / 1024.0d)),
-                new SummaryData.SummaryDataEntry(resource.getString("summary.snapshot.entrycount"), Long.toString(summary.getMaxEntryCount()))
+        summaryTable.setItems(FXCollections.observableArrayList(new SummaryData.SummaryDataEntry(resource.getString("summary.snapshot.count"), Integer.toString(summaryData.getCount())),
+                new SummaryData.SummaryDataEntry(resource.getString("summary.gc.count"), String.format("%d (Full: %d, Young: %d)", summaryData.getFullCount() + summaryData.getYngCount(), summaryData.getFullCount(), summaryData.getYngCount())),
+                new SummaryData.SummaryDataEntry(resource.getString("summary.heap.usage"), String.format("%.1f MB", summaryData.getLatestHeapUsage() / 1024.0d / 1024.0d)),
+                new SummaryData.SummaryDataEntry(resource.getString("summary.metaspace.usage"), String.format("%.1f MB", summaryData.getLatestMetaspaceUsage() / 1024.0d / 1024.0d)),
+                new SummaryData.SummaryDataEntry(resource.getString("summary.gc.time"), String.format("%d ms", summaryData.getMaxGCTime())),
+                new SummaryData.SummaryDataEntry(resource.getString("summary.snapshot.size"), String.format("%.1f KB", summaryData.getMaxSnapshotSize() / 1024.0d)),
+                new SummaryData.SummaryDataEntry(resource.getString("summary.snapshot.entrycount"), Long.toString(summaryData.getMaxEntryCount()))
         ));
     }
 
@@ -898,6 +913,39 @@ public class SnapShotController extends PluginController implements Initializabl
 
         Thread parseThread = new Thread(task);
         parseThread.start();
+    }
+
+    private void drawRebootSuspectLine(XYChart<String, Long> target) {
+
+        if (target.getData().isEmpty() || target.getData().get(0).getData().isEmpty()) {
+            return;
+        }
+
+        AnchorPane anchor = (AnchorPane) target.getParent().getChildrenUnmodifiable()
+                .stream()
+                .filter(n -> n instanceof AnchorPane)
+                .findAny()
+                .get();
+        ObservableList<Node> anchorChildren = anchor.getChildren();
+        anchorChildren.clear();
+
+        CategoryAxis xAxis = (CategoryAxis) target.getXAxis();
+        Axis yAxis = target.getYAxis();
+        Label chartTitle = (Label) target.getChildrenUnmodifiable().stream()
+                .filter(n -> n.getStyleClass().contains("chart-title"))
+                .findFirst()
+                .get();
+
+        double startX = xAxis.getLayoutX() + xAxis.getStartMargin() - 1.0d;
+        double yPos = yAxis.getLayoutY() + chartTitle.getLayoutY() + chartTitle.getHeight();
+        LocalDateTimeConverter converter = new LocalDateTimeConverter();
+        List<Rectangle> rectList = summaryData.getRebootSuspectList()
+                .stream()
+                .map(d -> converter.toString(d))
+                .map(s -> new Rectangle(xAxis.getDisplayPosition(s) + startX, yPos, 4d, yAxis.getHeight()))
+                .peek(r -> ((Rectangle) r).setStyle("-fx-fill: yellow;"))
+                .collect(Collectors.toList());
+        anchorChildren.addAll(rectList);
     }
 
 }

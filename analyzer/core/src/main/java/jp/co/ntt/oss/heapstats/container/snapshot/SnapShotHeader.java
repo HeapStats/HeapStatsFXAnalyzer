@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-
 package jp.co.ntt.oss.heapstats.container.snapshot;
 
 import java.io.IOException;
@@ -43,73 +42,110 @@ import jp.co.ntt.oss.heapstats.parser.handler.SnapShotHandler;
  * Contains the header information of the snapshot.Also, write to the temporary
  * file, do the reading.
  */
-public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
-    /** serialVersionUID. */
+public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable {
+
+    /**
+     * serialVersionUID.
+     */
     static final long serialVersionUID = -539015033687122109L;
 
-    /** SnapShot Case GC. */
-    private static final int SNAPSHOT_CAUSE_GC = 1;
+    /**
+     * SnapShot Case GC.
+     */
+    public static final int SNAPSHOT_CAUSE_GC = 1;
 
-    /** SnapShot Case DUMP REQUEST. */
-    private static final int SNAPSHOT_CAUSE_DATA_DUMP_REQUEST = 2;
+    /**
+     * SnapShot Case DUMP REQUEST.
+     */
+    public static final int SNAPSHOT_CAUSE_DATA_DUMP_REQUEST = 2;
 
-    /** SnapShot Case INTERVAL. */
-    private static final int SNAPSHOT_CAUSE_INTERVAL = 3;
+    /**
+     * SnapShot Case INTERVAL.
+     */
+    public static final int SNAPSHOT_CAUSE_INTERVAL = 3;
 
-    /** Byte order of the agent Dump file. */
+    /**
+     * Byte order of the agent Dump file.
+     */
     private ByteOrder byteOrderMark;
 
-    /** Time the snapshot was taken. */
+    /**
+     * Time the snapshot was taken.
+     */
     private LocalDateTime snapShotDate;
 
-    /** Number of live classes. */
+    /**
+     * Number of live classes.
+     */
     private long numEntries;
-    
-    /** Number of Instances. */
+
+    /**
+     * Number of Instances.
+     */
     private long numInstances;
 
-    /** SnapShot Cause. */
+    /**
+     * SnapShot Cause.
+     */
     private int cause;
 
-    /** GC Cause. */
+    /**
+     * GC Cause.
+     */
     private String gcCause;
 
-    /** Full GC Count. */
+    /**
+     * Full GC Count.
+     */
     private long fullCount;
 
-    /** Young GC Count. */
+    /**
+     * Young GC Count.
+     */
     private long yngCount;
 
-    /** GC Time. */
+    /**
+     * GC Time.
+     */
     private long gcTime;
 
-    /** New Heap Size. */
+    /**
+     * New Heap Size.
+     */
     private long newHeap;
 
-    /** old Heap Size. */
+    /**
+     * old Heap Size.
+     */
     private long oldHeap;
 
-    /** Total Heap Capacity. */
+    /**
+     * Total Heap Capacity.
+     */
     private long totalCapacity;
 
-    /** Metaspace usage. */
+    /**
+     * Metaspace usage.
+     */
     private long metaspaceUsage;
 
-    /** Metaspace capacity. */
+    /**
+     * Metaspace capacity.
+     */
     private long metaspaceCapacity;
-    
+
     private Path snapshotFile;
-    
+
     private int snapShotType;
-    
+
     private long fileOffset;
-    
+
     private long snapShotHeaderSize;
-    
+
     private long snapShotSize;
-    
+
     private SoftReference<Map<Long, ObjectData>> snapShotCache;
-    
+
     /**
      * Creates a SnapShotHeader.
      */
@@ -410,7 +446,7 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
 
     /**
      * Getter of SnapShot File.
-     * 
+     *
      * @return Path of this SnapShot.
      */
     public Path getSnapshotFile() {
@@ -419,18 +455,18 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
 
     /**
      * Setter of this SnapSHot.
-     * 
-     * @param  snapshotFile Path of this SnapShot.
-    */
+     *
+     * @param snapshotFile Path of this SnapShot.
+     */
     public void setSnapshotFile(Path snapshotFile) {
         this.snapshotFile = snapshotFile;
     }
 
     /**
-     * Get SnapShot type.
-     * This type is defined in HeapStatsParser:
-     * FILE_FORMAT_NO_CHILD, FILE_FORMAT_HAVE_CHILD, FILE_FORMAT_HAVE_CHILD_AND_METASPACE
-     * 
+     * Get SnapShot type. This type is defined in HeapStatsParser:
+     * FILE_FORMAT_NO_CHILD, FILE_FORMAT_HAVE_CHILD,
+     * FILE_FORMAT_HAVE_CHILD_AND_METASPACE
+     *
      * @return SnapShot Type
      */
     public int getSnapShotType() {
@@ -438,11 +474,11 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
     }
 
     /**
-     * Set SnapShot type.
-     * This type is defined in HeapStatsParser:
-     * FILE_FORMAT_NO_CHILD, FILE_FORMAT_HAVE_CHILD, FILE_FORMAT_HAVE_CHILD_AND_METASPACE
-     * 
-     * @param snapShotType 
+     * Set SnapShot type. This type is defined in HeapStatsParser:
+     * FILE_FORMAT_NO_CHILD, FILE_FORMAT_HAVE_CHILD,
+     * FILE_FORMAT_HAVE_CHILD_AND_METASPACE
+     *
+     * @param snapShotType
      */
     public void setSnapShotType(int snapShotType) {
         this.snapShotType = snapShotType;
@@ -450,7 +486,7 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
 
     /**
      * Getter of offset of this snapshot in file.
-     * 
+     *
      * @return Offset of this snapshot in file.
      */
     public long getFileOffset() {
@@ -459,7 +495,7 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
 
     /**
      * Setter of offset of this snapshot in file.
-     * 
+     *
      * @param fileOffset Offset of this snapshot in file.
      */
     public void setFileOffset(long fileOffset) {
@@ -468,7 +504,7 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
 
     /**
      * Get Size of SnapShot header.
-     * 
+     *
      * @return header size.
      */
     public long getSnapShotHeaderSize() {
@@ -477,8 +513,8 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
 
     /**
      * Set size of SnapShot header.
-     * 
-     * @param snapShotHeaderSize 
+     *
+     * @param snapShotHeaderSize
      */
     public void setSnapShotHeaderSize(long snapShotHeaderSize) {
         this.snapShotHeaderSize = snapShotHeaderSize;
@@ -486,7 +522,7 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
 
     /**
      * Getter of ofset of this snapshot in file.
-     * 
+     *
      * @return Offset of this snapshot in file.
      */
     public long getSnapShotSize() {
@@ -495,7 +531,7 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
 
     /**
      * Setter of size of this snapshot.
-     * 
+     *
      * @param snapShotSize Size of this snapshot.
      */
     public void setSnapShotSize(long snapShotSize) {
@@ -504,47 +540,48 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
 
     /**
      * Get SnapShot data from file.
-     * 
-     * @param needJavaStyle true if class name should be Java style, false means JNI style.
+     *
+     * @param needJavaStyle true if class name should be Java style, false means
+     * JNI style.
      * @return SnapShot which is related to this header.
      */
-    private Map<Long, ObjectData> getSnapShotDirectly(boolean needJavaStyle){
+    private Map<Long, ObjectData> getSnapShotDirectly(boolean needJavaStyle) {
         SnapShotHandler handler = new SnapShotHandler();
         SnapShotParser parser = new SnapShotParser(needJavaStyle);
-        
+
         try {
             parser.parseSingle(this, handler);
         } catch (IOException ex) {
             throw new UncheckedIOException(ex);
         }
-        
+
         Map<Long, ObjectData> result = handler.getSnapShot();
         setSnapShot(result);
-        
+
         return result;
     }
 
     /**
      * Get SnapShot in this header.
-     * 
-     * @param needJavaStyle true if class name should be Java style, false means JNI style.
+     *
+     * @param needJavaStyle true if class name should be Java style, false means
+     * JNI style.
      * @return SnapShot in this header.
      */
     public Map<Long, ObjectData> getSnapShot(boolean needJavaStyle) {
         return Optional.ofNullable(snapShotCache.get())
-                       .orElseGet(() -> getSnapShotDirectly(needJavaStyle));
+                .orElseGet(() -> getSnapShotDirectly(needJavaStyle));
     }
 
     /**
-     * Set SnapShot in this header.
-     * This SnapShot is managed as SoftReference.
-     * 
+     * Set SnapShot in this header. This SnapShot is managed as SoftReference.
+     *
      * @param snapShot SnapShot to be managed.
      */
     public void setSnapShot(Map<Long, ObjectData> snapShot) {
         this.snapShotCache = new SoftReference<>(snapShot);
     }
-    
+
     @Override
     public final String toString() {
         StringBuilder buf = new StringBuilder();
@@ -585,11 +622,11 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
     }
 
     /**
-     * Compare function for SnapShotHeader.
-     * This method is based on snapShotDate.
-     * 
+     * Compare function for SnapShotHeader. This method is based on
+     * snapShotDate.
+     *
      * @param o
-     * @return 
+     * @return
      */
     @Override
     public int compareTo(SnapShotHeader o) {
@@ -602,24 +639,24 @@ public class SnapShotHeader implements Comparable<SnapShotHeader>, Serializable{
     }
 
     /**
-     * equals method of this SnapShotHeader.
-     * This method is based on snapShotDate.
-     * 
+     * equals method of this SnapShotHeader. This method is based on
+     * snapShotDate.
+     *
      * @param obj
-     * @return 
+     * @return
      */
     @Override
     public boolean equals(Object obj) {
-        
+
         if (obj == null) {
             return false;
         }
-        
+
         if (getClass() != obj.getClass()) {
             return false;
         }
 
-        return Objects.equals(this.snapShotDate, ((SnapShotHeader)obj).snapShotDate);
+        return Objects.equals(this.snapShotDate, ((SnapShotHeader) obj).snapShotDate);
     }
 
 }

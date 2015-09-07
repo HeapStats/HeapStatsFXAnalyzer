@@ -429,7 +429,7 @@ public class LogController extends PluginController implements Initializable{
                                                         .collect(Collectors.toList());
         chartGrid.getChildren().stream()
                                .filter(n -> n instanceof StackPane)
-                               .forEach(p -> drawLineInternal((StackPane)p, suspectRebootDateList, "-fx-fill: goldenrod;"));
+                               .forEach(p -> drawLineInternal((StackPane)p, suspectRebootDateList, "-fx-fill: yellow;"));
     }
 
     /**
