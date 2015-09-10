@@ -15,7 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
 package jp.co.ntt.oss.heapstats.plugin.builtin.log;
 
 import javafx.util.StringConverter;
@@ -23,12 +22,12 @@ import jp.co.ntt.oss.heapstats.container.log.LogData;
 import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 
 /**
- * StringConverter for LogData.
- * This class provides method to convert LocalDateTime in LogData to String.
- * 
+ * StringConverter for LogData. This class provides method to convert
+ * LocalDateTime in LogData to String.
+ *
  * @author Yasumasa Suenaga.
  */
-public class LogDataConverter extends StringConverter<LogData>{
+public class LogDataConverter extends StringConverter<LogData> {
 
     @Override
     public String toString(LogData object) {
@@ -38,7 +37,7 @@ public class LogDataConverter extends StringConverter<LogData>{
 
     /**
      * This class DO NOT support this method.
-     * 
+     *
      * @param string
      * @return UnsupportedOperationException.
      */
@@ -46,5 +45,5 @@ public class LogDataConverter extends StringConverter<LogData>{
     public LogData fromString(String string) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
 }
