@@ -37,6 +37,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -131,7 +132,7 @@ public class HistogramController implements Initializable {
 
     private boolean excludeFilterEnable;
 
-    private Map<LocalDateTime, List<ObjectData>> topNList;
+    private ObjectProperty<ObservableMap<LocalDateTime, List<ObjectData>>> topNList;
 
     private Consumer<XYChart<String, ? extends Number>> drawRebootSuspectLine;
 
@@ -146,6 +147,7 @@ public class HistogramController implements Initializable {
         currentTarget = new SimpleObjectProperty<>(FXCollections.emptyObservableList());
         currentClassNameSet = new SimpleObjectProperty<>(FXCollections.emptyObservableSet());
         snapshotSelectionModel = new SimpleObjectProperty<>();
+        topNList = new SimpleObjectProperty<>();
         searchFilterEnable = false;
         excludeFilterEnable = false;
 
@@ -231,10 +233,10 @@ public class HistogramController implements Initializable {
      * chart series as value.
      */
     private void onDiffTaskSucceeded(DiffCalculator diff, Map<String, XYChart.Series<String, Long>> seriesMap) {
-        topNList = diff.getTopNList();
+        topNList.set(FXCollections.observableMap(diff.getTopNList()));
 
         currentTarget.get().stream()
-                .forEachOrdered(h -> topNList.get(h.getSnapShotDate()).stream()
+                .forEachOrdered(h -> topNList.get().get(h.getSnapShotDate()).stream()
                         .forEachOrdered(o -> buildTopNChartData(h, seriesMap, o)));
 
         lastDiffTable.getItems().addAll(diff.getLastDiffList());
@@ -454,11 +456,11 @@ public class HistogramController implements Initializable {
     }
 
     /**
-     * Get SnapShot list which contains Top N data.
+     * Get property of Map of Top N list.
      *
-     * @return Top N list.
+     * @return Property of map of Top N list.
      */
-    public Map<LocalDateTime, List<ObjectData>> getTopNList() {
+    public ObjectProperty<ObservableMap<LocalDateTime, List<ObjectData>>> topNListProperty() {
         return topNList;
     }
 

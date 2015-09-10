@@ -62,4 +62,15 @@ public class ChartColorManager {
         return result;
     }
 
+    /**
+     * Get class color from color cache.
+     *
+     * @param className Class name to get.
+     * @return Color string which relates className. transparent if className
+     * does not exist in cache.
+     */
+    public static String getCurrentColor(String className) {
+        return colorCache.getOrDefault(className, "transparent");
+    }
+
 }

@@ -19,12 +19,11 @@ package jp.co.ntt.oss.heapstats.plugin.builtin.snapshot;
 
 import java.io.File;
 import java.net.URL;
-import java.util.AbstractMap;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -34,6 +33,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -44,18 +44,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.SelectionModel;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
@@ -66,6 +62,7 @@ import jp.co.ntt.oss.heapstats.container.snapshot.SnapShotHeader;
 import jp.co.ntt.oss.heapstats.container.snapshot.SummaryData;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.tabs.HistogramController;
+import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.tabs.SnapshotController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.tabs.SummaryController;
 import jp.co.ntt.oss.heapstats.task.CSVDumpGC;
 import jp.co.ntt.oss.heapstats.task.CSVDumpHeap;
@@ -88,6 +85,9 @@ public class SnapShotController extends PluginController implements Initializabl
     private HistogramController histogramController;
 
     @FXML
+    private SnapshotController snapshotController;
+
+    @FXML
     private ComboBox<SnapShotHeader> startCombo;
 
     @FXML
@@ -98,39 +98,6 @@ public class SnapShotController extends PluginController implements Initializabl
 
     @FXML
     private RadioButton radioInstance;
-
-    @FXML
-    private ComboBox<SnapShotHeader> snapShotTimeCombo;
-
-    @FXML
-    private TableView<Map.Entry<String, String>> snapShotSummaryTable;
-
-    @FXML
-    private TableColumn<Map.Entry<String, String>, String> snapShotSummaryKey;
-
-    @FXML
-    private TableColumn<Map.Entry<String, String>, String> snapShotSummaryValue;
-
-    @FXML
-    private PieChart usagePieChart;
-
-    @FXML
-    private TableColumn<ObjectData, String> objColorColumn;
-
-    @FXML
-    private TableView<ObjectData> objDataTable;
-
-    @FXML
-    private TableColumn<ObjectData, String> objClassNameColumn;
-
-    @FXML
-    private TableColumn<ObjectData, String> objClassLoaderColumn;
-
-    @FXML
-    private TableColumn<ObjectData, Long> objInstancesColumn;
-
-    @FXML
-    private TableColumn<ObjectData, Long> objSizeColumn;
 
     @FXML
     private Tab histogramTab;
@@ -144,6 +111,10 @@ public class SnapShotController extends PluginController implements Initializabl
 
     private ObjectProperty<ObservableSet<String>> currentClassNameSet;
 
+    private ObjectProperty<SelectionModel<SnapShotHeader>> snapshotSelectionModel;
+
+    private ObjectProperty<ObservableMap<LocalDateTime, List<ObjectData>>> topNList;
+
     /**
      * Initializes the controller class.
      */
@@ -156,39 +127,22 @@ public class SnapShotController extends PluginController implements Initializabl
         currentTarget = new SimpleObjectProperty<>(FXCollections.emptyObservableList());
         summaryController.currentTargetProperty().bind(currentTarget);
         histogramController.currentTargetProperty().bind(currentTarget);
-        snapShotTimeCombo.itemsProperty().bind(currentTarget);
+        snapshotController.currentTargetProperty().bind(currentTarget);
         currentClassNameSet = new SimpleObjectProperty<>();
         summaryController.currentClassNameSetProperty().bind(currentClassNameSet);
         histogramController.currentClassNameSetProperty().bind(currentClassNameSet);
         histogramController.instanceGraphProperty().bind(radioInstance.selectedProperty());
-        histogramController.snapshotSelectionModelProperty().bind(snapShotTimeCombo.selectionModelProperty());
+        snapshotController.instanceGraphProperty().bind(radioInstance.selectedProperty());
+        snapshotSelectionModel = new SimpleObjectProperty<>();
+        snapshotSelectionModel.bind(snapshotController.snapshotSelectionModelProperty());
+        histogramController.snapshotSelectionModelProperty().bind(snapshotSelectionModel);
         histogramController.setDrawRebootSuspectLine(this::drawRebootSuspectLine);
+        topNList = new SimpleObjectProperty<>();
+        topNList.bind(histogramController.topNListProperty());
+        snapshotController.topNListProperty().bind(topNList);
 
         startCombo.setConverter(new SnapShotHeaderConverter());
         endCombo.setConverter(new SnapShotHeaderConverter());
-        snapShotTimeCombo.setConverter(new SnapShotHeaderConverter());
-
-        snapShotSummaryKey.setCellValueFactory(new PropertyValueFactory<>("key"));
-        snapShotSummaryValue.setCellValueFactory(new PropertyValueFactory<>("value"));
-
-        objColorColumn.setCellFactory(p -> new TableCell<ObjectData, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                String style = Optional.ofNullable((ObjectData) getTableRow().getItem())
-                        .filter(o -> histogramController.getTopNChart().getData().stream().anyMatch(d -> d.getName().equals(o.getName())))
-                        .map(o -> "-fx-background-color: " + ChartColorManager.getNextColor(o.getName()))
-                        .orElse("-fx-background-color: transparent;");
-                setStyle(style);
-            }
-        });
-
-        objClassNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        objClassLoaderColumn.setCellValueFactory(new PropertyValueFactory<>("loaderName"));
-        objInstancesColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
-        objInstancesColumn.setSortType(TableColumn.SortType.DESCENDING);
-        objSizeColumn.setCellValueFactory(new PropertyValueFactory<>("totalSize"));
-        objSizeColumn.setSortType(TableColumn.SortType.DESCENDING);
 
         okBtn.disableProperty().bind(startCombo.getSelectionModel().selectedIndexProperty().greaterThanOrEqualTo(endCombo.getSelectionModel().selectedIndexProperty()));
 
@@ -270,46 +224,6 @@ public class SnapShotController extends PluginController implements Initializabl
     }
 
     /**
-     * Event handler of SnapShot TIme.
-     *
-     * @param event ActionEvent of this event.
-     */
-    @FXML
-    @SuppressWarnings("unchecked")
-    private void onSnapShotTimeSelected(ActionEvent event) {
-        SnapShotHeader header = snapShotTimeCombo.getSelectionModel().getSelectedItem();
-        if (header == null) {
-            return;
-        }
-
-        ObservableList<Map.Entry<String, String>> summaryList = snapShotSummaryTable.getItems();
-        summaryList.clear();
-        usagePieChart.getData().clear();
-        objDataTable.getItems().clear();
-        ResourceBundle resource = ResourceBundle.getBundle("snapshotResources", new Locale(HeapStatsUtils.getLanguage()));
-
-        summaryList.addAll(
-                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.date"), (new LocalDateTimeConverter()).toString(header.getSnapShotDate())),
-                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.entries"), Long.toString(header.getNumEntries())),
-                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.instances"), Long.toString(header.getNumInstances())),
-                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.heap"), String.format("%.02f MB", (double) (header.getNewHeap() + header.getOldHeap()) / 1024.0d / 1024.0d)),
-                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.metaspace"), String.format("%.02f MB", (double) (header.getMetaspaceUsage()) / 1024.0d / 1024.0d)),
-                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.cause"), header.getCauseString()),
-                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.gccause"), header.getGcCause()),
-                new AbstractMap.SimpleEntry<>(resource.getString("snapshot.gctime"), String.format("%d ms", header.getGcTime())));
-
-        usagePieChart.getData().addAll(histogramController.getTopNList().get(header.getSnapShotDate()).stream()
-                .map(o -> new PieChart.Data(o.getName(), radioInstance.isSelected() ? o.getCount() : o.getTotalSize()))
-                .collect(Collectors.toList()));
-        usagePieChart.getData().stream()
-                .forEach(d -> d.getNode().setStyle("-fx-pie-color: " + ChartColorManager.getNextColor(d.getName())));
-
-        objDataTable.setItems(FXCollections.observableArrayList(
-                header.getSnapShot(HeapStatsUtils.getReplaceClassName()).values().stream().collect(Collectors.toList())));
-        objDataTable.getSortOrder().add(radioInstance.isSelected() ? objInstancesColumn : objSizeColumn);
-    }
-
-    /**
      * Returns plugin name. This value is used to show in main window tab.
      *
      * @return Plugin name.
@@ -326,7 +240,7 @@ public class SnapShotController extends PluginController implements Initializabl
      * @return selected snapshot header.
      */
     public SnapShotHeader getSelectedSnapShotHeader() {
-        return snapShotTimeCombo.getSelectionModel().getSelectedItem();
+        return snapshotSelectionModel.get().getSelectedItem();
     }
 
     /**
@@ -336,7 +250,7 @@ public class SnapShotController extends PluginController implements Initializabl
      * @return selected snapshot.
      */
     public Map<Long, ObjectData> getSelectedSnapShot() {
-        return snapShotTimeCombo.getSelectionModel().getSelectedItem().getSnapShot(HeapStatsUtils.getReplaceClassName());
+        return snapshotSelectionModel.get().getSelectedItem().getSnapShot(HeapStatsUtils.getReplaceClassName());
     }
 
     /**
@@ -353,8 +267,8 @@ public class SnapShotController extends PluginController implements Initializabl
 
         if (histogramTab.isSelected() && (histogramController.getSelectedData() != null)) {
             return histogramController.getSelectedData().getTag();
-        } else if (objDataTable.getSelectionModel().getSelectedItem() != null) {
-            return objDataTable.getSelectionModel().getSelectedItem().getTag();
+        } else if (snapshotController.getObjDataTable().getSelectionModel().getSelectedItem() != null) {
+            return snapshotController.getObjDataTable().getSelectionModel().getSelectedItem().getTag();
         } else {
             /* This message will help user to solve this error. */
             throw new IllegalStateException("Please select Object which you want to see the reference at [SnapShot Data] Tab.");
