@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-package jp.co.ntt.oss.heapstats.plugin.builtin.reftree;
+package jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.tabs;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,12 +37,12 @@ import com.mxgraph.view.mxStylesheet;
 public class ReferenceGraph extends mxGraph {
 
     @Override
-    public final String getToolTipForCell(Object cell){
-        
-        if(cell instanceof ReferenceCell){
-            return ((ReferenceCell)cell).toString();
+    public final String getToolTipForCell(Object cell) {
+
+        if (cell instanceof ReferenceCell) {
+            return ((ReferenceCell) cell).toString();
         }
-        
+
         return super.getToolTipForCell(cell);
     }
 
@@ -61,5 +61,5 @@ public class ReferenceGraph extends mxGraph {
         style.setDefaultEdgeStyle(edgeStyle);
         setStylesheet(style);
     }
-    
+
 }

@@ -31,9 +31,12 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -134,6 +137,8 @@ public class HistogramController implements Initializable {
 
     private ObjectProperty<ObservableMap<LocalDateTime, List<ObjectData>>> topNList;
 
+    private LongProperty currentObjectTag;
+
     private Consumer<XYChart<String, ? extends Number>> drawRebootSuspectLine;
 
     private Consumer<Task<Void>> taskExecutor;
@@ -148,6 +153,7 @@ public class HistogramController implements Initializable {
         currentClassNameSet = new SimpleObjectProperty<>(FXCollections.emptyObservableSet());
         snapshotSelectionModel = new SimpleObjectProperty<>();
         topNList = new SimpleObjectProperty<>();
+        currentObjectTag = new SimpleLongProperty();
         searchFilterEnable = false;
         excludeFilterEnable = false;
 
@@ -182,6 +188,10 @@ public class HistogramController implements Initializable {
         excludeFilterEnable = false;
 
         selectFilterApplyBtn.disableProperty().bind(searchList.selectionModelProperty().getValue().selectedItemProperty().isNull());
+        currentObjectTag.bind(Bindings.createLongBinding(() -> Optional.ofNullable(lastDiffTable.getSelectionModel().getSelectedItem())
+                .map(d -> d.getTag())
+                .orElse(0xffffffffffffffffl),
+                lastDiffTable.getSelectionModel().selectedItemProperty()));
     }
 
     /**
@@ -462,6 +472,15 @@ public class HistogramController implements Initializable {
      */
     public ObjectProperty<ObservableMap<LocalDateTime, List<ObjectData>>> topNListProperty() {
         return topNList;
+    }
+
+    /**
+     * Get property of current Object tag.
+     *
+     * @return Property of currentObjectTag.
+     */
+    public LongProperty currentObjectTagProperty() {
+        return currentObjectTag;
     }
 
     /**

@@ -21,16 +21,21 @@ import java.io.File;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.application.Platform;
+import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -51,6 +56,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
@@ -62,6 +68,7 @@ import jp.co.ntt.oss.heapstats.container.snapshot.SnapShotHeader;
 import jp.co.ntt.oss.heapstats.container.snapshot.SummaryData;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.tabs.HistogramController;
+import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.tabs.RefTreeController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.tabs.SnapshotController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.tabs.SummaryController;
 import jp.co.ntt.oss.heapstats.task.CSVDumpGC;
@@ -88,6 +95,9 @@ public class SnapShotController extends PluginController implements Initializabl
     private SnapshotController snapshotController;
 
     @FXML
+    private RefTreeController reftreeController;
+
+    @FXML
     private ComboBox<SnapShotHeader> startCombo;
 
     @FXML
@@ -100,10 +110,19 @@ public class SnapShotController extends PluginController implements Initializabl
     private RadioButton radioInstance;
 
     @FXML
+    private Button okBtn;
+
+    @FXML
+    private TabPane snapshotMain;
+
+    @FXML
     private Tab histogramTab;
 
     @FXML
-    private Button okBtn;
+    private Tab snapshotTab;
+
+    @FXML
+    private Tab reftreeTab;
 
     private ObjectProperty<ObservableList<SnapShotHeader>> currentTarget;
 
@@ -114,6 +133,10 @@ public class SnapShotController extends PluginController implements Initializabl
     private ObjectProperty<SelectionModel<SnapShotHeader>> snapshotSelectionModel;
 
     private ObjectProperty<ObservableMap<LocalDateTime, List<ObjectData>>> topNList;
+
+    private ObjectProperty<SnapShotHeader> currentSnapShotHeader;
+
+    private LongProperty currentObjectTag;
 
     /**
      * Initializes the controller class.
@@ -140,6 +163,22 @@ public class SnapShotController extends PluginController implements Initializabl
         topNList = new SimpleObjectProperty<>();
         topNList.bind(histogramController.topNListProperty());
         snapshotController.topNListProperty().bind(topNList);
+        currentSnapShotHeader = new SimpleObjectProperty<>();
+        currentSnapShotHeader.bind(snapshotController.snapshotSelectionModelProperty().get().selectedItemProperty());
+        reftreeController.currentSnapShotHeaderProperty().bind(currentSnapShotHeader);
+
+        currentObjectTag = new SimpleLongProperty();
+        // TODO:
+        //   Why can I NOT use binding?
+        //   First binding is enabled. But second binding is disabled.
+        //   So I use ChangeListener to avoid this issue.
+        //currentObjectTag.bind(histogramController.currentObjectTagProperty());
+        //currentObjectTag.bind(snapshotController.currentObjectTagProperty());
+        histogramController.currentObjectTagProperty().addListener((v, o, n) -> Optional.ofNullable(n).ifPresent(m -> currentObjectTag.set((Long) m)));
+        snapshotController.currentObjectTagProperty().addListener((v, o, n) -> Optional.ofNullable(n).ifPresent(m -> currentObjectTag.set((Long) m)));
+        reftreeController.currentObjectTagProperty().bind(currentObjectTag);
+
+        snapshotMain.getSelectionModel().selectedItemProperty().addListener(this::onTabChanged);
 
         startCombo.setConverter(new SnapShotHeaderConverter());
         endCombo.setConverter(new SnapShotHeaderConverter());
@@ -157,6 +196,16 @@ public class SnapShotController extends PluginController implements Initializabl
             bindTask(t);
             (new Thread(t)).start();
         });
+    }
+
+    private void onTabChanged(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
+        if (newValue == reftreeTab) {
+            if (oldValue == histogramTab) {
+                currentObjectTag.set(histogramController.currentObjectTagProperty().get());
+            } else if (oldValue == snapshotTab) {
+                currentObjectTag.set(snapshotController.currentObjectTagProperty().get());
+            }
+        }
     }
 
     /**
@@ -233,49 +282,6 @@ public class SnapShotController extends PluginController implements Initializabl
         return "SnapShot Data";
     }
 
-    /**
-     * Get SnapShot header which is selected. This method returns snapshot
-     * header which is selected ins SnapShot Data tab.
-     *
-     * @return selected snapshot header.
-     */
-    public SnapShotHeader getSelectedSnapShotHeader() {
-        return snapshotSelectionModel.get().getSelectedItem();
-    }
-
-    /**
-     * Get selected snapshot. This method returns snapshot which is selected in
-     * SnapShot Data tab.
-     *
-     * @return selected snapshot.
-     */
-    public Map<Long, ObjectData> getSelectedSnapShot() {
-        return snapshotSelectionModel.get().getSelectedItem().getSnapShot(HeapStatsUtils.getReplaceClassName());
-    }
-
-    /**
-     * Get selected object. If histogram tab is active and diff data is
-     * selected, this method returns tag which is selected. Other case, this
-     * method returns tag which is selected in snapshot data tab.
-     *
-     * If any object is not selected, throws IllegalStateException.
-     *
-     * @return class tag which is selected.
-     * @throws IllegalStateException If any object is not selected.
-     */
-    public long getSelectedClassTag() throws IllegalStateException {
-
-        if (histogramTab.isSelected() && (histogramController.getSelectedData() != null)) {
-            return histogramController.getSelectedData().getTag();
-        } else if (snapshotController.getObjDataTable().getSelectionModel().getSelectedItem() != null) {
-            return snapshotController.getObjDataTable().getSelectionModel().getSelectedItem().getTag();
-        } else {
-            /* This message will help user to solve this error. */
-            throw new IllegalStateException("Please select Object which you want to see the reference at [SnapShot Data] Tab.");
-        }
-
-    }
-
     @Override
     public EventHandler<Event> getOnPluginTabSelected() {
         return null;
@@ -288,7 +294,10 @@ public class SnapShotController extends PluginController implements Initializabl
 
     @Override
     public Map<String, String> getLibraryLicense() {
-        return null;
+        Map<String, String> licenseMap = new HashMap<>();
+        licenseMap.put("JGraphX", PluginController.LICENSE_BSD);
+
+        return licenseMap;
     }
 
     /**

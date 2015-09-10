@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-package jp.co.ntt.oss.heapstats.plugin.builtin.reftree;
+package jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.tabs;
 
 import java.text.NumberFormat;
 import com.mxgraph.model.mxCell;
@@ -33,19 +33,29 @@ import jp.co.ntt.oss.heapstats.container.snapshot.ObjectData;
  */
 public class ReferenceCell extends mxCell {
 
-    /** serialVersionUID. */
+    /**
+     * serialVersionUID.
+     */
     private static final long serialVersionUID = -4403355352725440764L;
 
-    /** Defines the height of the cell. */
+    /**
+     * Defines the height of the cell.
+     */
     private static final int CELL_HEIGHT = 30;
 
-    /** Define the width of the character in the cell. */
+    /**
+     * Define the width of the character in the cell.
+     */
     private static final int CHAR_WIDTH = 6;
 
-    /** Information about the objects to display Map. */
+    /**
+     * Information about the objects to display Map.
+     */
     private final ObjectData objectData;
 
-    /** Holds information whether the cell as a starting point. */
+    /**
+     * Holds information whether the cell as a starting point.
+     */
     private boolean rootCell;
 
     /**
@@ -60,21 +70,20 @@ public class ReferenceCell extends mxCell {
 
         objectData = data;
 
-        if(edge){
+        if (edge) {
             setEdge(true);
-        }
-        else{
+        } else {
             setValue(data.getName());
             setConnectable(false);
             setVertex(true);
 
-            if(root){
+            if (root) {
                 setStyle("shape=ellipse;fillColor=red;fontColor=black");
             }
-            
+
             rootCell = root;
         }
-        
+
         setConnectable(false);
         setGeometry(new mxGeometry(0, 0, CHAR_WIDTH * data.getName().length(), CELL_HEIGHT));
     }
@@ -101,7 +110,7 @@ public class ReferenceCell extends mxCell {
     public final String toString() {
         NumberFormat format = NumberFormat.getInstance();
         StringBuilder buf = new StringBuilder();
-        
+
         if (isVertex()) {
             buf.append(objectData.getLoaderName());
             buf.append(" (instances = ");
@@ -119,5 +128,5 @@ public class ReferenceCell extends mxCell {
 
         return buf.toString();
     }
-    
+
 }

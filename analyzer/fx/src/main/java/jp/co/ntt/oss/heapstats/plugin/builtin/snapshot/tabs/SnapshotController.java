@@ -26,9 +26,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -94,6 +97,8 @@ public class SnapshotController implements Initializable {
 
     private ObjectProperty<ObservableMap<LocalDateTime, List<ObjectData>>> topNList;
 
+    private LongProperty currentObjectTag;
+
     /**
      * Initializes the controller class.
      */
@@ -102,11 +107,11 @@ public class SnapshotController implements Initializable {
         currentTarget = new SimpleObjectProperty<>(FXCollections.emptyObservableList());
         instanceGraph = new SimpleBooleanProperty();
         topNList = new SimpleObjectProperty<>();
+        currentObjectTag = new SimpleLongProperty();
 
         snapShotTimeCombo.itemsProperty().bind(currentTarget);
 
         snapShotTimeCombo.setConverter(new SnapShotHeaderConverter());
-
         snapShotSummaryKey.setCellValueFactory(new PropertyValueFactory<>("key"));
         snapShotSummaryValue.setCellValueFactory(new PropertyValueFactory<>("value"));
 
@@ -127,6 +132,11 @@ public class SnapshotController implements Initializable {
         objInstancesColumn.setSortType(TableColumn.SortType.DESCENDING);
         objSizeColumn.setCellValueFactory(new PropertyValueFactory<>("totalSize"));
         objSizeColumn.setSortType(TableColumn.SortType.DESCENDING);
+
+        currentObjectTag.bind(Bindings.createLongBinding(() -> Optional.ofNullable(objDataTable.getSelectionModel().getSelectedItem())
+                .map(o -> o.getTag())
+                .orElse(0xffffffffffffffffl),
+                objDataTable.getSelectionModel().selectedItemProperty()));
     }
 
     /**
@@ -205,6 +215,15 @@ public class SnapshotController implements Initializable {
      */
     public ObjectProperty<ObservableMap<LocalDateTime, List<ObjectData>>> topNListProperty() {
         return topNList;
+    }
+
+    /**
+     * Get property of current Object tag.
+     *
+     * @return Property of currentObjectTag.
+     */
+    public LongProperty currentObjectTagProperty() {
+        return currentObjectTag;
     }
 
     /**

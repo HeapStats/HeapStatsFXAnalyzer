@@ -15,9 +15,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
 package jp.co.ntt.oss.heapstats.plugin.builtin.snapshot;
 
+import java.util.Optional;
 import javafx.util.StringConverter;
 import jp.co.ntt.oss.heapstats.container.snapshot.SnapShotHeader;
 import jp.co.ntt.oss.heapstats.utils.*;
@@ -25,20 +25,21 @@ import jp.co.ntt.oss.heapstats.utils.*;
 /**
  * StringConverter for LocalDateTime of SnapShotHeader. <br/>
  * This class is used at JavaFX controls.
- * 
+ *
  * @author Yasumasa Suenaga
  */
-public class SnapShotHeaderConverter extends StringConverter<SnapShotHeader>{
-    
+public class SnapShotHeaderConverter extends StringConverter<SnapShotHeader> {
+
     @Override
     public String toString(SnapShotHeader object) {
-        LocalDateTimeConverter converter = new LocalDateTimeConverter();
-        return converter.toString(object.getSnapShotDate());
+        return Optional.ofNullable(object)
+                .map(o -> (new LocalDateTimeConverter()).toString(o.getSnapShotDate()))
+                .orElse("");
     }
 
     @Override
     public SnapShotHeader fromString(String string) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
 }
