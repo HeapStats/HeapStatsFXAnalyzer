@@ -19,11 +19,8 @@ package jp.co.ntt.oss.heapstats.plugin.builtin.snapshot;
 
 import java.io.File;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -47,46 +44,35 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
-import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
-import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javax.xml.bind.JAXB;
 import jp.co.ntt.oss.heapstats.WindowController;
-import jp.co.ntt.oss.heapstats.container.snapshot.DiffData;
 import jp.co.ntt.oss.heapstats.container.snapshot.ObjectData;
 import jp.co.ntt.oss.heapstats.container.snapshot.SnapShotHeader;
 import jp.co.ntt.oss.heapstats.container.snapshot.SummaryData;
 import jp.co.ntt.oss.heapstats.plugin.PluginController;
+import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.tabs.HistogramController;
 import jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.tabs.SummaryController;
 import jp.co.ntt.oss.heapstats.task.CSVDumpGC;
 import jp.co.ntt.oss.heapstats.task.CSVDumpHeap;
-import jp.co.ntt.oss.heapstats.task.DiffCalculator;
 import jp.co.ntt.oss.heapstats.task.ParseHeader;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 import jp.co.ntt.oss.heapstats.utils.LocalDateTimeConverter;
 import jp.co.ntt.oss.heapstats.utils.TaskAdapter;
-import jp.co.ntt.oss.heapstats.xml.binding.Filter;
-import jp.co.ntt.oss.heapstats.xml.binding.Filters;
 
 /**
  * FXML Controller of SnapShot builtin plugin.
@@ -99,6 +85,9 @@ public class SnapShotController extends PluginController implements Initializabl
     private SummaryController summaryController;
 
     @FXML
+    private HistogramController histogramController;
+
+    @FXML
     private ComboBox<SnapShotHeader> startCombo;
 
     @FXML
@@ -109,45 +98,6 @@ public class SnapShotController extends PluginController implements Initializabl
 
     @FXML
     private RadioButton radioInstance;
-
-    @FXML
-    private TableView<Filter> excludeTable;
-
-    @FXML
-    private TableColumn<Filter, Boolean> hideColumn;
-
-    @FXML
-    private TableColumn<Filter, String> excludeNameColumn;
-
-    @FXML
-    private TextField searchText;
-
-    @FXML
-    private ListView<String> searchList;
-
-    @FXML
-    private StackedAreaChart<String, Long> topNChart;
-
-    @FXML
-    private NumberAxis topNYAxis;
-
-    @FXML
-    private TableView<DiffData> lastDiffTable;
-
-    @FXML
-    private TableColumn<DiffData, String> colorColumn;
-
-    @FXML
-    private TableColumn<DiffData, String> classNameColumn;
-
-    @FXML
-    private TableColumn<DiffData, String> classLoaderColumn;
-
-    @FXML
-    private TableColumn<DiffData, Long> instanceColumn;
-
-    @FXML
-    private TableColumn<DiffData, Long> totalSizeColumn;
 
     @FXML
     private ComboBox<SnapShotHeader> snapShotTimeCombo;
@@ -188,22 +138,11 @@ public class SnapShotController extends PluginController implements Initializabl
     @FXML
     private Button okBtn;
 
-    @FXML
-    private Button selectFilterApplyBtn;
-
     private ObjectProperty<ObservableList<SnapShotHeader>> currentTarget;
 
     private ObjectProperty<SummaryData> summaryData;
 
     private ObjectProperty<ObservableSet<String>> currentClassNameSet;
-
-    private boolean isInstanceGraph;
-
-    private Map<LocalDateTime, List<ObjectData>> topNList;
-
-    private boolean searchFilterEnable;
-
-    private boolean excludeFilterEnable;
 
     /**
      * Initializes the controller class.
@@ -216,36 +155,18 @@ public class SnapShotController extends PluginController implements Initializabl
         summaryController.summaryDataProperty().bind(summaryData);
         currentTarget = new SimpleObjectProperty<>(FXCollections.emptyObservableList());
         summaryController.currentTargetProperty().bind(currentTarget);
+        histogramController.currentTargetProperty().bind(currentTarget);
         snapShotTimeCombo.itemsProperty().bind(currentTarget);
         currentClassNameSet = new SimpleObjectProperty<>();
         summaryController.currentClassNameSetProperty().bind(currentClassNameSet);
+        histogramController.currentClassNameSetProperty().bind(currentClassNameSet);
+        histogramController.instanceGraphProperty().bind(radioInstance.selectedProperty());
+        histogramController.snapshotSelectionModelProperty().bind(snapShotTimeCombo.selectionModelProperty());
+        histogramController.setDrawRebootSuspectLine(this::drawRebootSuspectLine);
 
         startCombo.setConverter(new SnapShotHeaderConverter());
         endCombo.setConverter(new SnapShotHeaderConverter());
         snapShotTimeCombo.setConverter(new SnapShotHeaderConverter());
-
-        hideColumn.setCellValueFactory(new PropertyValueFactory<>("hide"));
-        hideColumn.setCellFactory(CheckBoxTableCell.forTableColumn(hideColumn));
-        excludeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-        colorColumn.setCellFactory(p -> new TableCell<DiffData, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                String style = Optional.ofNullable((DiffData) getTableRow().getItem())
-                        .filter(d -> d.isRanked())
-                        .map(d -> "-fx-background-color: " + ChartColorManager.getNextColor(d.getClassName()))
-                        .orElse("-fx-background-color: transparent;");
-                setStyle(style);
-            }
-        });
-
-        classNameColumn.setCellValueFactory(new PropertyValueFactory<>("className"));
-        classLoaderColumn.setCellValueFactory(new PropertyValueFactory<>("classLoaderName"));
-        instanceColumn.setCellValueFactory(new PropertyValueFactory<>("instances"));
-        instanceColumn.setSortType(TableColumn.SortType.DESCENDING);
-        totalSizeColumn.setCellValueFactory(new PropertyValueFactory<>("totalSize"));
-        totalSizeColumn.setSortType(TableColumn.SortType.DESCENDING);
 
         snapShotSummaryKey.setCellValueFactory(new PropertyValueFactory<>("key"));
         snapShotSummaryValue.setCellValueFactory(new PropertyValueFactory<>("value"));
@@ -255,7 +176,7 @@ public class SnapShotController extends PluginController implements Initializabl
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 String style = Optional.ofNullable((ObjectData) getTableRow().getItem())
-                        .filter(o -> topNChart.getData().stream().anyMatch(d -> d.getName().equals(o.getName())))
+                        .filter(o -> histogramController.getTopNChart().getData().stream().anyMatch(d -> d.getName().equals(o.getName())))
                         .map(o -> "-fx-background-color: " + ChartColorManager.getNextColor(o.getName()))
                         .orElse("-fx-background-color: transparent;");
                 setStyle(style);
@@ -269,22 +190,19 @@ public class SnapShotController extends PluginController implements Initializabl
         objSizeColumn.setCellValueFactory(new PropertyValueFactory<>("totalSize"));
         objSizeColumn.setSortType(TableColumn.SortType.DESCENDING);
 
-        searchList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
-        topNChart.lookup(".chart").setStyle("-fx-background-color: " + HeapStatsUtils.getChartBgColor() + ";");
-
-        searchFilterEnable = false;
-        excludeFilterEnable = false;
-
         okBtn.disableProperty().bind(startCombo.getSelectionModel().selectedIndexProperty().greaterThanOrEqualTo(endCombo.getSelectionModel().selectedIndexProperty()));
-        selectFilterApplyBtn.disableProperty().bind(searchList.selectionModelProperty().getValue().selectedItemProperty().isNull());
 
         setOnWindowResize((v, o, n) -> Platform.runLater(() -> Stream.of(summaryController.getHeapChart(),
                 summaryController.getInstanceChart(),
                 summaryController.getGcTimeChart(),
                 summaryController.getMetaspaceChart(),
-                topNChart)
+                histogramController.getTopNChart())
                 .forEach(c -> Platform.runLater(() -> drawRebootSuspectLine(c)))));
+
+        histogramController.setTaskExecutor(t -> {
+            bindTask(t);
+            (new Thread(t)).start();
+        });
     }
 
     /**
@@ -327,102 +245,6 @@ public class SnapShotController extends PluginController implements Initializabl
 
     }
 
-    private void setTopNChartColor(XYChart.Series<String, Long> series) {
-        String color = ChartColorManager.getNextColor(series.getName());
-
-        series.getNode().lookup(".chart-series-area-line").setStyle(String.format("-fx-stroke: %s;", color));
-        series.getNode().lookup(".chart-series-area-fill").setStyle(String.format("-fx-fill: %s;", color));
-
-        series.getData().stream()
-                .map(d -> d.getNode().lookup(".chart-area-symbol"))
-                .forEach(n -> n.setStyle(String.format("-fx-background-color: %s, white;", color)));
-    }
-
-    /**
-     * Build TopN Data for Chart with givien data.
-     *
-     * @param header SnapShot header which you want to build.
-     * @param seriesMap Chart series map which is contains class name as key,
-     * chart series as value.
-     * @param objData ObjectData which is you want to build.
-     */
-    private void buildTopNChartData(SnapShotHeader header, Map<String, XYChart.Series<String, Long>> seriesMap, ObjectData objData) {
-        XYChart.Series<String, Long> series = seriesMap.get(objData.getName());
-
-        if (series == null) {
-            series = new XYChart.Series<>();
-            series.setName(objData.getName());
-            topNChart.getData().add(series);
-            seriesMap.put(objData.getName(), series);
-        }
-
-        LocalDateTimeConverter converter = new LocalDateTimeConverter();
-        String time = converter.toString(header.getSnapShotDate());
-        long yValue = isInstanceGraph ? objData.getCount()
-                : objData.getTotalSize() / 1024 / 1024;
-        XYChart.Data<String, Long> data = new XYChart.Data<>(time, yValue);
-
-        series.getData().add(data);
-        String unit = isInstanceGraph ? "instances" : "MB";
-        String tip = String.format("%s: %s, %d " + unit, series.getName(), time, yValue);
-        Tooltip.install(data.getNode(), new Tooltip(tip));
-    }
-
-    /**
-     * onSucceeded event handler for DiffTask.
-     *
-     * @param diff Target task.
-     * @param seriesMap Chart series map which is contains class name as key,
-     * chart series as value.
-     */
-    private void onDiffTaskSucceeded(DiffCalculator diff, Map<String, XYChart.Series<String, Long>> seriesMap) {
-        topNList = diff.getTopNList();
-
-        currentTarget.get().stream()
-                .forEachOrdered(h -> topNList.get(h.getSnapShotDate()).stream()
-                        .forEachOrdered(o -> buildTopNChartData(h, seriesMap, o)));
-
-        lastDiffTable.getItems().addAll(diff.getLastDiffList());
-        lastDiffTable.getSortOrder().add(isInstanceGraph ? instanceColumn : totalSizeColumn);
-        topNChart.getData().forEach(this::setTopNChartColor);
-        Platform.runLater(() -> drawRebootSuspectLine(topNChart));
-
-        long maxVal = topNChart.getData().stream()
-                .flatMap(s -> s.dataProperty().get().stream())
-                .collect(Collectors.groupingBy(d -> d.getXValue(), Collectors.summingLong(d -> d.getYValue())))
-                .values()
-                .stream()
-                .mapToLong(Long::longValue)
-                .max()
-                .getAsLong();
-
-        topNYAxis.setUpperBound(maxVal * 1.05d);
-        topNYAxis.setTickUnit(maxVal / 20);
-        topNYAxis.setLabel(isInstanceGraph ? "instances" : "MB");
-
-        snapShotTimeCombo.getSelectionModel().selectLast();
-    }
-
-    /**
-     * Drawing Top N data to Chart and Table.
-     *
-     * @param target SnapShot to be drawed.
-     * @param includeOthers *Others* data should be included in this Top N data.
-     * @param predicate Filter function.
-     */
-    private void drawTopNData(List<SnapShotHeader> target, boolean includeOthers, Predicate<? super ObjectData> predicate) {
-        topNChart.getData().clear();
-        lastDiffTable.getItems().clear();
-        Map<String, XYChart.Series<String, Long>> seriesMap = new HashMap<>();
-
-        TaskAdapter<DiffCalculator> diff = new TaskAdapter<>(new DiffCalculator(target, HeapStatsUtils.getRankLevel(),
-                includeOthers, predicate, HeapStatsUtils.getReplaceClassName(), isInstanceGraph));
-        diff.setOnSucceeded(evt -> onDiffTaskSucceeded(diff.getTask(), seriesMap));
-        super.bindTask(diff);
-        Thread diffThread = new Thread(diff);
-        diffThread.start();
-    }
-
     /**
      * Event handler of OK button.
      *
@@ -430,33 +252,21 @@ public class SnapShotController extends PluginController implements Initializabl
      */
     @FXML
     private void onOkClick(ActionEvent event) {
-        isInstanceGraph = radioInstance.isSelected();
-
         int startIdx = startCombo.getSelectionModel().getSelectedIndex();
         int endIdx = endCombo.getSelectionModel().getSelectedIndex();
         currentTarget.set(FXCollections.observableArrayList(startCombo.getItems().subList(startIdx, endIdx + 1)));
         currentClassNameSet.set(FXCollections.observableSet());
         summaryData.set(new SummaryData(currentTarget.get()));
 
-        drawTopNData(currentTarget.get(), true, null);
+        Task<Void> topNTask = histogramController.getDrawTopNDataTask(currentTarget.get(), true, null);
+        super.bindTask(topNTask);
+        Thread topNThread = new Thread(topNTask);
+        topNThread.start();
 
-        Task<Void> task = summaryController.getCalculateGCSummaryTask(this::drawRebootSuspectLine);
-        super.bindTask(task);
-        Thread summarizeThread = new Thread(task);
+        Task<Void> summarizeTask = summaryController.getCalculateGCSummaryTask(this::drawRebootSuspectLine);
+        super.bindTask(summarizeTask);
+        Thread summarizeThread = new Thread(summarizeTask);
         summarizeThread.start();
-    }
-
-    /**
-     * Event handler of changing search TextField.
-     *
-     * @param event KeyEvent of this event.
-     */
-    @FXML
-    private void onSearchTextChanged(KeyEvent event) {
-        searchList.getItems().clear();
-        searchList.getItems().addAll(currentClassNameSet.get().stream()
-                .filter(n -> n.contains(searchText.getText()))
-                .collect(Collectors.toList()));
     }
 
     /**
@@ -488,110 +298,15 @@ public class SnapShotController extends PluginController implements Initializabl
                 new AbstractMap.SimpleEntry<>(resource.getString("snapshot.gccause"), header.getGcCause()),
                 new AbstractMap.SimpleEntry<>(resource.getString("snapshot.gctime"), String.format("%d ms", header.getGcTime())));
 
-        usagePieChart.getData().addAll(topNList.get(header.getSnapShotDate()).stream()
-                .map(o -> new PieChart.Data(o.getName(), isInstanceGraph ? o.getCount() : o.getTotalSize()))
+        usagePieChart.getData().addAll(histogramController.getTopNList().get(header.getSnapShotDate()).stream()
+                .map(o -> new PieChart.Data(o.getName(), radioInstance.isSelected() ? o.getCount() : o.getTotalSize()))
                 .collect(Collectors.toList()));
         usagePieChart.getData().stream()
                 .forEach(d -> d.getNode().setStyle("-fx-pie-color: " + ChartColorManager.getNextColor(d.getName())));
 
         objDataTable.setItems(FXCollections.observableArrayList(
                 header.getSnapShot(HeapStatsUtils.getReplaceClassName()).values().stream().collect(Collectors.toList())));
-        objDataTable.getSortOrder().add(isInstanceGraph ? objInstancesColumn : objSizeColumn);
-    }
-
-    /**
-     * Drawing and Showing table with beging selected value.
-     *
-     * @param enableSearch Search filter should be enabled.
-     * @param enableHide Hide filter should be enabled.
-     */
-    private Predicate<? super ObjectData> getFilter(boolean enableSearch, boolean enableHide) {
-        HashSet<String> targetSet = new HashSet<>(searchList.getSelectionModel().getSelectedItems());
-        Predicate<ObjectData> searchFilter = o -> targetSet.contains(o.getName());
-
-        List<String> hideRegexList = excludeTable.getItems().stream()
-                .filter(f -> f.isHide())
-                .flatMap(f -> f.getClasses().getName().stream())
-                .map(s -> ".*" + s + ".*")
-                .collect(Collectors.toList());
-        Predicate<ObjectData> hideFilter = o -> hideRegexList.stream().noneMatch(s -> o.getName().matches(s));
-
-        Predicate<ObjectData> filter;
-
-        if (enableSearch && enableHide) {
-            filter = searchFilter.and(hideFilter);
-        } else if (enableSearch) {
-            filter = searchFilter;
-        } else if (enableHide) {
-            filter = hideFilter;
-        } else {
-            filter = null;
-        }
-
-        return filter;
-    }
-
-    /**
-     * Selection method for incremental search.
-     *
-     * @param event ActionEvent of this event.
-     */
-    @FXML
-    private void onSelectFilterApply(ActionEvent event) {
-        searchFilterEnable = true;
-        Predicate<? super ObjectData> filter = getFilter(searchFilterEnable, excludeFilterEnable);
-        drawTopNData(currentTarget.get(), false, filter);
-    }
-
-    /**
-     * Event handler of clear button.
-     *
-     * @param event ActionEvent of this event.
-     */
-    @FXML
-    private void onSelectFilterClear(ActionEvent event) {
-        searchFilterEnable = false;
-        excludeFilterEnable = false;
-        drawTopNData(currentTarget.get(), false, null);
-    }
-
-    /**
-     * Event handler for adding exclude filter.
-     *
-     * @param event ActionEvent of this event.
-     */
-    @FXML
-    private void onAddClick(ActionEvent event) {
-        FileChooser dialog = new FileChooser();
-        ResourceBundle resource = ResourceBundle.getBundle("snapshotResources", new Locale(HeapStatsUtils.getLanguage()));
-
-        dialog.setTitle(resource.getString("dialog.filterchooser.title"));
-        dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
-        dialog.getExtensionFilters().addAll(new ExtensionFilter("Filter file (*.xml)", "*.xml"),
-                new ExtensionFilter("All files", "*.*"));
-
-        List<File> excludeFilterList = dialog.showOpenMultipleDialog(((Node) event.getSource()).getScene().getWindow());
-        if (excludeFilterList != null) {
-            excludeFilterList.stream()
-                    .map(f -> (Filters) JAXB.unmarshal(f, Filters.class))
-                    .filter(f -> f != null)
-                    .flatMap(f -> f.getFilter().stream()
-                            .map(e -> new BindingFilter(e)))
-                    .forEach(f -> excludeTable.getItems().addAll(f));
-        }
-
-    }
-
-    /**
-     * Event handler of apply button in exclude filter.
-     *
-     * @param event ActionEvent of this event.
-     */
-    @FXML
-    private void onHiddenFilterApply(ActionEvent event) {
-        excludeFilterEnable = true;
-        Predicate<? super ObjectData> filter = getFilter(searchFilterEnable, excludeFilterEnable);
-        drawTopNData(currentTarget.get(), false, filter);
+        objDataTable.getSortOrder().add(radioInstance.isSelected() ? objInstancesColumn : objSizeColumn);
     }
 
     /**
@@ -636,8 +351,8 @@ public class SnapShotController extends PluginController implements Initializabl
      */
     public long getSelectedClassTag() throws IllegalStateException {
 
-        if (histogramTab.isSelected() && (lastDiffTable.getSelectionModel().getSelectedItem() != null)) {
-            return lastDiffTable.getSelectionModel().getSelectedItem().getTag();
+        if (histogramTab.isSelected() && (histogramController.getSelectedData() != null)) {
+            return histogramController.getSelectedData().getTag();
         } else if (objDataTable.getSelectionModel().getSelectedItem() != null) {
             return objDataTable.getSelectionModel().getSelectedItem().getTag();
         } else {
@@ -703,7 +418,7 @@ public class SnapShotController extends PluginController implements Initializabl
         File csvFile = dialog.showSaveDialog(WindowController.getInstance().getOwner());
 
         if (csvFile != null) {
-            Predicate<? super ObjectData> filter = (searchFilterEnable || excludeFilterEnable) ? getFilter(searchFilterEnable, excludeFilterEnable) : null;
+            Predicate<? super ObjectData> filter = histogramController.getFilter();
             TaskAdapter<CSVDumpHeap> task = new TaskAdapter<>(new CSVDumpHeap(csvFile, isSelected ? currentTarget.get() : startCombo.getItems(), isSelected ? filter : null, HeapStatsUtils.getReplaceClassName()));
             super.bindTask(task);
 
