@@ -93,6 +93,8 @@ public class RefTreeController implements Initializable, MouseListener {
     private ObjectProperty<SnapShotHeader> currentSnapShotHeader;
 
     private LongProperty currentObjectTag;
+    
+    private ResourceBundle resource;
 
     private void buildTab() {
         if (currentSnapShotHeader.get() != null) {
@@ -111,6 +113,9 @@ public class RefTreeController implements Initializable, MouseListener {
         graph.getModel().beginUpdate();
         {
             ObjectData data = currentSnapShotHeader.get().getSnapShot(HeapStatsUtils.getReplaceClassName()).get(currentObjectTag.get());
+            if (data == null) {
+                throw new IllegalStateException(resource.getString("reftree.message.notselect"));
+            }
             ReferenceCell cell = new ReferenceCell(data, true, false);
             graph.addCell(cell);
         }
@@ -138,6 +143,7 @@ public class RefTreeController implements Initializable, MouseListener {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        resource = rb;
         currentSnapShotHeader = new SimpleObjectProperty<>();
         currentObjectTag = new SimpleLongProperty();
         currentObjectTag.addListener((v, o, n) -> Optional.ofNullable(n).ifPresent(t -> buildTab()));

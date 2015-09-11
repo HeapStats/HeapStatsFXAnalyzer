@@ -38,7 +38,7 @@ public class ArchiveDataConverter extends StringConverter<ArchiveData>{
 
     @Override
     public ArchiveData fromString(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("ArchiveData DO NOT convert from String.");
     }
     
 }
