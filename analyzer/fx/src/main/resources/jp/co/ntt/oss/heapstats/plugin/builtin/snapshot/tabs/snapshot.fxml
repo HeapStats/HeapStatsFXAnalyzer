@@ -45,6 +45,9 @@
                                                 <TableColumn fx:id="snapShotSummaryKey" editable="false" minWidth="95.0" prefWidth="170.0" sortable="false" />
                                                 <TableColumn fx:id="snapShotSummaryValue" editable="false" minWidth="190.0" prefWidth="190.0" sortable="false" />
                                             </columns>
+                                            <columnResizePolicy>
+                                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                            </columnResizePolicy>
                                         </TableView>
                                     </children>
                                 </AnchorPane>
@@ -62,6 +65,9 @@
                                 <TableColumn fx:id="objInstancesColumn" editable="false" prefWidth="75.0" text="%table.column.instances" />
                                 <TableColumn fx:id="objSizeColumn" editable="false" prefWidth="75.0" text="%table.column.totalsize" />
                             </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                            </columnResizePolicy>
                         </TableView>
                     </children>
                 </AnchorPane>

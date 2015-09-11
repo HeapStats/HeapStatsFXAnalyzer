@@ -54,6 +54,9 @@
                         <TableColumn id="category" fx:id="categoryColumn" editable="false" prefWidth="200.0" sortable="false" />
                         <TableColumn id="value" fx:id="valueColumn" editable="false" prefWidth="200.0" sortable="false" />
                     </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                    </columnResizePolicy>
                 </TableView>
                 <StackPane minHeight="0.0" minWidth="0.0">
                     <children>

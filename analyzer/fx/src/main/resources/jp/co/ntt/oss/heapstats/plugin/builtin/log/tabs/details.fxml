@@ -30,6 +30,9 @@
                 <TableColumn fx:id="archiveKeyColumn" editable="false" prefWidth="200.0" sortable="false" />
                 <TableColumn fx:id="archiveVauleColumn" editable="false" prefWidth="500.0" sortable="false" />
             </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
         </TableView>
         <Label text="%label.archive.file" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="250.0" />
         <ComboBox fx:id="fileCombo" onAction="#onFileComboAction" prefWidth="176.0" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="247.0" />

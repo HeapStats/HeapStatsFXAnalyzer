@@ -32,6 +32,9 @@
                         <TableColumn fx:id="keyColumn" editable="false" prefWidth="94.0" sortable="false" />
                         <TableColumn fx:id="valueColumn" editable="false" prefWidth="99.0" sortable="false" />
                     </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                    </columnResizePolicy>
                 </TableView>
             </children>
         </AnchorPane>

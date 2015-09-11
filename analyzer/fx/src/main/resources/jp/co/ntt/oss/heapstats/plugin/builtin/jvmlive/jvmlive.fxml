@@ -31,6 +31,9 @@
                 <TableColumn fx:id="jdpKey" prefWidth="212.0" />
                 <TableColumn fx:id="jdpValue" prefWidth="182.0" />
             </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
         </TableView>
         <Label layoutX="361.0" layoutY="368.0" text="%main.label.crashhistory" />
         <ListView id="crashlist" fx:id="crashList" layoutX="360.0" layoutY="392.0" onMouseClicked="#onCrashHistoryClicked" prefHeight="195.0" prefWidth="427.0" AnchorPane.bottomAnchor="13.0" AnchorPane.leftAnchor="360.0" AnchorPane.rightAnchor="13.0" AnchorPane.topAnchor="392.0">

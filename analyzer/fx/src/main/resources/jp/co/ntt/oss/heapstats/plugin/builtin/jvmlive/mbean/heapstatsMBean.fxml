@@ -31,6 +31,9 @@
                 <TableColumn fx:id="keyColumn" editable="false" prefWidth="147.0" text="config" />
                 <TableColumn fx:id="valueColumn" editable="true" prefWidth="290.0" text="value" />
             </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
         </TableView>
         <Button layoutX="165.0" layoutY="129.0" mnemonicParsing="false" onAction="#onCommitBtnClick" text="%dialog.config.commit" />
         <Button layoutX="14.0" layoutY="40.0" maxWidth="142.0" minWidth="142.0" mnemonicParsing="false" onAction="#onInvokeResourceBtnClick" prefWidth="142.0" text="%dialog.config.invokeResource" />

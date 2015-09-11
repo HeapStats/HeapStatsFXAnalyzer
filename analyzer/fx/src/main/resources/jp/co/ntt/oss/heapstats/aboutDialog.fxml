@@ -55,6 +55,9 @@
                                         <TableColumn fx:id="pluinTableNameColumn" editable="false" prefWidth="224.9999634027481" text="%about.plugin.name" />
                                         <TableColumn fx:id="pluginTableLicenseColumn" editable="false" minWidth="0.0" prefWidth="336.0000305175781" text="%about.plugin.license" />
                                     </columns>
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                    </columnResizePolicy>
                                 </TableView>
                             </children>
                         </AnchorPane>
@@ -70,6 +73,9 @@
                                         <TableColumn fx:id="libraryTableLibraryColumn" editable="false" prefWidth="120.99996948242188" text="%about.plugin.library" />
                                         <TableColumn fx:id="libraryTableLicenseColumn" editable="false" prefWidth="268.0000305175781" text="%about.plugin.license" />
                                     </columns>
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                    </columnResizePolicy>
                                 </TableView>
                             </children>
                         </AnchorPane>
