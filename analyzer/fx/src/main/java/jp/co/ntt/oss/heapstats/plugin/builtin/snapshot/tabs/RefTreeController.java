@@ -111,6 +111,9 @@ public class RefTreeController implements Initializable, MouseListener {
         graph.getModel().beginUpdate();
         {
             ObjectData data = currentSnapShotHeader.get().getSnapShot(HeapStatsUtils.getReplaceClassName()).get(currentObjectTag.get());
+            if (data == null) {
+                throw new IllegalStateException("Please select Object which you want to see the reference at [Histogram] or [SnapShot Data] Tab.");
+            }
             ReferenceCell cell = new ReferenceCell(data, true, false);
             graph.addCell(cell);
         }
