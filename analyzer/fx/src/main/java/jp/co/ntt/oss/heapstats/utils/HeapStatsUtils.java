@@ -91,6 +91,9 @@ public class HeapStatsUtils {
             // use default values.
         }
 
+        /* Load resource bundle */
+        resource = ResourceBundle.getBundle("HeapStatsResources", new Locale(prop.getProperty("language")));
+
         /* Validate values in properties. */
 
         /* Language */
@@ -98,7 +101,7 @@ public class HeapStatsUtils {
         if (language == null) {
             prop.setProperty("language", "en");
         } else if (!language.equals("en") && !language.equals("ja")) {
-            throw new HeapStatsConfigException("Invalid option: language=" + language);
+            throw new HeapStatsConfigException(resource.getString("invalid.option") + " language=" + language);
         }
 
         /* RankLevel */
@@ -109,7 +112,7 @@ public class HeapStatsUtils {
             try {
                 Integer.decode(rankLevelStr);
             } catch (NumberFormatException e) {
-                throw new HeapStatsConfigException("Invalid option: ranklevel=" + rankLevelStr, e);
+                throw new HeapStatsConfigException(resource.getString("invalid.option") + " ranklevel=" + rankLevelStr, e);
             }
         }
 
@@ -156,7 +159,7 @@ public class HeapStatsUtils {
             try {
                 Color.web(bgColorStr);
             } catch (IllegalArgumentException e) {
-                throw new HeapStatsConfigException("Invalid option: bgcolor=" + bgColorStr, e);
+                throw new HeapStatsConfigException(resource.getString("invalid.option") + "  bgcolor=" + bgColorStr, e);
             }
         }
 
@@ -165,9 +168,6 @@ public class HeapStatsUtils {
         if (heapOrder == null) {
             prop.setProperty("heaporder", "true");
         }
-
-        /* Load resource bundle */
-        resource = ResourceBundle.getBundle("HeapStatsResources", new Locale(prop.getProperty("language")));
 
         /* Add shutdown hook for saving current settings. */
         Runnable savePropImpl = () -> {
@@ -258,20 +258,20 @@ public class HeapStatsUtils {
     public static String getChartBgColor() {
         return prop.getProperty("bgcolor");
     }
-    
+
     /**
      * Get whether the bottom of java heap order is young or not.
      *
-     * @return whether the bottom is young or not..
+     * @return whether the bottom is young or not.
      */
     public static boolean getHeapOrder() {
         return Boolean.parseBoolean(prop.getProperty("heaporder_bottom_young"));
     }
 
     /**
-     * Set whethr the bottom of java heap order is young or not..
+     * Set whethr the bottom of java heap order is young or not.
      *
-     * @param heapOrder whether the bottom is young or not..
+     * @param heapOrder whether the bottom is young or not.
      */
     public static void setHeapOrder(boolean heapOrder) {
         prop.setProperty("heaporder_bottom_young", Boolean.toString(heapOrder));

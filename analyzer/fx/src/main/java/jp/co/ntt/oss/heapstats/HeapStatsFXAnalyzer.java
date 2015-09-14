@@ -15,7 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
 package jp.co.ntt.oss.heapstats;
 
 import java.io.InputStream;
@@ -26,45 +25,51 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import jp.co.ntt.oss.heapstats.utils.HeapStatsConfigException;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 
 /**
  * Main class of HeapStats FX Analyzer.
  * This class provides entry point of HeapStats FX Analyzer.
- * 
+ *
  * @author Yasumasa Suenaga
  */
 public class HeapStatsFXAnalyzer extends Application {
-        
+
     @Override
     public void start(Stage stage) throws Exception {
         stage.setTitle("HeapStats Analyzer");
-        
-        try(InputStream icon = getClass().getResourceAsStream("heapstats-icon.png")){
+
+        try (InputStream icon = getClass().getResourceAsStream("heapstats-icon.png")) {
             stage.getIcons().add(new Image(icon));
         }
-        
+
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> HeapStatsUtils.showExceptionDialog(e)));
-        HeapStatsUtils.load();
+        try {
+            HeapStatsUtils.load();
+        } catch (HeapStatsConfigException e) {
+            HeapStatsUtils.showExceptionDialog(e);
+            Runtime.getRuntime().exit(-1);
+        }
         FXMLLoader mainWindowLoader = new FXMLLoader(getClass().getResource("window.fxml"), HeapStatsUtils.getResourceBundle());
-        
+
         Parent root = mainWindowLoader.load();
         Scene scene = new Scene(root);
-        WindowController controller = (WindowController)mainWindowLoader.getController();
+        WindowController controller = (WindowController) mainWindowLoader.getController();
         controller.setOwner(stage);
         controller.loadPlugin();
-        
+
         stage.setScene(scene);
         stage.show();
     }
 
     /**
      * Main method of HeapStats analyzer.
-     * 
+     *
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         launch(args);
     }
-    
+
 }
