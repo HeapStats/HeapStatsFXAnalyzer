@@ -136,12 +136,16 @@ public class LogResourcesController implements Initializable {
     private ObjectProperty<ObservableList<ArchiveData>> archiveList;
 
     private List<LocalDateTime> suspectList;
+    
+    private ResourceBundle resource;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        resource = rb;
+        
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
         valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
 
@@ -287,7 +291,7 @@ public class LogResourcesController implements Initializable {
         }
 
         if ((anchor == null) || (chart == null)) {
-            throw new IllegalStateException("Could not find node to draw line.");
+            throw new IllegalStateException(resource.getString("message.drawline"));
         }
 
         ObservableList<Node> anchorChildren = anchor.getChildren();
@@ -483,7 +487,6 @@ public class LogResourcesController implements Initializable {
 
             /* Put summary data to table */
             SummaryData summary = new SummaryData(targetLogData, targetDiffData);
-            ResourceBundle resource = ResourceBundle.getBundle("logResources", new Locale(HeapStatsUtils.getLanguage()));
             procSummary.setItems(FXCollections.observableArrayList(new SummaryData.SummaryDataEntry(resource.getString("summary.cpu.average"), String.format("%.1f %%", summary.getAverageCPUUsage())),
                     new SummaryData.SummaryDataEntry(resource.getString("summary.cpu.peak"), String.format("%.1f %%", summary.getMaxCPUUsage())),
                     new SummaryData.SummaryDataEntry(resource.getString("summary.vsz.average"), String.format("%.1f MB", summary.getAverageVSZ())),

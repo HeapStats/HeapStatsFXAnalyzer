@@ -39,7 +39,7 @@ public class SnapShotHeaderConverter extends StringConverter<SnapShotHeader> {
 
     @Override
     public SnapShotHeader fromString(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("SnapShotHeader DO NOT convert from String.");
     }
 
 }

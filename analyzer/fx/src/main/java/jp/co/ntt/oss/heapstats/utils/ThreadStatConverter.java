@@ -36,7 +36,7 @@ public class ThreadStatConverter extends StringConverter<ThreadStat>{
 
     @Override
     public ThreadStat fromString(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("ThreadStat DO NOT convert from String.");
     }
     
 }

@@ -43,7 +43,7 @@ public class LogDataConverter extends StringConverter<LogData> {
      */
     @Override
     public LogData fromString(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("LogData DO NOT convert from String.");
     }
 
 }
