@@ -18,12 +18,13 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 
+<?import java.lang.*?>
 <?import javafx.scene.chart.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.tabs.SnapshotController">
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="jp.co.ntt.oss.heapstats.plugin.builtin.snapshot.tabs.SnapshotController">
     <children>
         <Label text="%label.snapshot" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" />
         <ComboBox fx:id="snapShotTimeCombo" layoutX="91.0" layoutY="45.0" onAction="#onSnapShotTimeSelected" prefHeight="23.0" prefWidth="176.0" AnchorPane.leftAnchor="70.0" AnchorPane.topAnchor="7.0" />
@@ -62,8 +63,8 @@
                                 <TableColumn fx:id="objColorColumn" editable="false" prefWidth="40.0" sortable="false" />
                                 <TableColumn fx:id="objClassNameColumn" editable="false" prefWidth="200.0" text="%table.column.classname" />
                                 <TableColumn fx:id="objClassLoaderColumn" editable="false" prefWidth="200.0" text="%table.column.classloader" />
-                                <TableColumn fx:id="objInstancesColumn" editable="false" prefWidth="75.0" text="%table.column.instances" />
-                                <TableColumn fx:id="objSizeColumn" editable="false" prefWidth="75.0" text="%table.column.totalsize" />
+                                <TableColumn fx:id="objInstancesColumn" editable="false" prefWidth="75.0" text="%snapshot.instances" />
+                                <TableColumn fx:id="objSizeColumn" editable="false" prefWidth="75.0" text="%snapshot.totalsize" />
                             </columns>
                             <columnResizePolicy>
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
