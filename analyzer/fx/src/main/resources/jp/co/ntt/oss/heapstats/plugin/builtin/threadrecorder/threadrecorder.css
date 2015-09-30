@@ -21,43 +21,43 @@
 }
 
 .rect-run {
-    -fx-fill: #ff8c00;
+    -fx-fill: darkorange;
 }
 
 .rect-monitorwait {
-    -fx-fill: #ff00ff;
+    -fx-fill: fuchsia;
 }
 
 .rect-monitorcontended {
-    -fx-fill: #32cd32;
+    -fx-fill: limegreen;
 }
 
 .rect-threadsleep {
-    -fx-fill: #87cefa;
+    -fx-fill: lightskyblue;
 }
 
 .rect-park {
-    -fx-fill: #9370db;
+    -fx-fill: mediumpurple;
 }
 
 .rect-filewrite {
-    -fx-fill: #ffd700;
+    -fx-fill: gold;
 }
 
 .rect-fileread {
-    -fx-fill: #228b22;
+    -fx-fill: forestgreen;
 }
 
 .rect-socketwrite {
-    -fx-fill: #ff4500;
+    -fx-fill: orangered;
+}
+
+.rect-socketread {
+    -fx-fill: olive;
 }
 
 .rect-fusion {
     -fx-fill: darkgray;
-}
-
-.rect-socketread {
-    -fx-fill: #808000;
 }
 
 .rect-range-selected {
