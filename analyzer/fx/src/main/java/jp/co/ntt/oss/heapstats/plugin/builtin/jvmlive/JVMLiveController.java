@@ -145,17 +145,19 @@ public class JVMLiveController extends PluginController implements Initializable
                                        protected void updateItem(Object item, boolean empty) {
                                          super.updateItem(item, empty);
                                          Optional.ofNullable(item).ifPresent(i -> {
-                                                                                     if(empty){
+                                                                                     try{
+                                                                                        if(i instanceof Labeled){
+                                                                                            setGraphic((Labeled)i);
+                                                                                        }
+                                                                                        else if(i instanceof JMXHelper){
+                                                                                            setGraphic(createHyperlink((JMXHelper)i));
+                                                                                        }
+                                                                                        else{
+                                                                                            setText((String)i);
+                                                                                        }
+                                                                                     }
+                                                                                     catch(Throwable t){
                                                                                          setText("<N/A>");
-                                                                                     }
-                                                                                     else if(i instanceof Labeled){
-                                                                                         setGraphic((Labeled)i);
-                                                                                     }
-                                                                                     else if(i instanceof JMXHelper){
-                                                                                         setGraphic(createHyperlink((JMXHelper)i));
-                                                                                     }
-                                                                                     else{
-                                                                                         setText((String)i);
                                                                                      }
                                                                                   });
                                        }
