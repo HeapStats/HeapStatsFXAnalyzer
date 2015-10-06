@@ -22,42 +22,52 @@
 
 .rect-run {
     -fx-fill: darkorange;
+    -fx-background-color: darkorange;
 }
 
 .rect-monitorwait {
     -fx-fill: fuchsia;
+    -fx-background-color: fuchsia;
 }
 
 .rect-monitorcontended {
     -fx-fill: limegreen;
+    -fx-background-color: limegreen;
 }
 
 .rect-threadsleep {
     -fx-fill: lightskyblue;
+    -fx-background-color: lightskyblue;
 }
 
 .rect-park {
     -fx-fill: mediumpurple;
+    -fx-background-color: mediumpurple;
 }
 
 .rect-filewrite {
     -fx-fill: gold;
+    -fx-background-color: gold;
 }
 
 .rect-fileread {
     -fx-fill: forestgreen;
+    -fx-background-color: forestgreen;
 }
 
 .rect-socketwrite {
     -fx-fill: orangered;
+    -fx-background-color: orangered;
 }
 
 .rect-socketread {
     -fx-fill: olive;
+    -fx-background-color: olive;
 }
 
 .rect-fusion {
     -fx-fill: darkgray;
+    -fx-background-color: darkgray;
 }
 
 .rect-range-selected {
