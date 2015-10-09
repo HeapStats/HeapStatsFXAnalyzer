@@ -62,7 +62,7 @@
                         </Menu>
                         <Menu mnemonicParsing="false" text="%menu.help">
                             <items>
-                                <MenuItem mnemonicParsing="false" text="%menu.help.howto" />
+                                <MenuItem mnemonicParsing="false" onAction="#onHowToClick" text="%menu.help.howto" />
                                 <MenuItem mnemonicParsing="false" onAction="#onAboutMenuClick" text="%menu.help.about" />
                             </items>
                         </Menu>

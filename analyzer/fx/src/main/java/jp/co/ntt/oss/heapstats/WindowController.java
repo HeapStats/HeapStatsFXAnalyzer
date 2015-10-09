@@ -38,6 +38,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -90,6 +91,8 @@ public class WindowController implements Initializable {
     private Scene aboutDialogScene;
 
     private static WindowController thisController;
+    
+    private HostServices hostServices;
 
     @FXML
     private void onExitClick(ActionEvent event) {
@@ -114,6 +117,11 @@ public class WindowController implements Initializable {
         dialog.setContentText(resource.getString("rank.label"));
         dialog.showAndWait()
               .ifPresent(v -> HeapStatsUtils.setRankLevel(Integer.parseInt(v)));
+    }
+    
+    @FXML
+    private void onHowToClick(ActionEvent event) {
+        hostServices.showDocument("http://icedtea.classpath.org/wiki/HeapStats/Analyzer-version2");
     }
 
     @FXML
@@ -248,6 +256,14 @@ public class WindowController implements Initializable {
         stackPane.getChildren().add(progress);
 
         initializeAboutDialog();
+    }
+    
+    /**
+     * Set HostServices to open HowTo page.
+     * @param hostServices HostServices
+     */
+    protected void setHostServices(HostServices hostServices) {
+        this.hostServices = hostServices;
     }
 
     /**
