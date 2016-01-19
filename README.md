@@ -1,6 +1,12 @@
 HeapStatsFXAnalyzer
 ===================
 
+***CAUTION***: HeapStatsFXAnalyzer has been ported as a part program of [heapstats](https://github.com/HeapStats/heapstats/). If you want reporting issues and/or pulling requests, please contribute to [heapstats](https://github.com/HeapStats/heapstats/). 
+
+***注意***: HeapStatsFXAnalyzer は [heapstats](https://github.com/HeapStats/heapstats/) のプログラムの一部として移植されました。もしバグ報告やプルリクエストがありましたら、[heapstats](https://github.com/HeapStats/heapstats/) にお願い致します。
+
+-----
+
 日本語は英語の後に記載しています。Japanese following English.
 
 HeapStatsFXAnalyzer aims to rebuild [HeapStats](http://icedtea.classpath.org/wiki/HeapStats)
